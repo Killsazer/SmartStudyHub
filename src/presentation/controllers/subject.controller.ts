@@ -1,17 +1,20 @@
-import { Controller, Get, Param, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { SubjectQueryService } from '../../application/services/subject-query.service';
 import { SubjectService } from '../../application/services/subject.service';
 import { CreateSubjectDto } from '../dtos/create-subject.dto';
+import { JwtAuthGuard } from '../../infrastructure/security/jwt-auth.guard';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 @Controller('subjects')
+@UseGuards(JwtAuthGuard)
 export class SubjectController {
   constructor(
     private readonly subjectQueryService: SubjectQueryService,
     private readonly subjectService: SubjectService
   ) {}
 
-  @Get('user/:userId')
-  async getUserSubjects(@Param('userId') userId: string) {
+  @Get()
+  async getUserSubjects(@CurrentUser() userId: string) {
     const subjects = await this.subjectQueryService.getSubjectsByUser(userId);
     
     return {
@@ -22,18 +25,15 @@ export class SubjectController {
 
   @Post()
   async createSubject(
-    @Body('userId') userId: string,
+    @CurrentUser() userId: string,
     @Body() dto: CreateSubjectDto
   ) {
-    if (!userId) {
-      return { status: 400, message: 'userId is required in the body.' };
-    }
-    
-    await this.subjectService.createSubject(userId, dto);
+    const subjectId = await this.subjectService.createSubject(userId, dto);
     
     return {
       status: 'success',
-      message: 'Subject created successfully'
+      message: 'Subject created successfully',
+      data: { id: subjectId }
     };
   }
 }

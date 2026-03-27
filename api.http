@@ -1,38 +1,69 @@
-### Тест 1: Запуск онбордингу для нового студента
-POST http://localhost:3000/onboarding
+### File: api.http
+@baseUrl = http://localhost:3000
+
+### 1. Register User
+# @name register
+POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "userId": "test-kpi-student"
+  "email": "vladyslav@kpi.ua",
+  "password": "gfhjkm_lkz_fdnjhbpfwss",
+  "firstName": "Vladyslav",
+  "lastName": "Student"
 }
 
-### Тест 2: Отримання всіх предметів студента (CQRS Query)
-GET http://localhost:3000/subjects/user/test-kpi-student
-
-### Тест 3: Динамічне створення предмету студентом
-POST http://localhost:3000/subjects
+### 2. Login User
+# @name login
+POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "userId": "test-kpi-student",
-  "title": "Бази Даних",
-  "teacherName": "Таранец",
-  "color": "#FF5722"
+  "email": "vladyslav@kpi.ua",
+  "password": "gfhjkm_lkz_fdnjhbpfwss"
 }
-### Тест 4: Створення нової таски для предмета
-POST http://localhost:3000/tasks
+
+### Збереження токена (працює автоматично завдяки @name login)
+@token = {{login.response.body.accessToken}}
+
+### 3. Create Subject (захищено JWT)
+# @name createSubject
+POST {{baseUrl}}/subjects
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-  "userId": "test-kpi-student",
-  "title": "Здати лабораторну №1",
+  "title": "Clean Architecture Methods",
+  "teacherName": "Robert C. Martin",
+  "color": "#00FF00"
+}
+
+### Збереження Subject ID
+@subjectId = {{createSubject.response.body.data.id}}
+
+### 4. Get Subjects (захищено JWT, дістає всіх предметів поточного юзера)
+GET {{baseUrl}}/subjects
+Authorization: Bearer {{token}}
+
+### 5. Create Task (захищено JWT)
+# @name createTask
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Complete Smart Study Hub",
   "priority": "HIGH",
-  "subjectId": "subj-1774619205516"
+  "subjectId": "{{subjectId}}"
 }
 
-### Тест 5: Зміна статусу таски (перевірка Command та Observer)
-PATCH http://localhost:3000/tasks/task-1774619874940/status
+### Збереження Task ID
+@taskId = {{createTask.response.body.data.id}}
+
+### 6. Update Task Status -> DONE (Тригерить Command та Observer)
+PATCH {{baseUrl}}/tasks/{{taskId}}/status
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "status": "DONE"

@@ -1,0 +1,20 @@
+// File: src/infrastructure/security/jwt.strategy.ts
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { PassportStrategy } from '@nestjs/passport';
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor() {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: process.env.JWT_SECRET || 'super-secret-key-kursach',
+    });
+  }
+
+  async validate(payload: any) {
+    // payload.sub зберігає userId (по стандартному JWT claim "subject")
+    return { userId: payload.sub, email: payload.email };
+  }
+}

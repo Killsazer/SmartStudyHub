@@ -1,20 +1,21 @@
 // File: src/presentation/controllers/task.controller.ts
-import { Controller, Post, Patch, Body, Param } from '@nestjs/common';
+import { Controller, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
 import { TaskService } from '../../application/services/task.service';
 import { CreateTaskDto } from '../dtos/create-task.dto';
 import { UpdateTaskStatusDto } from '../dtos/update-task-status.dto';
+import { JwtAuthGuard } from '../../infrastructure/security/jwt-auth.guard';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 @Controller('tasks')
+@UseGuards(JwtAuthGuard)
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
   async createTask(
-    @Body('userId') userId: string,
+    @CurrentUser() userId: string,
     @Body() dto: CreateTaskDto
   ) {
-    if (!userId) return { status: 400, message: 'userId is required' };
-    
     const task = await this.taskService.createTask(userId, dto);
     return { status: 'success', data: { id: task.id, title: task.title } };
   }

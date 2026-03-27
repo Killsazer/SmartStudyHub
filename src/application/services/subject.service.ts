@@ -1,3 +1,4 @@
+// File: src/application/services/subject.service.ts
 import { Injectable, Inject } from '@nestjs/common';
 import type { ISubjectRepository } from '../../domain/repositories/subject.repository.interface';
 import { SubjectBuilder } from '../../domain/patterns/builder/subject.builder';
@@ -10,7 +11,7 @@ export class SubjectService {
     private readonly subjectRepo: ISubjectRepository
   ) {}
 
-  public async createSubject(userId: string, dto: CreateSubjectDto): Promise<void> {
+  public async createSubject(userId: string, dto: CreateSubjectDto): Promise<string> {
     const subjectId = `subj-${Date.now()}`;
     
     // Використовуємо наш класичний патерн Builder (GoF) замість ручного створення об'єкта
@@ -31,5 +32,6 @@ export class SubjectService {
     await this.subjectRepo.save(subject);
     
     console.log(`[SubjectService] Dynamically created subject '${dto.title}' for user: ${userId}`);
+    return subject.id;
   }
 }
