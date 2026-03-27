@@ -1,0 +1,57 @@
+// File: src/infrastructure/repositories/prisma-task.repository.ts
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { ITaskRepository } from '../../domain/repositories/task.repository.interface';
+import { TaskEntity, TaskStatus, TaskPriority } from '../../domain/entities/task.entity';
+
+@Injectable()
+export class PrismaTaskRepository implements ITaskRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async save(task: TaskEntity): Promise<void> {
+    // В чистому CQRS архітектурі, імплементація сховища інкапсульована від Use Case
+    // Ми використовуємо upsert, щоб метод save працював і для Create і для Update (як в Hibernate/TypeORM)
+    await this.prisma.task.upsert({
+      where: { id: task.id },
+      update: {
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        deadline: task.deadline,
+        subjectId: task.subjectId,
+        userId: task.userId
+      },
+      create: {
+        id: task.id,
+        title: task.title,
+        description: task.description ?? null,
+        status: task.status,
+        priority: task.priority,
+        deadline: task.deadline ?? null,
+        subjectId: task.subjectId ?? null,
+        userId: task.userId
+      }
+    });
+    console.log(`[PrismaTaskRepository] Task '${task.title}' saved.`);
+  }
+
+  async findById(id: string): Promise<TaskEntity | null> {
+    const data = await this.prisma.task.findUnique({ where: { id } });
+    if (!data) return null;
+    
+    // Мапінг (Гідратація) DTO з бази у чисту Domain-сутність
+    const task = new TaskEntity(
+      data.id,
+      data.title,
+      data.status as TaskStatus,
+      data.priority as TaskPriority,
+      data.userId,
+      data.description ?? undefined,
+      data.deadline ?? undefined,
+      data.subjectId ?? undefined
+    );
+
+    return task;
+  }
+}

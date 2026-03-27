@@ -8,3 +8,32 @@ Content-Type: application/json
 
 ### Тест 2: Отримання всіх предметів студента (CQRS Query)
 GET http://localhost:3000/subjects/user/test-kpi-student
+
+### Тест 3: Динамічне створення предмету студентом
+POST http://localhost:3000/subjects
+Content-Type: application/json
+
+{
+  "userId": "test-kpi-student",
+  "title": "Бази Даних",
+  "teacherName": "Таранец",
+  "color": "#FF5722"
+}
+### Тест 4: Створення нової таски для предмета
+POST http://localhost:3000/tasks
+Content-Type: application/json
+
+{
+  "userId": "test-kpi-student",
+  "title": "Здати лабораторну №1",
+  "priority": "HIGH",
+  "subjectId": "subj-1774619205516"
+}
+
+### Тест 5: Зміна статусу таски (перевірка Command та Observer)
+PATCH http://localhost:3000/tasks/task-1774619874940/status
+Content-Type: application/json
+
+{
+  "status": "DONE"
+}
