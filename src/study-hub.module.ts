@@ -10,21 +10,30 @@ import { SubjectService } from './application/services/subject.service';
 import { TaskController } from './presentation/controllers/task.controller';
 import { TaskService } from './application/services/task.service';
 import { PrismaTaskRepository } from './infrastructure/repositories/prisma-task.repository';
+import { NoteController } from './presentation/controllers/note.controller';
+import { NoteService } from './application/services/note.service';
+import { PrismaNoteRepository } from './infrastructure/repositories/prisma-note.repository';
 
 @Module({
   controllers: [
     OnboardingController,
     SubjectController,
-    TaskController
+    TaskController,
+    NoteController
   ],
   providers: [
     OnboardingService,
     SubjectQueryService,
     SubjectService,
     TaskService,
+    NoteService,
     {
       provide: 'ITaskRepository',
       useClass: PrismaTaskRepository,
+    },
+    {
+      provide: 'INoteRepository',
+      useClass: PrismaNoteRepository,
     },
     // Найсуворіша реалізація Dependency Inversion:
     // Інжектимо інфраструктурний клас в інтерфейс домену (за його строковим токеном).

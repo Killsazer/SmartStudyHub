@@ -54,4 +54,18 @@ export class PrismaTaskRepository implements ITaskRepository {
 
     return task;
   }
+
+  async findByUserId(userId: string): Promise<TaskEntity[]> {
+    const data = await this.prisma.task.findMany({ where: { userId } });
+    return data.map(d => new TaskEntity(
+      d.id,
+      d.title,
+      d.status as TaskStatus,
+      d.priority as TaskPriority,
+      d.userId,
+      d.description ?? undefined,
+      d.deadline ?? undefined,
+      d.subjectId ?? undefined
+    ));
+  }
 }

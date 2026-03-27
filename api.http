@@ -68,3 +68,38 @@ Authorization: Bearer {{token}}
 {
   "status": "DONE"
 }
+
+### 7. Create Note Folder (Composite Container)
+# @name createFolder
+POST {{baseUrl}}/notes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Clean Architecture Notes",
+  "subjectId": "{{subjectId}}"
+}
+
+### Збереження Folder ID
+@folderId = {{createFolder.response.body.data.id}}
+
+### 8. Create Note Item inside Folder (Composite Leaf)
+POST {{baseUrl}}/notes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Chapter 1: SOLID principles",
+  "content": "S - Single Responsibility Principle...",
+  "parentId": "{{folderId}}",
+  "subjectId": "{{subjectId}}"
+}
+
+### 9. Get Notes Tree (Перевірка патерну Composite)
+GET {{baseUrl}}/notes/tree
+Authorization: Bearer {{token}}
+
+### 10. Get Sorted Tasks (Перевірка патерну Strategy)
+# Зміни sort=deadline на priority або title для перевірки різних стратегій
+GET {{baseUrl}}/tasks?sort=deadline
+Authorization: Bearer {{token}}

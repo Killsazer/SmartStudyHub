@@ -11,4 +11,9 @@ export interface ITaskRepository {
    * Знаходить завдання за ідентифікатором.
    */
   findById(id: string): Promise<TaskEntity | null>;
+
+  /**
+   * Знаходить всі завдання конкретного користувача.
+   */
+  findByUserId(userId: string): Promise<TaskEntity[]>;
 }

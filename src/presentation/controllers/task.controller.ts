@@ -1,5 +1,5 @@
 // File: src/presentation/controllers/task.controller.ts
-import { Controller, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { TaskService } from '../../application/services/task.service';
 import { CreateTaskDto } from '../dtos/create-task.dto';
 import { UpdateTaskStatusDto } from '../dtos/update-task-status.dto';
@@ -27,5 +27,14 @@ export class TaskController {
   ) {
     await this.taskService.changeTaskStatus(taskId, dto.status);
     return { status: 'success', message: `Task status securely updated to ${dto.status}` };
+  }
+
+  @Get()
+  async getUserTasks(
+    @CurrentUser() userId: string,
+    @Query('sort') sortType?: string
+  ) {
+    const tasks = await this.taskService.getUserTasks(userId, sortType);
+    return { status: 'success', data: tasks };
   }
 }
