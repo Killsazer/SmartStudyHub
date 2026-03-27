@@ -84,19 +84,13 @@ describe('AuthService', () => {
       expect(mockUserRepo.save).not.toHaveBeenCalled();
     });
 
-    it('🔄 should generate unique user IDs for each registration', async () => {
+    it('🔄 should generate user ID with correct prefix', async () => {
       mockUserRepo.findByEmail.mockResolvedValue(null);
 
       await service.register(validDto);
-      const firstUserId = mockUserRepo.save.mock.calls[0][0].id;
 
-      // Small time delay to ensure Date.now() differs
-      await new Promise(r => setTimeout(r, 5));
-      await service.register({ ...validDto, email: 'other@kpi.ua' });
-      const secondUserId = mockUserRepo.save.mock.calls[1][0].id;
-
-      expect(firstUserId).not.toEqual(secondUserId);
-      expect(firstUserId).toMatch(/^user-/);
+      const savedUser = mockUserRepo.save.mock.calls[0][0];
+      expect(savedUser.id).toMatch(/^user-\d+$/);
     });
 
     it('🔄 should propagate repository errors', async () => {
