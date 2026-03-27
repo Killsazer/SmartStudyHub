@@ -1,7 +1,7 @@
 <div align="center">
   <h1>📘 Smart Study Hub</h1>
   <p>
-    🇺🇸 <b>English</b> | 🇺🇦 <a href="README.uk.md">Українська</a>
+    🇺🇸 <b>English</b> | 🇺🇦 <a href="README.md">Українська</a>
   </p>
   <p><strong>Enterprise-grade Monorepo (NestJS + React) built with pristine Clean Architecture and 9 GoF Design Patterns.</strong></p>
 
@@ -113,19 +113,25 @@ Quality assurance is a fundamental pillar of this project.
 Follow these steps to spin up the entire ecosystem locally.
 
 ### 1. Start Infrastructure
+
 Boot up the PostgreSQL database using Docker Compose:
+
 ```bash
 docker-compose up -d
 ```
 
 ### 2. Install Dependencies
+
 Install all required packages from the root of the monorepo:
+
 ```bash
 npm install
 ```
 
 ### 3. Database Setup (Prisma)
+
 Generate the Prisma client and push the schema to your local database:
+
 ```bash
 cd apps/api
 npx prisma generate
@@ -134,10 +140,13 @@ cd ../..
 ```
 
 ### 4. Launch the Application
+
 Start both the NestJS API and the Vite React Frontend concurrently:
+
 ```bash
 npm run dev:all
 ```
+
 - **Backend API**: `http://localhost:3000`
 - **Frontend App**: `http://localhost:5173`
 

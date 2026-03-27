@@ -1,7 +1,7 @@
 <div align="center">
   <h1>📘 Smart Study Hub</h1>
   <p>
-    🇺🇸 <a href="README.md">English</a> | 🇺🇦 <b>Українська</b>
+    🇺🇸 <a href="README.eng.md">English</a> | 🇺🇦 <b>Українська</b>
   </p>
   <p><strong>Enterprise-рівень Monorepo (NestJS + React) з ідеальною Clean Architecture та реалізацією 9 патернів GoF.</strong></p>
 
