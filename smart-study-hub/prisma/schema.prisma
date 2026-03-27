@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Типи занять для Factory Method
+enum LessonType {
+  LECTURE
+  LAB
+  SEMINAR
+}
+
+// Статуси та пріоритети для Strategy та Observer
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subjects  Subject[]
+  tasks     Task[]
+  notes     Note[]
+}
+
+// Предмет (Subject) - будемо збирати через Builder
+model Subject {
+  id          String   @id @default(uuid())
+  title       String
+  teacherName String?
+  color       String?  @default("#000000")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  lessons     Lesson[]
+  tasks       Task[]
+  notes       Note[]
+}
+
+// Заняття в розкладі - для Factory Method
+model Lesson {
+  id        String     @id @default(uuid())
+  title     String
+  type      LessonType
+  startTime DateTime
+  endTime   DateTime
+  location  String?    // Аудиторія або посилання на Zoom
+  
+  subjectId String
+  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+}
+
+// Завдання - основа для Command, Observer, Decorator
+model Task {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  deadline    DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  subjectId   String?
+  subject     Subject?     @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Нотатки - основа для патерна Composite (ієрархія)
+model Note {
+  id        String   @id @default(uuid())
+  title     String
+  content   String?  // Текст або JSON-структура
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Self-relation для створення дерева нотаток (розділи та підрозділи)
+  parentId  String?
+  parent    Note?    @relation("NoteHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Note[]   @relation("NoteHierarchy")
+
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

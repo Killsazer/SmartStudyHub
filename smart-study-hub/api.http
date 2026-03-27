@@ -1,0 +1,10 @@
+### Тест 1: Запуск онбордингу для нового студента
+POST http://localhost:3000/onboarding
+Content-Type: application/json
+
+{
+  "userId": "test-kpi-student"
+}
+
+### Тест 2: Отримання всіх предметів студента (CQRS Query)
+GET http://localhost:3000/subjects/user/test-kpi-student
