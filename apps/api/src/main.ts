@@ -8,6 +8,8 @@ async function bootstrap() {
   // Запускаємо глобальну валідацію DTO пайплайнів (для class-validator)
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   
+  app.enableCors(); // <--- Додали CORS!
+  
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

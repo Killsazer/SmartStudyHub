@@ -4,13 +4,15 @@ export interface INoteNode {
   type: 'section' | 'block';
   title: string;
   content?: string;
+  subjectId?: string | null;
   children?: INoteNode[];
 }
 
 export abstract class NoteComponent {
   constructor(
     public readonly id: string,
-    public title: string
+    public title: string,
+    public subjectId: string | null = null
   ) {}
 
   add(component: NoteComponent): void {

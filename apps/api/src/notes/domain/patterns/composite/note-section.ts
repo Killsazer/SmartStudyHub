@@ -4,8 +4,8 @@ import { NoteComponent, INoteNode } from './note.component';
 export class NoteSection extends NoteComponent {
   private children: NoteComponent[] = [];
 
-  constructor(id: string, title: string) {
-    super(id, title);
+  constructor(id: string, title: string, subjectId: string | null = null) {
+    super(id, title, subjectId);
   }
 
   override add(component: NoteComponent): void {
@@ -21,7 +21,8 @@ export class NoteSection extends NoteComponent {
       id: this.id,
       type: 'section',
       title: this.title,
-      children: this.children.map((child) => child.toJSON())
+      children: this.children.map((child) => child.toJSON()),
+      subjectId: this.subjectId
     };
   }
 }

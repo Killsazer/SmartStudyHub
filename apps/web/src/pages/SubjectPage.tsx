@@ -1,0 +1,157 @@
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Plus } from 'lucide-react';
+import { TaskItem as TaskComponent } from '../features/tasks/components/TaskItem';
+import { TaskSortDropdown } from '../features/tasks/components/TaskSortDropdown';
+import { CreateTaskModal } from '../features/tasks/components/CreateTaskModal';
+import { getTasks, Task, SortStrategy } from '../features/tasks/api/tasks.api';
+import toast from 'react-hot-toast';
+
+import { getNoteTree, NoteComponent } from '../features/notes/api/notes.api';
+import { NoteTree } from '../features/notes/components/NoteTree';
+import { CreateNoteModal } from '../features/notes/components/CreateNoteModal';
+
+const SubjectPage = () => {
+  const { id } = useParams<{ id: string }>();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [notes, setNotes] = useState<NoteComponent[]>([]);
+  const [sortStrategy, setSortStrategy] = useState<SortStrategy>('deadline');
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [activeParentNoteId, setActiveParentNoteId] = useState<string | undefined>();
+  const [loadingTasks, setLoadingTasks] = useState(true);
+  const [loadingNotes, setLoadingNotes] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      fetchTasks();
+      fetchNotes();
+    }
+  }, [id, sortStrategy]);
+
+  const fetchTasks = async () => {
+    try {
+      const data = await getTasks(id!, sortStrategy);
+      setTasks(data);
+    } catch (err) {
+      toast.error('Failed to load tasks');
+    } finally {
+      setLoadingTasks(false);
+    }
+  };
+
+  const fetchNotes = async () => {
+    try {
+      const data = await getNoteTree();
+      // Only show notes related to this subject (top level components)
+      const subjectNotes = data.filter(n => n.subjectId === id || n.subjectId === null);
+      setNotes(subjectNotes);
+    } catch (err) {
+      toast.error('Failed to load notes');
+    } finally {
+      setLoadingNotes(false);
+    }
+  };
+
+  const handleOpenNoteModal = (parentId?: string) => {
+    setActiveParentNoteId(parentId);
+    setIsNoteModalOpen(true);
+  };
+
+  return (
+    <div className="min-h-screen">
+      <header className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-semibold text-lg tracking-tight">Back to Dashboard</span>
+          </Link>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        {/* TASKS COLUMN */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold tracking-tight">Active Tasks</h2>
+            <div className="flex items-center gap-4">
+              <TaskSortDropdown value={sortStrategy} onChange={setSortStrategy} />
+              <button
+                onClick={() => setIsTaskModalOpen(true)}
+                className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-lg transition-colors"
+                title="Create Task"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {loadingTasks ? (
+              <div className="animate-pulse flex flex-col gap-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-20 bg-zinc-800/50 rounded-xl" />
+                ))}
+              </div>
+            ) : tasks.length === 0 ? (
+              <div className="p-8 border border-zinc-800 border-dashed rounded-xl text-center text-zinc-500">
+                No tasks yet. Create one!
+              </div>
+            ) : (
+              tasks.map((task) => (
+                <TaskComponent 
+                  key={task.id} 
+                  task={task} 
+                  onStatusChanged={fetchTasks} 
+                />
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* NOTES COLUMN */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold tracking-tight">Notes & Handouts</h2>
+            <button
+              onClick={() => handleOpenNoteModal()}
+              className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-lg transition-colors"
+              title="Create Root Note/Folder"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          
+          {loadingNotes ? (
+            <div className="animate-pulse h-40 bg-zinc-800/50 rounded-xl" />
+          ) : (
+            <NoteTree 
+              data={notes} 
+              subjectId={id!} 
+              onAddNote={handleOpenNoteModal} 
+            />
+          )}
+        </section>
+
+      </main>
+
+      {/* MODALS */}
+      <CreateTaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        subjectId={id!}
+        onCreated={fetchTasks}
+      />
+      <CreateNoteModal
+        isOpen={isNoteModalOpen}
+        onClose={() => setIsNoteModalOpen(false)}
+        subjectId={id!}
+        parentId={activeParentNoteId}
+        onCreated={fetchNotes}
+      />
+    </div>
+  );
+};
+
+export default SubjectPage;

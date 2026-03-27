@@ -34,8 +34,8 @@ export class NoteService {
     
     allNotes.forEach(n => {
       const component = n.content 
-        ? new NoteBlock(n.id, n.title, n.content) 
-        : new NoteSection(n.id, n.title);
+        ? new NoteBlock(n.id, n.title, n.content, n.subjectId) 
+        : new NoteSection(n.id, n.title, n.subjectId);
         
       map.set(n.id, { component, entity: n });
     });
