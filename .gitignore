@@ -1,13 +1,15 @@
 # Dependencies
 node_modules
-/dist
+
+# Build output
+**/dist
 
 # Environment variables
 .env
 .env.test
 
 # Prisma generated client (if you chose custom output)
-/generated/prisma
+**/generated/prisma
 
 # Logs
 npm-debug.log*
