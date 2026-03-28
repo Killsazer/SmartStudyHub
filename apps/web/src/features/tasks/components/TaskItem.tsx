@@ -37,17 +37,17 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
   const isDone = task.status === 'DONE';
 
   return (
-    <div className={`group p-4 rounded-xl border flex items-center gap-4 transition-all ${isDone ? 'bg-zinc-900/40 border-zinc-800/50 opacity-60' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:shadow-lg hover:shadow-black/20'}`}>
+    <div className={`group p-4 rounded-xl border flex items-center gap-4 transition-all ${isDone ? 'bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800/50 opacity-60' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20'}`}>
       <button 
         onClick={toggleStatus} 
         disabled={loading}
-        className={`shrink-0 transition-colors ${isDone ? 'text-indigo-500' : 'text-zinc-600 hover:text-indigo-400'}`}
+        className={`shrink-0 transition-colors ${isDone ? 'text-indigo-500' : 'text-zinc-400 dark:text-zinc-600 hover:text-indigo-500 dark:hover:text-indigo-400'}`}
       >
         {isDone ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
       </button>
 
       <div className="flex-1 min-w-0">
-        <h4 className={`text-sm font-medium truncate ${isDone ? 'line-through text-zinc-500' : 'text-zinc-100'}`}>
+        <h4 className={`text-sm font-medium truncate ${isDone ? 'line-through text-zinc-400 dark:text-zinc-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
           {task.title}
         </h4>
         
@@ -68,12 +68,12 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
 
       <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
         {onEdit && (
-          <button onClick={onEdit} className="p-1.5 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors" title="Edit task">
+          <button onClick={onEdit} className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors" title="Edit task">
             <Edit2 className="w-4 h-4" />
           </button>
         )}
         {onDelete && (
-          <button onClick={onDelete} className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-800 rounded-lg transition-colors" title="Delete task">
+          <button onClick={onDelete} className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-zinc-800 rounded-lg transition-colors" title="Delete task">
             <Trash2 className="w-4 h-4" />
           </button>
         )}

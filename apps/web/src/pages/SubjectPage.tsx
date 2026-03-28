@@ -11,8 +11,11 @@ import toast from 'react-hot-toast';
 import { getNoteTree, deleteNote, NoteComponent } from '../features/notes/api/notes.api';
 import { NoteTree } from '../features/notes/components/NoteTree';
 import { CreateNoteModal } from '../features/notes/components/CreateNoteModal';
+import { useTranslation } from 'react-i18next';
+import { ThemeLangToggle } from '../shared/components/ThemeLangToggle';
 
 const SubjectPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notes, setNotes] = useState<NoteComponent[]>([]);
@@ -101,13 +104,14 @@ const SubjectPage = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur sticky top-0 z-50">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-200">
+      <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
+          <Link to="/" className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
             <ArrowLeft className="w-5 h-5" />
-            <span className="font-semibold text-lg tracking-tight">Back to Dashboard</span>
+            <span className="font-semibold text-lg tracking-tight">{t('back_to_dashboard')}</span>
           </Link>
+          <ThemeLangToggle />
         </div>
       </header>
 
@@ -116,13 +120,13 @@ const SubjectPage = () => {
         {/* TASKS COLUMN */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold tracking-tight">Active Tasks</h2>
+            <h2 className="text-xl font-bold tracking-tight">{t('active_tasks')}</h2>
             <div className="flex items-center gap-4">
               <TaskSortDropdown value={sortStrategy} onChange={setSortStrategy} />
               <button
                 onClick={handleOpenTaskCreate}
-                className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-lg transition-colors"
-                title="Create Task"
+                className="bg-zinc-200 hover:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white p-2 rounded-lg transition-colors"
+                title={t('create_task')}
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -133,12 +137,12 @@ const SubjectPage = () => {
             {loadingTasks ? (
               <div className="animate-pulse flex flex-col gap-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-20 bg-zinc-800/50 rounded-xl" />
+                  <div key={i} className="h-20 bg-zinc-200 dark:bg-zinc-800/50 rounded-xl" />
                 ))}
               </div>
             ) : tasks.length === 0 ? (
-              <div className="p-8 border border-zinc-800 border-dashed rounded-xl text-center text-zinc-500">
-                No tasks yet. Create one!
+              <div className="p-8 border border-zinc-300 dark:border-zinc-800 border-dashed rounded-xl text-center text-zinc-500">
+                {t('no_tasks')}
               </div>
             ) : (
               tasks.map((task) => (
@@ -157,18 +161,18 @@ const SubjectPage = () => {
         {/* NOTES COLUMN */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold tracking-tight">Notes & Handouts</h2>
+            <h2 className="text-xl font-bold tracking-tight">{t('notes_handouts')}</h2>
             <button
               onClick={() => handleOpenNoteModal()}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-lg transition-colors"
-              title="Create Root Note/Folder"
+              className="bg-zinc-200 hover:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white p-2 rounded-lg transition-colors"
+              title={t('create_root_note')}
             >
               <Plus className="w-4 h-4" />
             </button>
           </div>
           
           {loadingNotes ? (
-            <div className="animate-pulse h-40 bg-zinc-800/50 rounded-xl" />
+            <div className="animate-pulse h-40 bg-zinc-200 dark:bg-zinc-800/50 rounded-xl" />
           ) : (
             <NoteTree 
               data={notes} 

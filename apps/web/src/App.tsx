@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import { ThemeProvider } from './shared/theme/ThemeContext';
 
 import SubjectPage from './pages/SubjectPage';
 
@@ -15,8 +16,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -38,14 +40,11 @@ function App() {
           />
         </Routes>
         <Toaster position="top-center" toastOptions={{
-          style: {
-            background: '#18181b', // zinc-900
-            color: '#fff',
-            border: '1px solid #27272a' // zinc-800
-          }
+          className: 'dark:bg-zinc-900 border dark:border-zinc-800 bg-white border-zinc-200 text-zinc-900 dark:text-white'
         }} />
       </AuthProvider>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

@@ -13,7 +13,7 @@ export const SubjectCard: React.FC<Props> = ({ subject, onClick, onEdit, onDelet
   return (
     <div
       onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 hover:bg-zinc-800/50 transition-all cursor-pointer hover:border-zinc-700 hover:shadow-xl hover:-translate-y-1"
+      className="group relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-6 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-xl hover:-translate-y-1"
       style={{ borderTopColor: subject.color, borderTopWidth: '4px' }}
     >
       <div 
@@ -23,14 +23,14 @@ export const SubjectCard: React.FC<Props> = ({ subject, onClick, onEdit, onDelet
       
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
-          <div className="p-2 rounded-xl bg-zinc-800/80 w-fit">
+          <div className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 w-fit">
             <BookOpen className="w-6 h-6" style={{ color: subject.color }} />
           </div>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {onEdit && (
               <button 
                 onClick={onEdit} 
-                className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                 title="Edit subject"
               >
                 <Edit2 className="w-4 h-4" />
@@ -39,7 +39,7 @@ export const SubjectCard: React.FC<Props> = ({ subject, onClick, onEdit, onDelet
             {onDelete && (
               <button 
                 onClick={onDelete} 
-                className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-red-400 transition-colors"
+                className="p-1.5 hover:bg-red-50 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-red-500 transition-colors"
                 title="Delete subject"
               >
                 <Trash2 className="w-4 h-4" />
@@ -48,10 +48,10 @@ export const SubjectCard: React.FC<Props> = ({ subject, onClick, onEdit, onDelet
           </div>
         </div>
         
-        <h3 className="text-xl font-bold tracking-tight text-white mb-2">{subject.title}</h3>
+        <h3 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white mb-2">{subject.title}</h3>
         
         {subject.teacherName && (
-          <div className="flex items-center gap-2 text-zinc-400 text-sm">
+          <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-sm">
             <User className="w-4 h-4" />
             <span>{subject.teacherName}</span>
           </div>

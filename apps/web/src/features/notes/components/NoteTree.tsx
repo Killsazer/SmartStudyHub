@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Folder, FolderOpen, FileText, Plus, ChevronRight, ChevronDown, Edit2, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { NoteComponent } from '../api/notes.api';
 
 interface NoteNodeProps {
@@ -17,14 +18,14 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
   return (
     <div className="flex flex-col">
       <div 
-        className="group flex items-center gap-2 py-2 px-3 hover:bg-zinc-800/50 rounded-lg transition-colors cursor-pointer"
+        className="group flex items-center gap-2 py-2 px-3 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors cursor-pointer"
         style={{ paddingLeft: `${depth * 1.5 + 0.75}rem` }}
         onClick={() => {
           if (isSection) setIsExpanded(!isExpanded);
           else onEdit(node);
         }}
       >
-        <button className="w-4 h-4 text-zinc-500 hover:text-zinc-300 flex items-center justify-center">
+        <button className="w-4 h-4 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 flex items-center justify-center">
           {isSection ? (
             isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
           ) : (
@@ -38,7 +39,7 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
           <FileText className="w-4 h-4 text-zinc-400" />
         )}
 
-        <span className={`text-sm ${isSection ? 'font-medium text-zinc-200' : 'text-zinc-300'}`}>
+        <span className={`text-sm ${isSection ? 'font-medium text-zinc-800 dark:text-zinc-200' : 'text-zinc-600 dark:text-zinc-300'}`}>
           {node.title}
         </span>
 
@@ -49,7 +50,7 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
                 e.stopPropagation();
                 onAddChild(node.id);
               }}
-              className="p-1 hover:bg-zinc-700 rounded text-zinc-400"
+              className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-zinc-500 dark:text-zinc-400"
               title="Add to folder"
             >
               <Plus className="w-4 h-4" />
@@ -60,7 +61,7 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
               e.stopPropagation();
               onEdit(node);
             }}
-            className="p-1 hover:bg-zinc-700 rounded text-zinc-400"
+            className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-zinc-500 dark:text-zinc-400"
             title="Edit"
           >
             <Edit2 className="w-4 h-4" />
@@ -70,7 +71,7 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
               e.stopPropagation();
               onDelete(node.id);
             }}
-            className="p-1 hover:bg-zinc-700 rounded text-red-400"
+            className="p-1 hover:bg-red-50 dark:hover:bg-zinc-700 rounded text-red-500 dark:text-red-400"
             title="Delete"
           >
             <Trash2 className="w-4 h-4" />
@@ -98,26 +99,25 @@ interface NoteTreeProps {
 }
 
 export const NoteTree: React.FC<NoteTreeProps> = ({ data, onAddNote, onEditNote, onDeleteNote }) => {
-  // Option to filter tree based on Subject ID if the backend doesn't filter perfectly
-  // We'll just display what the backend throws us for now as a demo.
+  const { t } = useTranslation();
   
   if (data.length === 0) {
     return (
-      <div className="p-8 border border-zinc-800 border-dashed rounded-xl text-center flex flex-col items-center">
-        <FolderOpen className="w-8 h-8 text-zinc-500 mb-3" />
-        <p className="text-zinc-400 text-sm mb-4">No notes here yet.</p>
+      <div className="p-8 border border-zinc-200 dark:border-zinc-800 border-dashed rounded-xl text-center flex flex-col items-center">
+        <FolderOpen className="w-8 h-8 text-zinc-400 dark:text-zinc-500 mb-3" />
+        <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-4">{t('no_notes')}</p>
         <button
           onClick={() => onAddNote()}
-          className="text-indigo-400 hover:text-indigo-300 text-sm font-medium flex items-center gap-1"
+          className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm font-medium flex items-center gap-1"
         >
-          <Plus className="w-4 h-4" /> Create Note
+          <Plus className="w-4 h-4" /> {t('create_note')}
         </button>
       </div>
     );
   }
 
   return (
-    <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-2">
+    <div className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2">
       {data.map(node => (
         <NoteNode key={node.id} node={node} onAddChild={onAddNote} onEdit={onEditNote} onDelete={onDeleteNote} />
       ))}
