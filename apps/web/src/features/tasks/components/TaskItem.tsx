@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Flag, CheckCircle2, Circle } from 'lucide-react';
+import { Calendar, Flag, CheckCircle2, Circle, Edit2, Trash2 } from 'lucide-react';
 import { Task, changeTaskStatus } from '../api/tasks.api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -7,6 +7,8 @@ import { format } from 'date-fns';
 interface Props {
   task: Task;
   onStatusChanged: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 const PRIORITY_COLORS = {
@@ -15,7 +17,7 @@ const PRIORITY_COLORS = {
   HIGH: 'text-red-500 bg-red-500/10',
 };
 
-export const TaskItem: React.FC<Props> = ({ task, onStatusChanged }) => {
+export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDelete }) => {
   const [loading, setLoading] = useState(false);
 
   const toggleStatus = async () => {
@@ -35,7 +37,7 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged }) => {
   const isDone = task.status === 'DONE';
 
   return (
-    <div className={`p-4 rounded-xl border flex items-center gap-4 transition-all ${isDone ? 'bg-zinc-900/40 border-zinc-800/50 opacity-60' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:shadow-lg hover:shadow-black/20'}`}>
+    <div className={`group p-4 rounded-xl border flex items-center gap-4 transition-all ${isDone ? 'bg-zinc-900/40 border-zinc-800/50 opacity-60' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:shadow-lg hover:shadow-black/20'}`}>
       <button 
         onClick={toggleStatus} 
         disabled={loading}
@@ -62,6 +64,19 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged }) => {
             </span>
           )}
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+        {onEdit && (
+          <button onClick={onEdit} className="p-1.5 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors" title="Edit task">
+            <Edit2 className="w-4 h-4" />
+          </button>
+        )}
+        {onDelete && (
+          <button onClick={onDelete} className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-800 rounded-lg transition-colors" title="Delete task">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );

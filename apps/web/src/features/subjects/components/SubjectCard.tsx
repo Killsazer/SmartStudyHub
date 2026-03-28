@@ -1,13 +1,15 @@
 import React from 'react';
-import { BookOpen, User } from 'lucide-react';
+import { BookOpen, User, Edit2, Trash2 } from 'lucide-react';
 import { SubjectItem } from '../api/subjects.api';
 
 interface Props {
   subject: SubjectItem;
   onClick: () => void;
+  onEdit?: (e: React.MouseEvent) => void;
+  onDelete?: (e: React.MouseEvent) => void;
 }
 
-export const SubjectCard: React.FC<Props> = ({ subject, onClick }) => {
+export const SubjectCard: React.FC<Props> = ({ subject, onClick, onEdit, onDelete }) => {
   return (
     <div
       onClick={onClick}
@@ -23,6 +25,26 @@ export const SubjectCard: React.FC<Props> = ({ subject, onClick }) => {
         <div className="flex items-start justify-between mb-4">
           <div className="p-2 rounded-xl bg-zinc-800/80 w-fit">
             <BookOpen className="w-6 h-6" style={{ color: subject.color }} />
+          </div>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {onEdit && (
+              <button 
+                onClick={onEdit} 
+                className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                title="Edit subject"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
+            {onDelete && (
+              <button 
+                onClick={onDelete} 
+                className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-red-400 transition-colors"
+                title="Delete subject"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
         

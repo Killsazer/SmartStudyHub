@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, BookOpen, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../features/auth/AuthContext';
-import { getSubjects, createSubject, SubjectItem } from '../features/subjects/api/subjects.api';
+import { getSubjects, createSubject, updateSubject, deleteSubject, SubjectItem } from '../features/subjects/api/subjects.api';
 import { SubjectCard } from '../features/subjects/components/SubjectCard';
 import { CreateSubjectModal } from '../features/subjects/components/CreateSubjectModal';
 
@@ -13,6 +13,7 @@ const DashboardPage = () => {
   const [subjects, setSubjects] = useState<SubjectItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSubject, setEditingSubject] = useState<SubjectItem | null>(null);
 
   useEffect(() => {
     fetchSubjects();
@@ -31,13 +32,43 @@ const DashboardPage = () => {
 
   const handleCreateSubject = async (data: { title: string; teacherName?: string; color: string }) => {
     try {
-      const newSubj = await createSubject(data);
-      setSubjects([...subjects, newSubj]);
-      toast.success('Subject created!');
+      if (editingSubject) {
+        await updateSubject(editingSubject.id, data);
+        setSubjects(subjects.map(s => s.id === editingSubject.id ? { ...s, ...data } : s));
+        toast.success('Subject updated!');
+      } else {
+        const newSubj = await createSubject(data);
+        setSubjects([...subjects, newSubj]);
+        toast.success('Subject created!');
+      }
     } catch (error) {
-      toast.error('Failed to create subject');
+      toast.error(editingSubject ? 'Failed to update subject' : 'Failed to create subject');
       throw error;
     }
+  };
+
+  const handleDeleteSubject = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this subject? All tasks and notes inside will be lost.')) return;
+    
+    try {
+      await deleteSubject(id);
+      setSubjects(subjects.filter(s => s.id !== id));
+      toast.success('Subject deleted');
+    } catch (error) {
+      toast.error('Failed to delete subject');
+    }
+  };
+
+  const handleOpenEdit = (e: React.MouseEvent, subject: SubjectItem) => {
+    e.stopPropagation();
+    setEditingSubject(subject);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenCreate = () => {
+    setEditingSubject(null);
+    setIsModalOpen(true);
   };
 
   return (
@@ -65,7 +96,7 @@ const DashboardPage = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold tracking-tight">My Subjects</h1>
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleOpenCreate}
             className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -85,7 +116,7 @@ const DashboardPage = () => {
             <h3 className="text-lg font-medium text-white mb-2">No subjects yet</h3>
             <p className="text-zinc-400 max-w-sm mb-6">Create your first subject to start organizing your tasks and notes.</p>
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleOpenCreate}
               className="bg-indigo-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-600 transition-colors"
             >
               Configure Subject
@@ -98,6 +129,8 @@ const DashboardPage = () => {
                 key={subj.id}
                 subject={subj}
                 onClick={() => navigate(`/subjects/${subj.id}`)}
+                onEdit={(e) => handleOpenEdit(e, subj)}
+                onDelete={(e) => handleDeleteSubject(e, subj.id)}
               />
             ))}
           </div>
@@ -106,8 +139,12 @@ const DashboardPage = () => {
 
       <CreateSubjectModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingSubject(null);
+        }}
         onSubmit={handleCreateSubject}
+        initialData={editingSubject}
       />
     </div>
   );

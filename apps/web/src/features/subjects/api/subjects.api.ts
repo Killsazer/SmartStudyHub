@@ -16,3 +16,11 @@ export const createSubject = async (data: { title: string; teacherName?: string;
   const res = await apiClient.post('/subjects', data);
   return res.data.data;
 };
+
+export const updateSubject = async (id: string, data: Partial<{ title: string; teacherName: string; color: string }>): Promise<void> => {
+  await apiClient.patch(`/subjects/${id}`, data);
+};
+
+export const deleteSubject = async (id: string): Promise<void> => {
+  await apiClient.delete(`/subjects/${id}`);
+};

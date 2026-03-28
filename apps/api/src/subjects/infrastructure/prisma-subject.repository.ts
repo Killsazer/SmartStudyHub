@@ -54,4 +54,21 @@ export class PrismaSubjectRepository implements ISubjectRepository {
       },
     });
   }
+
+  async update(id: string, data: Partial<{ title: string; teacherName: string | null; color: string | null; }>): Promise<void> {
+    await this.prisma.subject.update({
+      where: { id },
+      data: {
+        title: data.title,
+        teacherName: data.teacherName,
+        color: data.color,
+      }
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.subject.delete({
+      where: { id }
+    });
+  }
 }

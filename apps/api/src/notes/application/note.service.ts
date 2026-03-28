@@ -3,6 +3,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import type { INoteRepository } from '../domain/note.repository.interface';
 import { NoteEntity } from '../domain/note.entity';
 import { CreateNoteDto } from '../presentation/create-note.dto';
+import { UpdateNoteDto } from '../presentation/update-note.dto';
 import { NoteSection } from '../domain/patterns/composite/note-section';
 import { NoteBlock } from '../domain/patterns/composite/note-block';
 
@@ -54,5 +55,26 @@ export class NoteService {
     });
 
     return forest.map(rootComponent => rootComponent.toJSON());
+  }
+
+  async updateNote(userId: string, noteId: string, dto: UpdateNoteDto): Promise<NoteEntity> {
+    const note = await this.noteRepo.findById(noteId);
+    if (!note) {
+      throw new Error(`Note with ID ${noteId} not found`);
+    }
+    
+    if (dto.title !== undefined) note.title = dto.title;
+    if (dto.content !== undefined) note.content = dto.content;
+
+    await this.noteRepo.save(note);
+    return note;
+  }
+
+  async deleteNote(userId: string, noteId: string): Promise<void> {
+    const note = await this.noteRepo.findById(noteId);
+    if (!note) {
+      throw new Error(`Note with ID ${noteId} not found`);
+    }
+    await this.noteRepo.delete(noteId);
   }
 }

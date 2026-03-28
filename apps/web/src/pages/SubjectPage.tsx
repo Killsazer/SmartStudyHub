@@ -4,10 +4,11 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import { TaskItem as TaskComponent } from '../features/tasks/components/TaskItem';
 import { TaskSortDropdown } from '../features/tasks/components/TaskSortDropdown';
 import { CreateTaskModal } from '../features/tasks/components/CreateTaskModal';
-import { getTasks, Task, SortStrategy } from '../features/tasks/api/tasks.api';
+import { getTasks, deleteTask, Task, SortStrategy } from '../features/tasks/api/tasks.api';
 import toast from 'react-hot-toast';
 
-import { getNoteTree, NoteComponent } from '../features/notes/api/notes.api';
+
+import { getNoteTree, deleteNote, NoteComponent } from '../features/notes/api/notes.api';
 import { NoteTree } from '../features/notes/components/NoteTree';
 import { CreateNoteModal } from '../features/notes/components/CreateNoteModal';
 
@@ -17,7 +18,10 @@ const SubjectPage = () => {
   const [notes, setNotes] = useState<NoteComponent[]>([]);
   const [sortStrategy, setSortStrategy] = useState<SortStrategy>('deadline');
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState<NoteComponent | null>(null);
   const [activeParentNoteId, setActiveParentNoteId] = useState<string | undefined>();
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [loadingNotes, setLoadingNotes] = useState(true);
@@ -40,6 +44,27 @@ const SubjectPage = () => {
     }
   };
 
+  const handleDeleteTask = async (taskId: string) => {
+    if (!window.confirm('Delete this task?')) return;
+    try {
+      await deleteTask(taskId);
+      toast.success('Task deleted');
+      fetchTasks();
+    } catch (err) {
+      toast.error('Failed to delete task');
+    }
+  };
+
+  const handleOpenTaskCreate = () => {
+    setEditingTask(null);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleOpenTaskEdit = (task: Task) => {
+    setEditingTask(task);
+    setIsTaskModalOpen(true);
+  };
+
   const fetchNotes = async () => {
     try {
       const data = await getNoteTree();
@@ -53,8 +78,25 @@ const SubjectPage = () => {
     }
   };
 
+  const handleDeleteNote = async (noteId: string) => {
+    if (!window.confirm('Are you sure you want to delete this note/folder? All contents will be lost.')) return;
+    try {
+      await deleteNote(noteId);
+      toast.success('Deleted successfully');
+      fetchNotes();
+    } catch (err) {
+      toast.error('Failed to delete note');
+    }
+  };
+
   const handleOpenNoteModal = (parentId?: string) => {
+    setEditingNote(null);
     setActiveParentNoteId(parentId);
+    setIsNoteModalOpen(true);
+  };
+
+  const handleEditNote = (note: NoteComponent) => {
+    setEditingNote(note);
     setIsNoteModalOpen(true);
   };
 
@@ -78,7 +120,7 @@ const SubjectPage = () => {
             <div className="flex items-center gap-4">
               <TaskSortDropdown value={sortStrategy} onChange={setSortStrategy} />
               <button
-                onClick={() => setIsTaskModalOpen(true)}
+                onClick={handleOpenTaskCreate}
                 className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-lg transition-colors"
                 title="Create Task"
               >
@@ -104,6 +146,8 @@ const SubjectPage = () => {
                   key={task.id} 
                   task={task} 
                   onStatusChanged={fetchTasks} 
+                  onEdit={() => handleOpenTaskEdit(task)}
+                  onDelete={() => handleDeleteTask(task.id)}
                 />
               ))
             )}
@@ -129,7 +173,9 @@ const SubjectPage = () => {
             <NoteTree 
               data={notes} 
               subjectId={id!} 
-              onAddNote={handleOpenNoteModal} 
+              onAddNote={handleOpenNoteModal}
+              onEditNote={handleEditNote}
+              onDeleteNote={handleDeleteNote}
             />
           )}
         </section>
@@ -139,16 +185,24 @@ const SubjectPage = () => {
       {/* MODALS */}
       <CreateTaskModal
         isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setEditingTask(null);
+        }}
         subjectId={id!}
         onCreated={fetchTasks}
+        initialData={editingTask}
       />
       <CreateNoteModal
         isOpen={isNoteModalOpen}
-        onClose={() => setIsNoteModalOpen(false)}
+        onClose={() => {
+          setIsNoteModalOpen(false);
+          setEditingNote(null);
+        }}
         subjectId={id!}
         parentId={activeParentNoteId}
         onCreated={fetchNotes}
+        initialData={editingNote}
       />
     </div>
   );

@@ -1,19 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { SubjectItem } from '../api/subjects.api';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: { title: string; teacherName?: string; color: string }) => Promise<void>;
+  initialData?: SubjectItem | null;
 }
 
 const COLORS = ['#6366f1', '#ef4444', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
 
-export const CreateSubjectModal: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
+export const CreateSubjectModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [title, setTitle] = useState('');
   const [teacherName, setTeacherName] = useState('');
   const [color, setColor] = useState(COLORS[0]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(initialData?.title || '');
+      setTeacherName(initialData?.teacherName || '');
+      setColor(initialData?.color || COLORS[0]);
+    }
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
@@ -35,7 +45,7 @@ export const CreateSubjectModal: React.FC<Props> = ({ isOpen, onClose, onSubmit 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-          <h2 className="text-xl font-bold">New Subject</h2>
+          <h2 className="text-xl font-bold">{initialData ? 'Edit Subject' : 'New Subject'}</h2>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-zinc-800 text-zinc-400">
             <X className="w-5 h-5" />
           </button>
@@ -93,7 +103,7 @@ export const CreateSubjectModal: React.FC<Props> = ({ isOpen, onClose, onSubmit 
               disabled={loading}
               className="px-4 py-2 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-600 text-white transition-colors disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Subject'}
+              {loading ? 'Saving...' : initialData ? 'Save Changes' : 'Create Subject'}
             </button>
           </div>
         </form>

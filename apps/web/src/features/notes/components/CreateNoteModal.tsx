@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { createNote } from '../api/notes.api';
+import { createNote, updateNote, NoteComponent } from '../api/notes.api';
 import toast from 'react-hot-toast';
 
 interface Props {
@@ -9,13 +9,22 @@ interface Props {
   parentId?: string;
   subjectId: string;
   onCreated: () => void;
+  initialData?: NoteComponent | null;
 }
 
-export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, subjectId, onCreated }) => {
+export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, subjectId, onCreated, initialData }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSection, setIsSection] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(initialData?.title || '');
+      setContent(initialData?.content || '');
+      setIsSection(initialData ? initialData.type === 'section' : false);
+    }
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
@@ -23,13 +32,21 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
     e.preventDefault();
     setLoading(true);
     try {
-      await createNote({
-        title,
-        content: isSection ? undefined : content,
-        parentId: parentId || undefined,
-        subjectId,
-      });
-      toast.success(isSection ? 'Folder created!' : 'Note created!');
+      if (initialData) {
+        await updateNote(initialData.id, {
+          title,
+          content: isSection ? undefined : content,
+        });
+        toast.success(isSection ? 'Folder updated!' : 'Note updated!');
+      } else {
+        await createNote({
+          title,
+          content: isSection ? undefined : content,
+          parentId: parentId || undefined,
+          subjectId,
+        });
+        toast.success(isSection ? 'Folder created!' : 'Note created!');
+      }
       setTitle('');
       setContent('');
       setIsSection(false);
@@ -46,7 +63,7 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-          <h2 className="text-xl font-bold">{isSection ? 'New Folder' : 'New Note'}</h2>
+          <h2 className="text-xl font-bold">{initialData ? (isSection ? 'Edit Folder' : 'Edit Note') : (isSection ? 'New Folder' : 'New Note')}</h2>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-zinc-800 text-zinc-400">
             <X className="w-5 h-5" />
           </button>
@@ -59,7 +76,8 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
                 type="checkbox"
                 checked={isSection}
                 onChange={(e) => setIsSection(e.target.checked)}
-                className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-zinc-900"
+                disabled={!!initialData}
+                className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-zinc-900 disabled:opacity-50"
               />
               Create as Folder (Section)
             </label>
@@ -102,7 +120,7 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
               disabled={loading}
               className="px-4 py-2 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-600 text-white disabled:opacity-50"
             >
-              {loading ? 'Saving...' : 'Create'}
+              {loading ? 'Saving...' : initialData ? 'Save Changes' : 'Create'}
             </button>
           </div>
         </form>

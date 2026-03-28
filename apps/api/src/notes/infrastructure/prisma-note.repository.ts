@@ -40,4 +40,21 @@ export class PrismaNoteRepository implements INoteRepository {
       d.subjectId ?? undefined
     ));
   }
+
+  async findById(id: string): Promise<NoteEntity | null> {
+    const d = await this.prisma.note.findUnique({ where: { id } });
+    if (!d) return null;
+    return new NoteEntity(
+      d.id,
+      d.title,
+      d.userId,
+      d.content ?? undefined,
+      d.parentId ?? undefined,
+      d.subjectId ?? undefined
+    );
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.note.delete({ where: { id } });
+  }
 }

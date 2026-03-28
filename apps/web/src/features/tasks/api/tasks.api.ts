@@ -6,6 +6,7 @@ export interface Task {
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   deadline?: string;
+  description?: string;
   subjectId: string;
 }
 
@@ -23,4 +24,12 @@ export const createTask = async (data: { title: string; subjectId: string; prior
 
 export const changeTaskStatus = async (id: string, status: string): Promise<void> => {
   await apiClient.patch(`/tasks/${id}/status`, { status });
+};
+
+export const updateTask = async (id: string, data: Partial<{ title: string; description: string; priority: string; deadline: string }>): Promise<void> => {
+  await apiClient.patch(`/tasks/${id}`, data);
+};
+
+export const deleteTask = async (id: string): Promise<void> => {
+  await apiClient.delete(`/tasks/${id}`);
 };

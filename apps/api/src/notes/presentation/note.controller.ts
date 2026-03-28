@@ -1,7 +1,8 @@
 // File: src/notes/presentation/note.controller.ts
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { NoteService } from '../application/note.service';
 import { CreateNoteDto } from './create-note.dto';
+import { UpdateNoteDto } from './update-note.dto';
 import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../shared/security/current-user.decorator';
 
@@ -23,5 +24,24 @@ export class NoteController {
   async getNotesTree(@CurrentUser() userId: string) {
     const tree = await this.noteService.getNotesTree(userId);
     return { status: 'success', data: tree };
+  }
+
+  @Patch(':id')
+  async updateNote(
+    @CurrentUser() userId: string,
+    @Param('id') noteId: string,
+    @Body() dto: UpdateNoteDto
+  ) {
+    const note = await this.noteService.updateNote(userId, noteId, dto);
+    return { status: 'success', data: { id: note.id, title: note.title } };
+  }
+
+  @Delete(':id')
+  async deleteNote(
+    @CurrentUser() userId: string,
+    @Param('id') noteId: string
+  ) {
+    await this.noteService.deleteNote(userId, noteId);
+    return { status: 'success', message: 'Note deleted successfully' };
   }
 }

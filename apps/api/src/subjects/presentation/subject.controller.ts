@@ -1,8 +1,9 @@
 // File: src/subjects/presentation/subject.controller.ts
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { SubjectService } from '../application/subject.service';
 import { SubjectQueryService } from '../application/subject-query.service';
 import { CreateSubjectDto } from './create-subject.dto';
+import { UpdateSubjectDto } from './update-subject.dto';
 import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../shared/security/current-user.decorator';
 
@@ -27,5 +28,24 @@ export class SubjectController {
   async getSubjects(@CurrentUser() userId: string) {
     const subjects = await this.subjectQueryService.getSubjectsByUser(userId);
     return { status: 'success', data: subjects };
+  }
+
+  @Patch(':id')
+  async updateSubject(
+    @CurrentUser() userId: string,
+    @Param('id') subjectId: string,
+    @Body() dto: UpdateSubjectDto
+  ) {
+    await this.subjectService.updateSubject(userId, subjectId, dto);
+    return { status: 'success', message: 'Subject updated successfully' };
+  }
+
+  @Delete(':id')
+  async deleteSubject(
+    @CurrentUser() userId: string,
+    @Param('id') subjectId: string
+  ) {
+    await this.subjectService.deleteSubject(userId, subjectId);
+    return { status: 'success', message: 'Subject deleted successfully' };
   }
 }
