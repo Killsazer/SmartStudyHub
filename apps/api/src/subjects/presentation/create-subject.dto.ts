@@ -5,10 +5,6 @@ export class CreateSubjectDto {
   @IsNotEmpty()
   title: string;
 
-  @IsString()
-  @IsOptional()
-  teacherName?: string;
-
   @IsHexColor()
   @IsOptional()
   color?: string;

@@ -52,9 +52,10 @@ export class TaskController {
   @Get()
   async getUserTasks(
     @CurrentUser() userId: string,
-    @Query('sort') sortType?: string
+    @Query('sort') sortType?: string,
+    @Query('subjectId') subjectId?: string
   ) {
-    const tasks = await this.taskService.getUserTasks(userId, sortType);
+    const tasks = await this.taskService.getUserTasks(userId, sortType, subjectId);
     return { status: 'success', data: tasks };
   }
 }

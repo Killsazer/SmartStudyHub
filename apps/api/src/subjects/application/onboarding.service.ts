@@ -1,6 +1,6 @@
-// File: src/subjects/application/onboarding.service.ts
 import { Injectable, Inject } from '@nestjs/common';
 import type { ISubjectRepository } from '../domain/subject.repository.interface';
+import type { ITeacherRepository } from '../../schedule/domain/teacher.repository.interface';
 import { StudyHubFacade } from '../domain/patterns/study-hub.facade';
 
 @Injectable()
@@ -9,15 +9,18 @@ export class OnboardingService {
 
   constructor(
     @Inject('ISubjectRepository')
-    private readonly subjectRepository: ISubjectRepository
+    private readonly subjectRepository: ISubjectRepository,
+    @Inject('ITeacherRepository')
+    private readonly teacherRepository: ITeacherRepository,
   ) {
     this.studyHubFacade = new StudyHubFacade();
   }
 
   public async processNewUserOnboarding(userId: string): Promise<void> {
     console.log(`[OnboardingService] Processing onboarding for user: ${userId}`);
-    const onboardingSubject = this.studyHubFacade.createOnboardingSubject(userId);
-    await this.subjectRepository.save(onboardingSubject);
+    const { subject, teacher } = this.studyHubFacade.createOnboardingData(userId);
+    await this.subjectRepository.save(subject);
+    await this.teacherRepository.save(teacher);
     console.log(`[OnboardingService] Onboarding successfully generated and saved to DB for user: ${userId}`);
   }
 }

@@ -1,6 +1,6 @@
-// File: src/subjects/domain/patterns/subject.builder.ts
+// GoF Pattern: Builder — adapted for new schedule-centric model
 import { SubjectEntity } from '../subject.entity';
-import { BaseLesson } from './lesson.factory';
+import { BaseScheduleSlot } from '../../../schedule/domain/patterns/schedule-slot.factory';
 import { TaskEntity } from '../../../tasks/domain/task.entity';
 
 export class SubjectBuilder {
@@ -8,13 +8,8 @@ export class SubjectBuilder {
 
   constructor(id: string, title: string, userId: string) {
     this.subject = new SubjectEntity(id, title, userId);
-    this.subject.lessons = this.subject.lessons || [];
+    this.subject.scheduleSlots = this.subject.scheduleSlots || [];
     this.subject.tasks = this.subject.tasks || [];
-  }
-
-  setTeacher(teacherName: string): SubjectBuilder {
-    this.subject.teacherName = teacherName;
-    return this;
   }
 
   setColor(color: string): SubjectBuilder {
@@ -22,8 +17,8 @@ export class SubjectBuilder {
     return this;
   }
 
-  addLesson(lesson: BaseLesson): SubjectBuilder {
-    this.subject.lessons.push(lesson);
+  addScheduleSlot(slot: BaseScheduleSlot): SubjectBuilder {
+    this.subject.scheduleSlots.push(slot);
     return this;
   }
 

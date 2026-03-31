@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, User, Edit2, Trash2 } from 'lucide-react';
+import { BookOpen, Edit2, Trash2 } from 'lucide-react';
 import { SubjectItem } from '../api/subjects.api';
 
 interface Props {
@@ -50,12 +50,7 @@ export const SubjectCard: React.FC<Props> = ({ subject, onClick, onEdit, onDelet
         
         <h3 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white mb-2">{subject.title}</h3>
         
-        {subject.teacherName && (
-          <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-sm">
-            <User className="w-4 h-4" />
-            <span>{subject.teacherName}</span>
-          </div>
-        )}
+
       </div>
     </div>
   );

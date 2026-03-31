@@ -6,7 +6,7 @@ import { SubjectItem } from '../api/subjects.api';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { title: string; teacherName?: string; color: string }) => Promise<void>;
+  onSubmit: (data: { title: string; color: string }) => Promise<void>;
   initialData?: SubjectItem | null;
 }
 
@@ -15,14 +15,12 @@ const COLORS = ['#6366f1', '#ef4444', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'
 export const CreateSubjectModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, initialData }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
-  const [teacherName, setTeacherName] = useState('');
   const [color, setColor] = useState(COLORS[0]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setTitle(initialData?.title || '');
-      setTeacherName(initialData?.teacherName || '');
       setColor(initialData?.color || COLORS[0]);
     }
   }, [isOpen, initialData]);
@@ -33,9 +31,8 @@ export const CreateSubjectModal: React.FC<Props> = ({ isOpen, onClose, onSubmit,
     e.preventDefault();
     setLoading(true);
     try {
-      await onSubmit({ title, teacherName, color });
+      await onSubmit({ title, color });
       setTitle('');
-      setTeacherName('');
       setColor(COLORS[0]);
       onClose();
     } finally {
@@ -66,16 +63,7 @@ export const CreateSubjectModal: React.FC<Props> = ({ isOpen, onClose, onSubmit,
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('teacher_opt')}</label>
-            <input
-              type="text"
-              value={teacherName}
-              onChange={(e) => setTeacherName(e.target.value)}
-              className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              placeholder={t('teacher_ph')}
-            />
-          </div>
+
 
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('accent_color')}</label>

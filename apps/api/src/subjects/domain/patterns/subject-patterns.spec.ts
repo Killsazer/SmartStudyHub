@@ -1,12 +1,12 @@
 // File: src/subjects/domain/patterns/subject-patterns.spec.ts
-// Covers: Builder (SubjectBuilder), Factory Method (LessonFactory)
+// Covers: Builder (SubjectBuilder), Factory Method (ScheduleSlotFactory via re-export)
 import { SubjectBuilder } from './subject.builder';
-import { LessonFactory, LessonType, LectureLesson, LabLesson, SeminarLesson } from './lesson.factory';
+import { ScheduleSlotFactory, ClassType, LectureSlot, LabSlot, PracticeSlot } from '../../../schedule/domain/patterns/schedule-slot.factory';
 import { SubjectEntity } from '../subject.entity';
 import { TaskEntity, TaskStatus, TaskPriority } from '../../../tasks/domain/task.entity';
 
 // ═══════════════════════════════════════════════════════════════
-// BUILDER PATTERN
+// BUILDER PATTERN (adapted for schedule-centric model)
 // ═══════════════════════════════════════════════════════════════
 
 describe('SubjectBuilder', () => {
@@ -21,16 +21,15 @@ describe('SubjectBuilder', () => {
     expect(subject.userId).toBe('u1');
   });
 
-  it('✅ fluent API — setTeacher and setColor should return `this` for chaining', () => {
+  it('✅ fluent API — setColor should return `this` for chaining', () => {
     const builder = new SubjectBuilder('s1', 'Math', 'u1');
 
-    const result = builder.setTeacher('Prof. Smith').setColor('#FF0000');
+    const result = builder.setColor('#FF0000');
 
     // Chaining should work and return the same builder
     expect(result).toBe(builder);
 
     const subject = result.build();
-    expect(subject.teacherName).toBe('Prof. Smith');
     expect(subject.color).toBe('#FF0000');
   });
 
@@ -40,18 +39,18 @@ describe('SubjectBuilder', () => {
     expect(subject.color).toBe('#000000');
   });
 
-  it('✅ addLesson() should accumulate lessons', () => {
-    const lesson = LessonFactory.createLesson(LessonType.LECTURE, {
-      id: 'l1', title: 'Intro', subjectId: 's1',
-      startTime: new Date(), endTime: new Date(),
+  it('✅ addScheduleSlot() should accumulate schedule slots', () => {
+    const slot = ScheduleSlotFactory.createSlot(ClassType.LECTURE, {
+      id: 'sl1', userId: 'u1', subjectId: 's1', teacherId: null,
+      weekNumber: 1, dayOfWeek: 1, startTime: '09:00', endTime: '10:30',
     });
 
     const subject = new SubjectBuilder('s1', 'CS', 'u1')
-      .addLesson(lesson)
+      .addScheduleSlot(slot)
       .build();
 
-    expect(subject.lessons.length).toBe(1);
-    expect(subject.lessons[0].type).toBe(LessonType.LECTURE);
+    expect(subject.scheduleSlots.length).toBe(1);
+    expect(subject.scheduleSlots[0].classType).toBe(ClassType.LECTURE);
   });
 
   it('✅ addTask() should accumulate tasks', () => {
@@ -66,76 +65,78 @@ describe('SubjectBuilder', () => {
   });
 
   it('✅ full fluent chain should produce a complete Subject', () => {
-    const lesson = LessonFactory.createLesson(LessonType.LAB, {
-      id: 'l1', title: 'Practical', subjectId: 's1',
-      startTime: new Date(), endTime: new Date(), location: 'Room 305'
+    const slot = ScheduleSlotFactory.createSlot(ClassType.LAB, {
+      id: 'sl1', userId: 'u1', subjectId: 's1', teacherId: 't1',
+      weekNumber: 1, dayOfWeek: 3, startTime: '14:00', endTime: '15:30',
+      location: 'Room 305',
     });
     const task = new TaskEntity('t1', 'Lab report', TaskStatus.TODO, TaskPriority.HIGH, 'u1');
 
     const subject = new SubjectBuilder('s1', 'OOP', 'u1')
-      .setTeacher('Dr. Johnson')
       .setColor('#2196F3')
-      .addLesson(lesson)
+      .addScheduleSlot(slot)
       .addTask(task)
       .build();
 
-    expect(subject.teacherName).toBe('Dr. Johnson');
     expect(subject.color).toBe('#2196F3');
-    expect(subject.lessons.length).toBe(1);
+    expect(subject.scheduleSlots.length).toBe(1);
     expect(subject.tasks.length).toBe(1);
   });
 });
 
 // ═══════════════════════════════════════════════════════════════
-// FACTORY METHOD PATTERN
+// FACTORY METHOD PATTERN (ScheduleSlotFactory — adapted from LessonFactory)
 // ═══════════════════════════════════════════════════════════════
 
-describe('LessonFactory', () => {
-  const lessonProps = {
-    id: 'l-1',
-    title: 'Test Lesson',
+describe('ScheduleSlotFactory', () => {
+  const slotProps = {
+    id: 'sl-1',
+    userId: 'u1',
     subjectId: 'subj-1',
-    startTime: new Date('2026-09-01T09:00:00'),
-    endTime: new Date('2026-09-01T10:30:00'),
+    teacherId: 'teacher-1',
+    weekNumber: 1,
+    dayOfWeek: 1,
+    startTime: '09:00',
+    endTime: '10:30',
     location: 'Room 101',
   };
 
-  it('✅ should create LectureLesson for LECTURE type', () => {
-    const lesson = LessonFactory.createLesson(LessonType.LECTURE, lessonProps);
+  it('✅ should create LectureSlot for LECTURE type', () => {
+    const slot = ScheduleSlotFactory.createSlot(ClassType.LECTURE, slotProps);
 
-    expect(lesson).toBeInstanceOf(LectureLesson);
-    expect(lesson.type).toBe(LessonType.LECTURE);
-    expect(lesson.props.title).toBe('Test Lesson');
+    expect(slot).toBeInstanceOf(LectureSlot);
+    expect(slot.classType).toBe(ClassType.LECTURE);
+    expect(slot.props.startTime).toBe('09:00');
   });
 
-  it('✅ should create LabLesson for LAB type', () => {
-    const lesson = LessonFactory.createLesson(LessonType.LAB, lessonProps);
+  it('✅ should create LabSlot for LAB type', () => {
+    const slot = ScheduleSlotFactory.createSlot(ClassType.LAB, slotProps);
 
-    expect(lesson).toBeInstanceOf(LabLesson);
-    expect(lesson.type).toBe(LessonType.LAB);
+    expect(slot).toBeInstanceOf(LabSlot);
+    expect(slot.classType).toBe(ClassType.LAB);
   });
 
-  it('✅ should create SeminarLesson for SEMINAR type', () => {
-    const lesson = LessonFactory.createLesson(LessonType.SEMINAR, lessonProps);
+  it('✅ should create PracticeSlot for PRACTICE type', () => {
+    const slot = ScheduleSlotFactory.createSlot(ClassType.PRACTICE, slotProps);
 
-    expect(lesson).toBeInstanceOf(SeminarLesson);
-    expect(lesson.type).toBe(LessonType.SEMINAR);
+    expect(slot).toBeInstanceOf(PracticeSlot);
+    expect(slot.classType).toBe(ClassType.PRACTICE);
   });
 
-  it('❌ should throw Error for invalid lesson type', () => {
+  it('❌ should throw Error for invalid class type', () => {
     expect(() => {
-      LessonFactory.createLesson('WORKSHOP' as LessonType, lessonProps);
-    }).toThrow('Invalid lesson type');
+      ScheduleSlotFactory.createSlot('WORKSHOP' as ClassType, slotProps);
+    }).toThrow('Invalid class type');
   });
 
-  it('✅ getLessonDetails() should return descriptive string for each type', () => {
-    const lecture = LessonFactory.createLesson(LessonType.LECTURE, lessonProps);
-    const lab = LessonFactory.createLesson(LessonType.LAB, lessonProps);
-    const seminar = LessonFactory.createLesson(LessonType.SEMINAR, lessonProps);
+  it('✅ getSlotDetails() should return descriptive string for each type', () => {
+    const lecture = ScheduleSlotFactory.createSlot(ClassType.LECTURE, slotProps);
+    const lab = ScheduleSlotFactory.createSlot(ClassType.LAB, slotProps);
+    const practice = ScheduleSlotFactory.createSlot(ClassType.PRACTICE, slotProps);
 
-    expect(lecture.getLessonDetails()).toContain('Lecture');
-    expect(lecture.getLessonDetails()).toContain('Room 101');
-    expect(lab.getLessonDetails()).toContain('Laboratory');
-    expect(seminar.getLessonDetails()).toContain('Seminar');
+    expect(lecture.getSlotDetails()).toContain('Лекція');
+    expect(lecture.getSlotDetails()).toContain('Room 101');
+    expect(lab.getSlotDetails()).toContain('Лабораторна');
+    expect(practice.getSlotDetails()).toContain('Практика');
   });
 });

@@ -80,8 +80,12 @@ export class TaskService {
     await this.taskRepo.delete(taskId);
   }
 
-  async getUserTasks(userId: string, sortType?: string): Promise<TaskEntity[]> {
-    const tasks = await this.taskRepo.findByUserId(userId);
+  async getUserTasks(userId: string, sortType?: string, subjectId?: string): Promise<TaskEntity[]> {
+    let tasks = await this.taskRepo.findByUserId(userId);
+    
+    if (subjectId) {
+      tasks = tasks.filter(t => t.subjectId === subjectId);
+    }
     
     if (!sortType || tasks.length === 0) return tasks;
 

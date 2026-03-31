@@ -148,7 +148,8 @@ describe('NoteService', () => {
         id: 'b1',
         type: 'block',
         title: 'Test',
-        content: 'Body'
+        content: 'Body',
+        subjectId: null
       });
     });
   });

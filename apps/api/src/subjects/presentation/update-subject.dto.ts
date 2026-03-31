@@ -9,11 +9,6 @@ export class UpdateSubjectDto {
 
   @IsString()
   @IsOptional()
-  @MaxLength(100)
-  teacherName?: string;
-
-  @IsString()
-  @IsOptional()
   @MaxLength(7)
   color?: string;
 }

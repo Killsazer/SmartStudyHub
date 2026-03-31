@@ -39,8 +39,19 @@ export class AuthService {
     return this.generateToken(user);
   }
 
+  async getProfile(userId: string) {
+    const user = await this.userRepo.findById(userId);
+    if (!user) throw new UnauthorizedException('User not found');
+    return { 
+      id: user.id, 
+      email: user.email, 
+      firstName: user.firstName, 
+      lastName: user.lastName 
+    };
+  }
+
   private generateToken(user: UserEntity) {
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName };
     return { accessToken: this.jwtService.sign(payload) };
   }
 }

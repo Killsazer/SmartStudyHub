@@ -6,6 +6,7 @@ import { OnboardingService } from './application/onboarding.service';
 import { SubjectService } from './application/subject.service';
 import { SubjectQueryService } from './application/subject-query.service';
 import { PrismaSubjectRepository } from './infrastructure/prisma-subject.repository';
+import { PrismaTeacherRepository } from '../schedule/infrastructure/prisma-teacher.repository';
 
 @Module({
   controllers: [OnboardingController, SubjectController],
@@ -16,6 +17,10 @@ import { PrismaSubjectRepository } from './infrastructure/prisma-subject.reposit
     {
       provide: 'ISubjectRepository',
       useClass: PrismaSubjectRepository,
+    },
+    {
+      provide: 'ITeacherRepository',
+      useClass: PrismaTeacherRepository,
     },
   ],
 })

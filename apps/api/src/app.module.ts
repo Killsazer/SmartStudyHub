@@ -7,9 +7,10 @@ import { AuthModule } from './auth/auth.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { TasksModule } from './tasks/tasks.module';
 import { NotesModule } from './notes/notes.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, SubjectsModule, TasksModule, NotesModule],
+  imports: [PrismaModule, AuthModule, SubjectsModule, TasksModule, NotesModule, ScheduleModule],
   controllers: [AppController],
   providers: [AppService],
 })

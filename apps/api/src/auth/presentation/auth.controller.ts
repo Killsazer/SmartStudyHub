@@ -1,8 +1,10 @@
 // File: src/auth/presentation/auth.controller.ts
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { CreateUserDto } from './create-user.dto';
 import { LoginUserDto } from './login-user.dto';
+import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
+import { CurrentUser } from '../../shared/security/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -16,5 +18,11 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginUserDto) {
     return this.authService.login(dto);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@CurrentUser() userId: string) {
+    return this.authService.getProfile(userId);
   }
 }

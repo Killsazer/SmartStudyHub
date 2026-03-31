@@ -3,8 +3,8 @@ import { apiClient } from '../../../shared/api/client';
 export interface SubjectItem {
   id: string;
   title: string;
-  teacherName?: string;
   color: string;
+  tasks?: Array<{ id: string; status: string }>;
 }
 
 export const getSubjects = async (): Promise<SubjectItem[]> => {
@@ -12,12 +12,12 @@ export const getSubjects = async (): Promise<SubjectItem[]> => {
   return res.data.data;
 };
 
-export const createSubject = async (data: { title: string; teacherName?: string; color: string }): Promise<SubjectItem> => {
+export const createSubject = async (data: { title: string; color: string }): Promise<SubjectItem> => {
   const res = await apiClient.post('/subjects', data);
   return res.data.data;
 };
 
-export const updateSubject = async (id: string, data: Partial<{ title: string; teacherName: string; color: string }>): Promise<void> => {
+export const updateSubject = async (id: string, data: Partial<{ title: string; color: string }>): Promise<void> => {
   await apiClient.patch(`/subjects/${id}`, data);
 };
 

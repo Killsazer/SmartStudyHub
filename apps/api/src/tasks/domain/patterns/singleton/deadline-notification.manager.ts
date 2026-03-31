@@ -40,10 +40,8 @@ export class DeadlineNotificationManager {
   private flushQueueForUser(userId: string): void {
     const connection = this.activeConnections.get(userId);
     if (connection) {
-      // ... logic to send over WebSocket
       console.log(`[WebSocket Manager] Sent push notification to ${userId}`);
       
-      // Clear specific user's queue
       const itemsToRemove = Array.from(this.notificationQueue).filter(item => item.startsWith(userId));
       itemsToRemove.forEach(item => this.notificationQueue.delete(item));
     }

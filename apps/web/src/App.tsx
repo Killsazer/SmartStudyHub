@@ -7,7 +7,6 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import { ThemeProvider } from './shared/theme/ThemeContext';
 
-import SubjectPage from './pages/SubjectPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -30,14 +29,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/subjects/:id"
-            element={
-              <ProtectedRoute>
-                <SubjectPage />
-              </ProtectedRoute>
-            }
-          />
+
         </Routes>
         <Toaster position="top-center" toastOptions={{
           className: 'dark:bg-zinc-900 border dark:border-zinc-800 bg-white border-zinc-200 text-zinc-900 dark:text-white'

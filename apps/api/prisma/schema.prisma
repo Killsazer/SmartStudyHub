@@ -6,11 +6,11 @@ datasource db {
   provider = "postgresql"
 }
 
-// Типи занять для Factory Method
-enum LessonType {
+// Типи занять для Factory Method (adapted: LessonType → ClassType)
+enum ClassType {
   LECTURE
   LAB
-  SEMINAR
+  PRACTICE
 }
 
 // Статуси та пріоритети для Strategy та Observer
@@ -35,39 +35,71 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  subjects  Subject[]
-  tasks     Task[]
-  notes     Note[]
+  subjects        Subject[]
+  tasks           Task[]
+  notes           Note[]
+  teachers        Teacher[]
+  scheduleSlots   ScheduleSlot[]
+  sharedSchedules SharedSchedule[]
 }
 
-// Предмет (Subject) - будемо збирати через Builder
+// Предмет (Subject) - збираємо через Builder
 model Subject {
-  id          String   @id @default(uuid())
-  title       String
-  teacherName String?
-  color       String?  @default("#000000")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  title     String
+  color     String?  @default("#000000")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  lessons     Lesson[]
-  tasks       Task[]
-  notes       Note[]
+  tasks         Task[]
+  notes         Note[]
+  scheduleSlots ScheduleSlot[]
 }
 
-// Заняття в розкладі - для Factory Method
-model Lesson {
-  id        String     @id @default(uuid())
-  title     String
-  type      LessonType
-  startTime DateTime
-  endTime   DateTime
-  location  String?    // Аудиторія або посилання на Zoom
-  
+// Викладач - профіль з контактами та фото
+model Teacher {
+  id        String   @id @default(uuid())
+  name      String
+  photoUrl  String?
+  contacts  String?
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  scheduleSlots ScheduleSlot[]
+}
+
+// Слот розкладу - для Factory Method (адаптований з Lesson)
+model ScheduleSlot {
+  id         String    @id @default(uuid())
+  weekNumber Int       // 1 або 2
+  dayOfWeek  Int       // 1-7 (Пн-Нд)
+  startTime  String    // "08:30" формат HH:MM
+  endTime    String    // "10:05" формат HH:MM
+  classType  ClassType
+  location   String?   // Аудиторія або лінк
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   subjectId String
-  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+}
+
+// Спільний розклад - для імпорту/експорту через хеш-код
+model SharedSchedule {
+  id           String   @id @default(uuid())
+  hashToken    String   @unique
+  snapshotData Json
+  createdAt    DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // Завдання - основа для Command, Observer, Decorator
@@ -81,11 +113,11 @@ model Task {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  subjectId   String?
-  subject     Subject?     @relation(fields: [subjectId], references: [id], onDelete: SetNull)
-  
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // Нотатки - основа для патерна Composite (ієрархія)
@@ -97,13 +129,13 @@ model Note {
   updatedAt DateTime @updatedAt
 
   // Self-relation для створення дерева нотаток (розділи та підрозділи)
-  parentId  String?
-  parent    Note?    @relation("NoteHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children  Note[]   @relation("NoteHierarchy")
+  parentId String?
+  parent   Note?    @relation("NoteHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Note[]   @relation("NoteHierarchy")
 
   subjectId String?
   subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
