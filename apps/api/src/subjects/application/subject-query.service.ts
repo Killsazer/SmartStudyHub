@@ -1,6 +1,7 @@
 // File: src/subjects/application/subject-query.service.ts
 import { Injectable, Inject } from '@nestjs/common';
 import type { ISubjectRepository } from '../domain/subject.repository.interface';
+import { SubjectEntity } from '../domain/subject.entity';
 
 @Injectable()
 export class SubjectQueryService {
@@ -9,8 +10,10 @@ export class SubjectQueryService {
     private readonly subjectRepo: ISubjectRepository
   ) {}
 
-  public async getSubjectsByUser(userId: string): Promise<any[]> {
-    console.log(`[SubjectQueryService] Fetching subjects for user: ${userId}`);
+  /**
+   * Returns all subjects belonging to a given user.
+   */
+  public async getSubjectsByUser(userId: string): Promise<SubjectEntity[]> {
     return this.subjectRepo.findByUserId(userId);
   }
 }

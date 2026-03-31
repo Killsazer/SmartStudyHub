@@ -1,9 +1,21 @@
-// GoF Pattern: Builder — adapted for new schedule-centric model
+/**
+ * ====================================================================
+ * Патерн: Builder (Породжувальний / Creational)
+ * ====================================================================
+ * Дозволяє покроково збирати складний об'єкт SubjectEntity,
+ * додаючи до нього розклад, завдання та налаштування кольору.
+ * Це зручніше за конструктор із 10+ параметрами — Builder дозволяє
+ * конструювати різні конфігурації об'єкта через fluent-інтерфейс.
+ *
+ * Ключові ознаки патерну:
+ * - Методи повертають `this` для ланцюгових викликів (fluent API)
+ * - Фінальний метод `build()` повертає готовий об'єкт
+ * ====================================================================
+ */
 import { SubjectEntity } from '../subject.entity';
-import { BaseScheduleSlot } from '../../../schedule/domain/patterns/schedule-slot.factory';
-import { TaskEntity } from '../../../tasks/domain/task.entity';
 
 export class SubjectBuilder {
+  /** Внутрішній об'єкт, що поступово наповнюється через fluent-методи */
   private subject: SubjectEntity;
 
   constructor(id: string, title: string, userId: string) {
@@ -12,21 +24,29 @@ export class SubjectBuilder {
     this.subject.tasks = this.subject.tasks || [];
   }
 
+  /** Крок Builder: задає колір предмета */
   setColor(color: string): SubjectBuilder {
     this.subject.color = color;
     return this;
   }
 
-  addScheduleSlot(slot: BaseScheduleSlot): SubjectBuilder {
+  /** Крок Builder: додає слот розкладу до агрегату */
+  addScheduleSlot(slot: unknown): SubjectBuilder {
     this.subject.scheduleSlots.push(slot);
     return this;
   }
 
-  addTask(task: TaskEntity): SubjectBuilder {
+  /** Крок Builder: додає завдання до агрегату */
+  addTask(task: unknown): SubjectBuilder {
     this.subject.tasks.push(task);
     return this;
   }
 
+  /**
+   * Фінальний метод Builder — повертає повністю зібраний об'єкт.
+   * Після виклику build() подальша модифікація через Builder неможлива
+   * без створення нового екземпляра.
+   */
   build(): SubjectEntity {
     return this.subject;
   }

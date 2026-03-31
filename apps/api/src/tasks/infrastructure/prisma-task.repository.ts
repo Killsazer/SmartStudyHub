@@ -31,28 +31,38 @@ export class PrismaTaskRepository implements ITaskRepository {
         userId: task.userId
       }
     });
-    console.log(`[PrismaTaskRepository] Task '${task.title}' saved.`);
   }
 
   async findById(id: string): Promise<TaskEntity | null> {
     const data = await this.prisma.task.findUnique({ where: { id } });
     if (!data) return null;
-    
-    return new TaskEntity(
-      data.id,
-      data.title,
-      data.status as TaskStatus,
-      data.priority as TaskPriority,
-      data.userId,
-      data.description ?? undefined,
-      data.deadline ?? undefined,
-      data.subjectId ?? undefined
-    );
+    return this.toDomainEntity(data);
   }
 
   async findByUserId(userId: string): Promise<TaskEntity[]> {
     const data = await this.prisma.task.findMany({ where: { userId } });
-    return data.map(d => new TaskEntity(
+    return data.map(d => this.toDomainEntity(d));
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.task.delete({ where: { id } });
+  }
+
+  /**
+   * Maps a raw Prisma record to a TaskEntity domain object.
+   * Centralised to eliminate mapping duplication across find methods (DRY).
+   */
+  private toDomainEntity(d: {
+    id: string;
+    title: string;
+    status: string;
+    priority: string;
+    userId: string;
+    description: string | null;
+    deadline: Date | null;
+    subjectId: string | null;
+  }): TaskEntity {
+    return new TaskEntity(
       d.id,
       d.title,
       d.status as TaskStatus,
@@ -61,10 +71,6 @@ export class PrismaTaskRepository implements ITaskRepository {
       d.description ?? undefined,
       d.deadline ?? undefined,
       d.subjectId ?? undefined
-    ));
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.prisma.task.delete({ where: { id } });
+    );
   }
 }

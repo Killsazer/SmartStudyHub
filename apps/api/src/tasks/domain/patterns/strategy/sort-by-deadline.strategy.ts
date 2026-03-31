@@ -1,7 +1,15 @@
-// File: src/tasks/domain/patterns/strategy/sort-by-deadline.strategy.ts
+/**
+ * ====================================================================
+ * Патерн: Strategy — Конкретна стратегія (сортування за дедлайном)
+ * ====================================================================
+ * Сортує завдання за зростанням дедлайну (найближчі — першими).
+ * Завдання без дедлайну переміщуються в кінець списку.
+ * ====================================================================
+ */
 import { ITaskSortStrategy } from './task-sort.strategy';
 import { TaskEntity } from '../../task.entity';
 
+/** Конкретна стратегія: сортує за дедлайном (ascending, nulls last) */
 export class SortByDeadlineStrategy implements ITaskSortStrategy {
   sort(tasks: TaskEntity[]): TaskEntity[] {
     return [...tasks].sort((a, b) => {

@@ -31,19 +31,31 @@ export class PrismaNoteRepository implements INoteRepository {
 
   async findByUserId(userId: string): Promise<NoteEntity[]> {
     const data = await this.prisma.note.findMany({ where: { userId } });
-    return data.map(d => new NoteEntity(
-      d.id,
-      d.title,
-      d.userId,
-      d.content ?? undefined,
-      d.parentId ?? undefined,
-      d.subjectId ?? undefined
-    ));
+    return data.map(d => this.toDomainEntity(d));
   }
 
   async findById(id: string): Promise<NoteEntity | null> {
     const d = await this.prisma.note.findUnique({ where: { id } });
     if (!d) return null;
+    return this.toDomainEntity(d);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.note.delete({ where: { id } });
+  }
+
+  /**
+   * Maps a raw Prisma record to a NoteEntity domain object.
+   * Centralised to eliminate mapping duplication across find methods (DRY).
+   */
+  private toDomainEntity(d: {
+    id: string;
+    title: string;
+    userId: string;
+    content: string | null;
+    parentId: string | null;
+    subjectId: string | null;
+  }): NoteEntity {
     return new NoteEntity(
       d.id,
       d.title,
@@ -52,9 +64,5 @@ export class PrismaNoteRepository implements INoteRepository {
       d.parentId ?? undefined,
       d.subjectId ?? undefined
     );
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.prisma.note.delete({ where: { id } });
   }
 }

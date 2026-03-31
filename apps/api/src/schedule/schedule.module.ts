@@ -7,12 +7,12 @@ import { TeacherService } from './application/teacher.service';
 import { ScheduleSlotService } from './application/schedule-slot.service';
 import { ExportScheduleUseCase } from './application/export-schedule.use-case';
 import { ImportScheduleUseCase } from './application/import-schedule.use-case';
-import { PrismaTeacherRepository } from './infrastructure/prisma-teacher.repository';
 import { PrismaScheduleSlotRepository } from './infrastructure/prisma-schedule-slot.repository';
 import { PrismaSharedScheduleRepository } from './infrastructure/prisma-shared-schedule.repository';
-import { PrismaSubjectRepository } from '../subjects/infrastructure/prisma-subject.repository';
+import { SharedProvidersModule } from '../shared/shared-providers.module';
 
 @Module({
+  imports: [SharedProvidersModule],
   controllers: [TeacherController, ScheduleSlotController, ShareController],
   providers: [
     TeacherService,
@@ -20,21 +20,12 @@ import { PrismaSubjectRepository } from '../subjects/infrastructure/prisma-subje
     ExportScheduleUseCase,
     ImportScheduleUseCase,
     {
-      provide: 'ITeacherRepository',
-      useClass: PrismaTeacherRepository,
-    },
-    {
       provide: 'IScheduleSlotRepository',
       useClass: PrismaScheduleSlotRepository,
     },
     {
       provide: 'ISharedScheduleRepository',
       useClass: PrismaSharedScheduleRepository,
-    },
-    // Needed by Export/Import use cases
-    {
-      provide: 'ISubjectRepository',
-      useClass: PrismaSubjectRepository,
     },
   ],
 })

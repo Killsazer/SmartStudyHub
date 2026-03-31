@@ -1,7 +1,8 @@
 // File: src/schedule/infrastructure/prisma-shared-schedule.repository.ts
 import { Injectable } from '@nestjs/common';
-import { ISharedScheduleRepository, SharedScheduleData } from '../domain/shared-schedule.repository.interface';
+import { ISharedScheduleRepository, SharedScheduleData, ScheduleSnapshotData } from '../domain/shared-schedule.repository.interface';
 import { PrismaService } from '../../shared/prisma/prisma.service';
+import type { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PrismaSharedScheduleRepository implements ISharedScheduleRepository {
@@ -12,7 +13,7 @@ export class PrismaSharedScheduleRepository implements ISharedScheduleRepository
       data: {
         id: data.id,
         hashToken: data.hashToken,
-        snapshotData: data.snapshotData,
+        snapshotData: data.snapshotData as unknown as Prisma.InputJsonValue,
         userId: data.userId,
       },
     });
@@ -25,7 +26,7 @@ export class PrismaSharedScheduleRepository implements ISharedScheduleRepository
     return {
       id: d.id,
       hashToken: d.hashToken,
-      snapshotData: d.snapshotData,
+      snapshotData: d.snapshotData as unknown as ScheduleSnapshotData,
       userId: d.userId,
     };
   }

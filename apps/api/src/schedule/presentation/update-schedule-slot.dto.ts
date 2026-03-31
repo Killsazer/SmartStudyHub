@@ -1,5 +1,6 @@
 // File: src/schedule/presentation/update-schedule-slot.dto.ts
-import { IsString, IsOptional, IsInt, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsInt, IsEnum, Min, Max } from 'class-validator';
+import { ClassType } from '../domain/schedule-slot.entity';
 
 export class UpdateScheduleSlotDto {
   @IsString()
@@ -30,9 +31,9 @@ export class UpdateScheduleSlotDto {
   @IsOptional()
   endTime?: string;
 
-  @IsString()
+  @IsEnum(ClassType)
   @IsOptional()
-  classType?: string;
+  classType?: ClassType;
 
   @IsString()
   @IsOptional()

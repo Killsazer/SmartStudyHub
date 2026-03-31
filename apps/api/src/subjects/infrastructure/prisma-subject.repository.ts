@@ -14,32 +14,26 @@ export class PrismaSubjectRepository implements ISubjectRepository {
         id: subject.id,
         title: subject.title,
         color: subject.color,
-        userId: subject.userId,
-
-        tasks: {
-          create: subject.tasks.map((task) => ({
-            id: task.id,
-            title: task.title,
-            description: task.description,
-            status: task.status,
-            priority: task.priority,
-            deadline: task.deadline,
-            userId: task.userId,
-          })),
-        },
+        userId: subject.userId, 
       },
     });
-
-    console.log(`[PrismaSubjectRepository] Successfully saved Subject '${subject.title}' with ${subject.tasks.length} tasks to PostgreSQL.`);
   }
 
-  async findByUserId(userId: string): Promise<any[]> {
-    return this.prisma.subject.findMany({
+  async findByUserId(userId: string): Promise<SubjectEntity[]> {
+    const records = await this.prisma.subject.findMany({
       where: { userId },
       include: {
         tasks: true,
         scheduleSlots: true,
       },
+    });
+
+    return records.map((r) => {
+      const entity = new SubjectEntity(r.id, r.title, r.userId);
+      entity.color = r.color ?? '#000000';
+      entity.tasks = r.tasks ?? [];
+      entity.scheduleSlots = r.scheduleSlots ?? [];
+      return entity;
     });
   }
 

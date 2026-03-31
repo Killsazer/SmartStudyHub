@@ -4,6 +4,17 @@ import { IScheduleSlotRepository } from '../domain/schedule-slot.repository.inte
 import { ScheduleSlotEntity, ClassType } from '../domain/schedule-slot.entity';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 
+interface SlotUpdateFields {
+  weekNumber?: number;
+  dayOfWeek?: number;
+  startTime?: string;
+  endTime?: string;
+  classType?: ClassType;
+  location?: string | null;
+  subject?: { connect: { id: string } };
+  teacher?: { connect: { id: string } } | { disconnect: true };
+}
+
 @Injectable()
 export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -34,9 +45,9 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
         location: slot.location ?? null,
       },
     });
-    console.log(`[PrismaScheduleSlotRepo] Slot saved: day=${slot.dayOfWeek}, ${slot.startTime}-${slot.endTime}`);
   }
 
+  // 💡 Виправлено: classType: string -> classType: ClassType
   async update(id: string, data: Partial<{
     subjectId: string;
     teacherId: string | null;
@@ -44,10 +55,10 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
     dayOfWeek: number;
     startTime: string;
     endTime: string;
-    classType: string;
+    classType: ClassType; 
     location: string | null;
   }>): Promise<void> {
-    const updateData: any = {};
+    const updateData: SlotUpdateFields = {};
     if (data.weekNumber !== undefined) updateData.weekNumber = data.weekNumber;
     if (data.dayOfWeek !== undefined) updateData.dayOfWeek = data.dayOfWeek;
     if (data.startTime !== undefined) updateData.startTime = data.startTime;
@@ -68,11 +79,7 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
   async findById(id: string): Promise<ScheduleSlotEntity | null> {
     const d = await this.prisma.scheduleSlot.findUnique({ where: { id } });
     if (!d) return null;
-    return new ScheduleSlotEntity(
-      d.id, d.userId, d.subjectId, d.teacherId,
-      d.weekNumber, d.dayOfWeek, d.startTime, d.endTime,
-      d.classType as ClassType, d.location ?? undefined,
-    );
+    return this.toDomainEntity(d);
   }
 
   async findByUserId(userId: string): Promise<ScheduleSlotEntity[]> {
@@ -80,11 +87,7 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
       where: { userId },
       orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
     });
-    return data.map(d => new ScheduleSlotEntity(
-      d.id, d.userId, d.subjectId, d.teacherId,
-      d.weekNumber, d.dayOfWeek, d.startTime, d.endTime,
-      d.classType as ClassType, d.location ?? undefined,
-    ));
+    return data.map(d => this.toDomainEntity(d));
   }
 
   async findByUserIdAndWeek(userId: string, weekNumber: number): Promise<ScheduleSlotEntity[]> {
@@ -92,10 +95,29 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
       where: { userId, weekNumber },
       orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
     });
-    return data.map(d => new ScheduleSlotEntity(
+    return data.map(d => this.toDomainEntity(d));
+  }
+
+  /**
+   * Maps a raw Prisma record to a ScheduleSlotEntity domain object.
+   * Centralised to eliminate mapping duplication across find methods (DRY).
+   */
+  private toDomainEntity(d: {
+    id: string;
+    userId: string;
+    subjectId: string;
+    teacherId: string | null;
+    weekNumber: number;
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    classType: string;
+    location: string | null;
+  }): ScheduleSlotEntity {
+    return new ScheduleSlotEntity(
       d.id, d.userId, d.subjectId, d.teacherId,
       d.weekNumber, d.dayOfWeek, d.startTime, d.endTime,
       d.classType as ClassType, d.location ?? undefined,
-    ));
+    );
   }
 }

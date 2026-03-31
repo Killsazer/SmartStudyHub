@@ -1,5 +1,3 @@
-// File: src/schedule/domain/schedule-slot.entity.ts
-
 export enum ClassType {
   LECTURE = 'LECTURE',
   LAB = 'LAB',

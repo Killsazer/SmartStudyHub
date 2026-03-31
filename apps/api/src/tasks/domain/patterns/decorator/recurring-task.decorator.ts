@@ -1,6 +1,25 @@
-// File: src/tasks/domain/patterns/decorator/recurring-task.decorator.ts
+/**
+ * ====================================================================
+ * Патерн: Decorator (Структурний / Structural)
+ * ====================================================================
+ * Динамічно розширює поведінку завдання (ITask) без зміни його коду.
+ * RecurringTaskDecorator «обгортає» існуюче завдання та перевизначає
+ * метод `completeTask()`: при завершенні автоматично створює наступне
+ * повторюване завдання.
+ *
+ * Ключові ознаки:
+ * - Декоратор має той самий інтерфейс (ITask), що й об'єкт, який обгортає
+ * - Делегує базову поведінку до `wrappee` (обгорнутий об'єкт)
+ * - Додає нову поведінку до/після делегації
+ * ====================================================================
+ */
 import { ITask, TaskStatus, TaskEntity, TaskPriority } from '../../task.entity';
 
+/**
+ * Абстрактний декоратор — базовий клас, що реалізує інтерфейс ITask
+ * та делегує всі виклики до обгорнутого об'єкта (wrappee).
+ * Конкретні декоратори наслідують і перевизначають потрібні методи.
+ */
 export abstract class TaskDecorator implements ITask {
   constructor(protected wrappee: ITask) {}
 
@@ -13,11 +32,16 @@ export abstract class TaskDecorator implements ITask {
   get description(): string | undefined { return this.wrappee.description; }
   get subjectId(): string | undefined { return this.wrappee.subjectId; }
 
+  /** Делегація до обгорнутого об'єкта — base behavior */
   completeTask(): ITask | null {
     return this.wrappee.completeTask();
   }
 }
 
+/**
+ * Конкретний декоратор — додає поведінку автоматичного створення
+ * наступного завдання при завершенні поточного (recurring/повторюване).
+ */
 export class RecurringTaskDecorator extends TaskDecorator {
   constructor(
     wrappee: ITask,
@@ -26,13 +50,18 @@ export class RecurringTaskDecorator extends TaskDecorator {
     super(wrappee);
   }
 
+  /**
+   * Перевизначений метод — спочатку делегує завершення до wrappee,
+   * потім створює нове завдання з розрахованим наступним дедлайном.
+   * Це і є «розширення поведінки» декоратором.
+   */
   override completeTask(): ITask | null {
     super.completeTask();
 
     const nextDeadline = this.calculateNextDeadline(this.deadline);
-    
+
     const newTask = new TaskEntity(
-      `auto-gen-${Date.now()}`, 
+      `auto-gen-${Date.now()}`,
       this.title,
       TaskStatus.TODO,
       this.priority,
@@ -46,6 +75,7 @@ export class RecurringTaskDecorator extends TaskDecorator {
     return newTask;
   }
 
+  /** Обчислює дедлайн наступного повторення */
   private calculateNextDeadline(currentDeadline?: Date): Date {
     const nextDate = currentDeadline ? new Date(currentDeadline) : new Date();
     nextDate.setDate(nextDate.getDate() + this.recurrenceDays);

@@ -1,11 +1,6 @@
 // File: src/schedule/presentation/create-schedule-slot.dto.ts
 import { IsString, IsNotEmpty, IsOptional, IsInt, IsEnum, Min, Max } from 'class-validator';
-
-enum ClassType {
-  LECTURE = 'LECTURE',
-  LAB = 'LAB',
-  PRACTICE = 'PRACTICE',
-}
+import { ClassType } from '../domain/schedule-slot.entity';
 
 export class CreateScheduleSlotDto {
   @IsString()

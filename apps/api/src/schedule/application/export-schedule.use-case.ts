@@ -3,7 +3,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../domain/schedule-slot.repository.interface';
 import type { ITeacherRepository } from '../domain/teacher.repository.interface';
 import type { ISubjectRepository } from '../../subjects/domain/subject.repository.interface';
-import type { ISharedScheduleRepository } from '../domain/shared-schedule.repository.interface';
+import type { ISharedScheduleRepository, ScheduleSnapshotData } from '../domain/shared-schedule.repository.interface';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -20,15 +20,14 @@ export class ExportScheduleUseCase {
   ) {}
 
   async execute(userId: string): Promise<string> {
-    // Collect all user data
     const [slots, teachers, subjects] = await Promise.all([
       this.slotRepo.findByUserId(userId),
       this.teacherRepo.findByUserId(userId),
       this.subjectRepo.findByUserId(userId),
     ]);
 
-    const snapshotData = {
-      subjects: subjects.map((s: any) => ({
+    const snapshotData: ScheduleSnapshotData = {
+      subjects: subjects.map(s => ({
         id: s.id,
         title: s.title,
         color: s.color,
@@ -52,7 +51,7 @@ export class ExportScheduleUseCase {
     };
 
     // Generate 8-character hash token
-    const hashToken = crypto.randomBytes(4).toString('hex'); // 8 hex chars
+    const hashToken = crypto.randomBytes(4).toString('hex');
 
     await this.sharedRepo.save({
       id: `shared-${Date.now()}`,
@@ -61,7 +60,6 @@ export class ExportScheduleUseCase {
       userId,
     });
 
-    console.log(`[ExportScheduleUseCase] Exported schedule for user ${userId}, token: ${hashToken}`);
     return hashToken;
   }
 }

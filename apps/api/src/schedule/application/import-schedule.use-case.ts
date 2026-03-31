@@ -27,20 +27,7 @@ export class ImportScheduleUseCase {
       throw new NotFoundException(`Schedule with code '${hashToken}' not found`);
     }
 
-    const snapshot = shared.snapshotData as {
-      subjects: Array<{ id: string; title: string; color: string }>;
-      teachers: Array<{ id: string; name: string; photoUrl?: string; contacts?: string }>;
-      slots: Array<{
-        subjectId: string;
-        teacherId: string | null;
-        weekNumber: number;
-        dayOfWeek: number;
-        startTime: string;
-        endTime: string;
-        classType: string;
-        location?: string;
-      }>;
-    };
+    const snapshot = shared.snapshotData;
 
     // Map old IDs to new IDs for cloned data
     const subjectIdMap = new Map<string, string>();
@@ -68,7 +55,7 @@ export class ImportScheduleUseCase {
       const newSubjectId = subjectIdMap.get(slot.subjectId);
       const newTeacherId = slot.teacherId ? teacherIdMap.get(slot.teacherId) ?? null : null;
 
-      if (!newSubjectId) continue; // Skip if subject mapping failed
+      if (!newSubjectId) continue;
 
       const newSlotId = `slot-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       const entity = new ScheduleSlotEntity(
@@ -78,7 +65,5 @@ export class ImportScheduleUseCase {
       );
       await this.slotRepo.save(entity);
     }
-
-    console.log(`[ImportScheduleUseCase] Successfully imported schedule for user ${userId} from hash: ${hashToken}`);
   }
 }
