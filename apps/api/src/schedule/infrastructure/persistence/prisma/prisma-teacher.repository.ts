@@ -1,6 +1,6 @@
 // File: src/schedule/infrastructure/prisma-teacher.repository.ts
 import { Injectable } from '@nestjs/common';
-import { ITeacherRepository } from '../domain/teacher.repository.interface';
+import { ITeacherRepository } from '../../../domain/repositories/teacher.repository.interface';
 import { TeacherEntity } from '../../../domain/entities/teacher.entity';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 

@@ -1,12 +1,13 @@
 // File: src/schedule/application/import-schedule.use-case.ts
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import type { IScheduleSlotRepository } from '../domain/schedule-slot.repository.interface';
-import type { ITeacherRepository } from '../domain/teacher.repository.interface';
-import type { ISubjectRepository } from '../../subjects/domain/subject.repository.interface';
-import type { ISharedScheduleRepository } from '../domain/shared-schedule.repository.interface';
-import { ScheduleSlotEntity, ClassType } from '../domain/schedule-slot.entity';
-import { TeacherEntity } from '../domain/teacher.entity';
-import { SubjectEntity } from '../../subjects/domain/subject.entity';
+import type { IScheduleSlotRepository } from '../../domain/repositories/schedule-slot.repository.interface';
+import type { ITeacherRepository } from '../../domain/repositories/teacher.repository.interface';
+import type { ISubjectRepository } from '../../../subjects/domain/subject.repository.interface';
+import type { ISharedScheduleRepository } from '../../domain/repositories/shared-schedule.repository.interface';
+import { ScheduleSlotEntity, ClassType } from '../../domain/entities/schedule-slot.entity';
+import { ScheduleSlotFactory } from '../../domain/patterns/schedule-slot.factory';
+import { TeacherEntity } from '../../domain/entities/teacher.entity';
+import { SubjectEntity } from '../../../subjects/domain/subject.entity';
 
 @Injectable()
 export class ImportScheduleUseCase {
@@ -58,11 +59,17 @@ export class ImportScheduleUseCase {
       if (!newSubjectId) continue;
 
       const newSlotId = `slot-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      const entity = new ScheduleSlotEntity(
-        newSlotId, userId, newSubjectId, newTeacherId,
-        slot.weekNumber, slot.dayOfWeek, slot.startTime, slot.endTime,
-        slot.classType as ClassType, slot.location,
-      );
+      const entity = ScheduleSlotFactory.createSlot(slot.classType as ClassType, {
+        id: newSlotId,
+        userId,
+        subjectId: newSubjectId,
+        teacherId: newTeacherId,
+        weekNumber: slot.weekNumber,
+        dayOfWeek: slot.dayOfWeek,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        location: slot.location,
+      }) as unknown as ScheduleSlotEntity;
       await this.slotRepo.save(entity);
     }
   }

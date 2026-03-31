@@ -1,8 +1,8 @@
 // File: src/schedule/presentation/schedule-slot.controller.ts
 import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { ScheduleSlotService } from '../application/schedule-slot.service';
-import { CreateScheduleSlotDto } from '../../create-schedule-slot.dto';
-import { UpdateScheduleSlotDto } from '../../update-schedule-slot.dto';
+import { ScheduleSlotService } from '../../../application/services/schedule-slot.service';
+import { CreateScheduleSlotDto } from '../dtos/create-schedule-slot.dto';
+import { UpdateScheduleSlotDto } from '../dtos/update-schedule-slot.dto';
 import { JwtAuthGuard } from '../../../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../../../shared/security/current-user.decorator';
 

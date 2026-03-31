@@ -1,9 +1,9 @@
 // File: src/schedule/application/teacher.service.ts
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import type { ITeacherRepository } from '../domain/teacher.repository.interface';
-import { TeacherEntity } from '../domain/teacher.entity';
-import { CreateTeacherDto } from '../presentation/create-teacher.dto';
-import { UpdateTeacherDto } from '../presentation/update-teacher.dto';
+import type { ITeacherRepository } from '../../domain/repositories/teacher.repository.interface';
+import { TeacherEntity } from '../../domain/entities/teacher.entity';
+import { CreateTeacherDto } from '../../presentation/http/dtos/create-teacher.dto';
+import { UpdateTeacherDto } from '../../presentation/http/dtos/update-teacher.dto';
 
 @Injectable()
 export class TeacherService {
