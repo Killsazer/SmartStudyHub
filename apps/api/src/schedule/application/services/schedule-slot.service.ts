@@ -1,10 +1,10 @@
 // File: src/schedule/application/schedule-slot.service.ts
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import type { IScheduleSlotRepository } from '../domain/schedule-slot.repository.interface';
-import { ScheduleSlotEntity, ClassType } from '../domain/schedule-slot.entity';
-import { ScheduleSlotFactory } from '../domain/patterns/schedule-slot.factory';
-import { CreateScheduleSlotDto } from '../presentation/create-schedule-slot.dto';
-import { UpdateScheduleSlotDto } from '../presentation/update-schedule-slot.dto';
+import type { IScheduleSlotRepository } from '../../domain/repositories/schedule-slot.repository.interface';
+import { ScheduleSlotEntity, ClassType } from '../../domain/entities/schedule-slot.entity';
+import { ScheduleSlotFactory } from '../../domain/patterns/schedule-slot.factory';
+import { CreateScheduleSlotDto } from '../../presentation/http/dtos/create-schedule-slot.dto';
+import { UpdateScheduleSlotDto } from '../../presentation/http/dtos/update-schedule-slot.dto';
 
 @Injectable()
 export class ScheduleSlotService {

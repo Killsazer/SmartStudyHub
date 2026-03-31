@@ -1,6 +1,6 @@
 // GoF Pattern: Factory Method (adapted from LessonFactory)
 
-import { ClassType } from '../schedule-slot.entity';
+import { ClassType } from '../entities/schedule-slot.entity';
 export { ClassType };
 
 export interface ScheduleSlotProps {

@@ -1,7 +1,7 @@
 // File: src/schedule/infrastructure/prisma-schedule-slot.repository.ts
 import { Injectable } from '@nestjs/common';
-import { IScheduleSlotRepository } from '../domain/schedule-slot.repository.interface';
-import { ScheduleSlotEntity, ClassType } from '../domain/schedule-slot.entity';
+import { IScheduleSlotRepository } from '../domain/repositories/schedule-slot.repository.interface';
+import { ScheduleSlotEntity, ClassType } from '../domain/entities/schedule-slot.entity';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 
 interface SlotUpdateFields {

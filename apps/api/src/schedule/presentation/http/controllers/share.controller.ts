@@ -2,9 +2,9 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { ExportScheduleUseCase } from '../application/export-schedule.use-case';
 import { ImportScheduleUseCase } from '../application/import-schedule.use-case';
-import { ImportScheduleDto } from './import-schedule.dto';
-import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
-import { CurrentUser } from '../../shared/security/current-user.decorator';
+import { ImportScheduleDto } from '../dtos/import-schedule.dto';
+import { JwtAuthGuard } from '../../../../shared/security/jwt-auth.guard';
+import { CurrentUser } from '../../../../shared/security/current-user.decorator';
 
 @Controller('schedule')
 @UseGuards(JwtAuthGuard)

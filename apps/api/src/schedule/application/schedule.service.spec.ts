@@ -5,8 +5,8 @@ import { TeacherService } from './teacher.service';
 import { ScheduleSlotService } from './schedule-slot.service';
 import { ExportScheduleUseCase } from './export-schedule.use-case';
 import { ImportScheduleUseCase } from './import-schedule.use-case';
-import { TeacherEntity } from '../domain/teacher.entity';
-import { ScheduleSlotEntity, ClassType } from '../domain/schedule-slot.entity';
+import { TeacherEntity } from '../domain/entities/teacher.entity';
+import { ScheduleSlotEntity, ClassType } from '../domain/entities/schedule-slot.entity';
 import { NotFoundException } from '@nestjs/common';
 
 // ═══════════════════════════════════════════════════════════════

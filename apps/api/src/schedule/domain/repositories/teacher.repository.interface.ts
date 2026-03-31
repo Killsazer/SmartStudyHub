@@ -1,5 +1,5 @@
 // File: src/schedule/domain/teacher.repository.interface.ts
-import { TeacherEntity } from './teacher.entity';
+import { TeacherEntity } from './entities/teacher.entity';
 
 export interface ITeacherRepository {
   save(teacher: TeacherEntity): Promise<void>;

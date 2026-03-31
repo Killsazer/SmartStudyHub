@@ -1,14 +1,14 @@
 // File: src/schedule/schedule.module.ts
 import { Module } from '@nestjs/common';
-import { TeacherController } from './presentation/teacher.controller';
-import { ScheduleSlotController } from './presentation/schedule-slot.controller';
-import { ShareController } from './presentation/share.controller';
-import { TeacherService } from './application/teacher.service';
-import { ScheduleSlotService } from './application/schedule-slot.service';
-import { ExportScheduleUseCase } from './application/export-schedule.use-case';
-import { ImportScheduleUseCase } from './application/import-schedule.use-case';
-import { PrismaScheduleSlotRepository } from './infrastructure/prisma-schedule-slot.repository';
-import { PrismaSharedScheduleRepository } from './infrastructure/prisma-shared-schedule.repository';
+import { TeacherController } from './presentation/http/controllers/teacher.controller';
+import { ScheduleSlotController } from './presentation/http/controllers/schedule-slot.controller';
+import { ShareController } from './presentation/http/controllers/share.controller';
+import { TeacherService } from './application/services/teacher.service';
+import { ScheduleSlotService } from './application/services/schedule-slot.service';
+import { ExportScheduleUseCase } from './application/use-cases/export-schedule.use-case';
+import { ImportScheduleUseCase } from './application/use-cases/import-schedule.use-case';
+import { PrismaScheduleSlotRepository } from './infrastructure/persistence/prisma/prisma-schedule-slot.repository';
+import { PrismaSharedScheduleRepository } from './infrastructure/persistence/prisma/prisma-shared-schedule.repository';
 import { SharedProvidersModule } from '../shared/shared-providers.module';
 
 @Module({

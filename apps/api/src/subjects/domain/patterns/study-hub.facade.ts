@@ -3,7 +3,7 @@ import { SubjectEntity } from '../subject.entity';
 import { SubjectBuilder } from './subject.builder';
 import { ScheduleSlotFactory, ClassType } from '../../../schedule/domain/patterns/schedule-slot.factory';
 import { TaskEntity, TaskStatus, TaskPriority } from '../../../tasks/domain/task.entity';
-import { TeacherEntity } from '../../../schedule/domain/teacher.entity';
+import { TeacherEntity } from '../../../schedule/domain/entities/teacher.entity';
 
 export class StudyHubFacade {
   public createOnboardingData(userId: string): {

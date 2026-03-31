@@ -1,6 +1,6 @@
 // File: src/schedule/infrastructure/prisma-shared-schedule.repository.ts
 import { Injectable } from '@nestjs/common';
-import { ISharedScheduleRepository, SharedScheduleData, ScheduleSnapshotData } from '../domain/shared-schedule.repository.interface';
+import { ISharedScheduleRepository, SharedScheduleData, ScheduleSnapshotData } from '../domain/repositories/shared-schedule.repository.interface';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import type { Prisma } from '@prisma/client';
 

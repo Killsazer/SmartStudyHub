@@ -1,7 +1,7 @@
 // File: src/shared/shared-providers.module.ts
 import { Module } from '@nestjs/common';
 import { PrismaSubjectRepository } from '../subjects/infrastructure/prisma-subject.repository';
-import { PrismaTeacherRepository } from '../schedule/infrastructure/prisma-teacher.repository';
+import { PrismaTeacherRepository } from '../schedule/infrastructure/persistence/prisma/prisma-teacher.repository';
 
 /**
  * Shared providers module — centralises repository bindings

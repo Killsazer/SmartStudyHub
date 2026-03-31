@@ -1,5 +1,5 @@
 // File: src/schedule/domain/schedule-slot.repository.interface.ts
-import { ScheduleSlotEntity } from './schedule-slot.entity';
+import { ScheduleSlotEntity } from '../entities/schedule-slot.entity';
 
 export interface IScheduleSlotRepository {
   save(slot: ScheduleSlotEntity): Promise<void>;

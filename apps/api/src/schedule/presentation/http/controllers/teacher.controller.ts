@@ -1,10 +1,10 @@
 // File: src/schedule/presentation/teacher.controller.ts
 import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { TeacherService } from '../application/teacher.service';
-import { CreateTeacherDto } from './create-teacher.dto';
-import { UpdateTeacherDto } from './update-teacher.dto';
-import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
-import { CurrentUser } from '../../shared/security/current-user.decorator';
+import { CreateTeacherDto } from '../dtos/create-teacher.dto';
+import { UpdateTeacherDto } from '../dtos/update-teacher.dto';
+import { JwtAuthGuard } from '../../../../shared/security/jwt-auth.guard';
+import { CurrentUser } from '../../../../shared/security/current-user.decorator';
 
 @Controller('teachers')
 @UseGuards(JwtAuthGuard)
