@@ -1,4 +1,3 @@
-// File: src/schedule/application/import-schedule.use-case.ts
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../../domain/repositories/schedule-slot.repository.interface';
 import type { ITeacherRepository } from '../../domain/repositories/teacher.repository.interface';
@@ -8,6 +7,7 @@ import { ScheduleSlotEntity, ClassType } from '../../domain/entities/schedule-sl
 import { ScheduleSlotFactory } from '../../domain/patterns/schedule-slot.factory';
 import { TeacherEntity } from '../../domain/entities/teacher.entity';
 import { SubjectEntity } from '../../../subjects/domain/subject.entity';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ImportScheduleUseCase {
@@ -45,9 +45,20 @@ export class ImportScheduleUseCase {
 
     // Clone teachers
     for (const teacher of snapshot.teachers) {
-      const newId = `teacher-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const newId = randomUUID();
       teacherIdMap.set(teacher.id, newId);
-      const entity = new TeacherEntity(newId, teacher.name, userId, teacher.photoUrl, teacher.contacts);
+      
+      const props = {
+        id: newId,
+        name: teacher.name,
+        userId: userId,
+        photoUrl: teacher.photoUrl,
+        contacts: teacher.contacts,
+      };
+
+      // 💡 2. Створюємо сутність за новими правилами
+      const entity = new TeacherEntity(props);
+      
       await this.teacherRepo.save(entity);
     }
 

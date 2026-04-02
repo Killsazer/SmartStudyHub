@@ -1,16 +1,4 @@
-// File: src/schedule/presentation/update-teacher.dto.ts
-import { IsString, IsOptional } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateTeacherDto } from './create-teacher.dto';
 
-export class UpdateTeacherDto {
-  @IsString()
-  @IsOptional()
-  name?: string;
-
-  @IsString()
-  @IsOptional()
-  photoUrl?: string;
-
-  @IsString()
-  @IsOptional()
-  contacts?: string;
-}
+export class UpdateTeacherDto extends PartialType(CreateTeacherDto) {}

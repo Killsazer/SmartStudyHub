@@ -1,4 +1,3 @@
-// File: src/schedule/presentation/teacher.controller.ts
 import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { TeacherService } from '../../../application/services/teacher.service';
 import { CreateTeacherDto } from '../dtos/create-teacher.dto';
@@ -17,7 +16,8 @@ export class TeacherController {
     @Body() dto: CreateTeacherDto,
   ) {
     const teacher = await this.teacherService.createTeacher(userId, dto);
-    return { status: 'success', data: { id: teacher.id, name: teacher.name } };
+    // 💡 Повертаємо всю сутність для зручності фронтенду
+    return { status: 'success', data: teacher };
   }
 
   @Get()
@@ -32,8 +32,8 @@ export class TeacherController {
     @Param('id') teacherId: string,
     @Body() dto: UpdateTeacherDto,
   ) {
-    await this.teacherService.updateTeacher(userId, teacherId, dto);
-    return { status: 'success', message: 'Teacher updated successfully' };
+    const updatedTeacher = await this.teacherService.updateTeacher(userId, teacherId, dto);
+    return { status: 'success', data: updatedTeacher };
   }
 
   @Delete(':id')

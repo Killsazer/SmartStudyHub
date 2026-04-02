@@ -1,12 +1,11 @@
-// File: src/schedule/presentation/create-teacher.dto.ts
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUrl } from 'class-validator';
 
 export class CreateTeacherDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsString()
+  @IsUrl({}, { message: 'photoUrl must be a valid web address' })
   @IsOptional()
   photoUrl?: string;
 

@@ -1,17 +1,26 @@
-// File: src/schedule/domain/teacher.entity.ts
-export class TeacherEntity {
-  constructor(
-    public readonly id: string,
-    public name: string,
-    public readonly userId: string,
-    public photoUrl?: string,
-    public contacts?: string,
-  ) {}
+export interface TeacherProps {
+  id: string;
+  name: string;
+  userId: string;
+  photoUrl?: string;
+  contacts?: string;
+}
 
-  /**
-   * Returns an avatar URL — either the uploaded photoUrl
-   * or a generated one from ui-avatars.com based on the teacher's name.
-   */
+export class TeacherEntity {
+  public readonly id: string;
+  public name: string;
+  public readonly userId: string;
+  public photoUrl?: string;
+  public contacts?: string;
+
+  constructor(props: TeacherProps) {
+    this.id = props.id;
+    this.name = props.name;
+    this.userId = props.userId;
+    this.photoUrl = props.photoUrl;
+    this.contacts = props.contacts;
+  }
+
   getAvatarUrl(): string {
     if (this.photoUrl) return this.photoUrl;
     const encoded = encodeURIComponent(this.name);
