@@ -1,4 +1,3 @@
-// File: src/schedule/schedule.module.ts
 import { Module } from '@nestjs/common';
 import { TeacherController } from './presentation/http/controllers/teacher.controller';
 import { ScheduleSlotController } from './presentation/http/controllers/schedule-slot.controller';

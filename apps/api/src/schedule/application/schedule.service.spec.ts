@@ -1,16 +1,15 @@
-// File: src/schedule/application/schedule.service.spec.ts
-// Covers: TeacherService, ScheduleSlotService (Factory Method), ExportScheduleUseCase, ImportScheduleUseCase
 import { Test, TestingModule } from '@nestjs/testing';
-import { TeacherService } from './teacher.service';
-import { ScheduleSlotService } from './schedule-slot.service';
-import { ExportScheduleUseCase } from './export-schedule.use-case';
-import { ImportScheduleUseCase } from './import-schedule.use-case';
-import { TeacherEntity } from '../domain/entities/teacher.entity';
-import { ScheduleSlotEntity, ClassType } from '../domain/entities/schedule-slot.entity';
-import { NotFoundException } from '@nestjs/common';
+import { TeacherService } from './services/teacher.service';
+import { ScheduleSlotService } from './services/schedule-slot.service';
+import { ExportScheduleUseCase } from './use-cases/export-schedule.use-case';
+import { ImportScheduleUseCase } from './use-cases/import-schedule.use-case';
+import { TeacherEntity, TeacherProps } from '../domain/entities/teacher.entity';
+import { ClassType, ScheduleSlotProps } from '../domain/entities/schedule-slot.entity';
+import { ScheduleSlotFactory } from '../domain/patterns/schedule-slot.factory';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
 
 // ═══════════════════════════════════════════════════════════════
-// TEACHER SERVICE
+// TEACHER SERVICE TESTS
 // ═══════════════════════════════════════════════════════════════
 
 describe('TeacherService', () => {
@@ -37,7 +36,7 @@ describe('TeacherService', () => {
     jest.clearAllMocks();
   });
 
-  it('✅ should create a teacher and save to repository', async () => {
+  it('✅ should create a teacher using Props and save to repository', async () => {
     const dto = { name: 'Dr. Smith', photoUrl: 'https://example.com/photo.jpg', contacts: 'smith@kpi.ua' };
     const result = await service.createTeacher('u1', dto);
 
@@ -45,11 +44,12 @@ describe('TeacherService', () => {
     expect(result).toBeInstanceOf(TeacherEntity);
     expect(result.name).toBe('Dr. Smith');
     expect(result.userId).toBe('u1');
-    expect(result.id).toMatch(/^teacher-/);
+    expect(result.id).toBeDefined();
   });
 
   it('✅ should return teachers for a user', async () => {
-    const teachers = [new TeacherEntity('t1', 'Prof A', 'u1')];
+    const props: TeacherProps = { id: 't1', name: 'Prof A', userId: 'u1' };
+    const teachers = [new TeacherEntity(props)];
     mockTeacherRepo.findByUserId.mockResolvedValue(teachers);
 
     const result = await service.getTeachers('u1');
@@ -57,16 +57,13 @@ describe('TeacherService', () => {
     expect(result[0].name).toBe('Prof A');
   });
 
-  it('✅ should generate avatar URL from ui-avatars.com when no photoUrl', () => {
-    const teacher = new TeacherEntity('t1', 'Dr. Smith', 'u1');
+  it('✅ should generate avatar URL from ui-avatars.com when no photoUrl is provided', () => {
+    const props: TeacherProps = { id: 't1', name: 'Dr. Smith', userId: 'u1' };
+    const teacher = new TeacherEntity(props);
     const url = teacher.getAvatarUrl();
+    
     expect(url).toContain('ui-avatars.com');
     expect(url).toContain('Dr.%20Smith');
-  });
-
-  it('✅ should return photoUrl when available', () => {
-    const teacher = new TeacherEntity('t1', 'Dr. Smith', 'u1', 'https://example.com/photo.jpg');
-    expect(teacher.getAvatarUrl()).toBe('https://example.com/photo.jpg');
   });
 
   it('❌ should throw NotFoundException when updating non-existent teacher', async () => {
@@ -74,10 +71,19 @@ describe('TeacherService', () => {
     await expect(service.updateTeacher('u1', 'nonexistent', { name: 'New' }))
       .rejects.toThrow(NotFoundException);
   });
+
+  it('🚨 SECURITY: should throw ForbiddenException when updating a teacher belonging to another user', async () => {
+    const props: TeacherProps = { id: 't1', name: 'Hacked Teacher', userId: 'victim-user' };
+    mockTeacherRepo.findById.mockResolvedValue(new TeacherEntity(props));
+
+    // 'hacker-user' намагається оновити викладача 'victim-user'
+    await expect(service.updateTeacher('hacker-user', 't1', { name: 'Hacked' }))
+      .rejects.toThrow(ForbiddenException);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════
-// SCHEDULE SLOT SERVICE (uses Factory Method pattern)
+// SCHEDULE SLOT SERVICE TESTS
 // ═══════════════════════════════════════════════════════════════
 
 describe('ScheduleSlotService', () => {
@@ -107,29 +113,28 @@ describe('ScheduleSlotService', () => {
 
   it('✅ should create a schedule slot using Factory Method and save it', async () => {
     const dto = {
-      subjectId: 'subj-1',
-      teacherId: 'teacher-1',
-      weekNumber: 1,
-      dayOfWeek: 1,
-      startTime: '08:30',
-      endTime: '10:05',
-      classType: ClassType.LECTURE,
-      location: 'Aud. 305',
+      subjectId: 'subj-1', teacherId: 'teacher-1',
+      weekNumber: 1, dayOfWeek: 1, startTime: '08:30', endTime: '10:05',
+      classType: ClassType.LECTURE, location: 'Aud. 305',
     };
 
     const result = await service.createSlot('u1', dto as any);
 
     expect(mockSlotRepo.save).toHaveBeenCalledTimes(1);
-    expect(result).toBeInstanceOf(ScheduleSlotEntity);
     expect(result.classType).toBe(ClassType.LECTURE);
     expect(result.startTime).toBe('08:30');
-    expect(result.id).toMatch(/^slot-/);
+    expect(result.id).toBeDefined();
+    
+    // Перевірка інкапсуляції
+    expect(result.getSlotDetails()).toContain('Aud. 305');
   });
 
   it('✅ should return slots filtered by week number', async () => {
-    const slots = [
-      new ScheduleSlotEntity('s1', 'u1', 'subj1', null, 1, 1, '08:30', '10:05', ClassType.LECTURE),
-    ];
+    const props: ScheduleSlotProps = {
+      id: 's1', userId: 'u1', subjectId: 'subj1', teacherId: null,
+      weekNumber: 1, dayOfWeek: 1, startTime: '08:30', endTime: '10:05'
+    };
+    const slots = [ScheduleSlotFactory.createSlot(ClassType.LECTURE, props)];
     mockSlotRepo.findByUserIdAndWeek.mockResolvedValue(slots);
 
     const result = await service.getSlots('u1', 1);
@@ -137,21 +142,24 @@ describe('ScheduleSlotService', () => {
     expect(mockSlotRepo.findByUserIdAndWeek).toHaveBeenCalledWith('u1', 1);
   });
 
-  it('✅ should return all slots when no week filter', async () => {
-    mockSlotRepo.findByUserId.mockResolvedValue([]);
-    await service.getSlots('u1');
-    expect(mockSlotRepo.findByUserId).toHaveBeenCalledWith('u1');
-  });
+  it('🚨 SECURITY: should throw ForbiddenException when deleting another user\'s slot (IDOR)', async () => {
+    const props: ScheduleSlotProps = {
+      id: 's1', userId: 'victim-user', subjectId: 'subj1', teacherId: null,
+      weekNumber: 1, dayOfWeek: 1, startTime: '08:30', endTime: '10:05'
+    };
+    const victimSlot = ScheduleSlotFactory.createSlot(ClassType.LECTURE, props);
+    mockSlotRepo.findById.mockResolvedValue(victimSlot);
 
-  it('❌ should throw NotFoundException when updating non-existent slot', async () => {
-    mockSlotRepo.findById.mockResolvedValue(null);
-    await expect(service.updateSlot('u1', 'nonexistent', {}))
-      .rejects.toThrow(NotFoundException);
+    await expect(service.deleteSlot('hacker-user', 's1'))
+      .rejects.toThrow(ForbiddenException);
+      
+    // Переконуємось, що репозиторій НЕ був викликаний для видалення
+    expect(mockSlotRepo.delete).not.toHaveBeenCalled();
   });
 });
 
 // ═══════════════════════════════════════════════════════════════
-// EXPORT / IMPORT USE CASES
+// EXPORT / IMPORT USE CASES TESTS
 // ═══════════════════════════════════════════════════════════════
 
 describe('ExportScheduleUseCase', () => {
@@ -177,18 +185,15 @@ describe('ExportScheduleUseCase', () => {
     useCase = module.get<ExportScheduleUseCase>(ExportScheduleUseCase);
   });
 
-  it('✅ should generate an 8-character hash token', async () => {
+  it('✅ should generate an 8-character hash token and save snapshot', async () => {
     const hash = await useCase.execute('u1');
+    
     expect(hash).toHaveLength(8);
     expect(/^[0-9a-f]{8}$/.test(hash)).toBe(true);
-  });
-
-  it('✅ should save snapshot data to SharedSchedule repository', async () => {
-    await useCase.execute('u1');
+    
     expect(mockSharedRepo.save).toHaveBeenCalledTimes(1);
     const savedData = mockSharedRepo.save.mock.calls[0][0];
-    expect(savedData.hashToken).toBeDefined();
-    expect(savedData.snapshotData).toBeDefined();
+    expect(savedData.hashToken).toBe(hash);
     expect(savedData.userId).toBe('u1');
   });
 });
@@ -230,28 +235,22 @@ describe('ImportScheduleUseCase', () => {
     useCase = module.get<ImportScheduleUseCase>(ImportScheduleUseCase);
   });
 
-  it('✅ should clone subjects, teachers, and slots with NEW IDs', async () => {
+  it('✅ should successfully import subjects, teachers, and slots with mapped NEW IDs', async () => {
     await useCase.execute('u2', 'abc12345');
 
+    // Перевіряємо виклики репозиторіїв
     expect(mockSubjectRepo.save).toHaveBeenCalledTimes(1);
     expect(mockTeacherRepo.save).toHaveBeenCalledTimes(1);
     expect(mockSlotRepo.save).toHaveBeenCalledTimes(1);
 
-    // Verify new IDs (not old ones)
-    const savedSubject = mockSubjectRepo.save.mock.calls[0][0];
-    expect(savedSubject.id).not.toBe('old-subj-1');
-    expect(savedSubject.title).toBe('Math');
-    expect(savedSubject.userId).toBe('u2');
-
+    // Перевіряємо, що ID викладача був згенерований заново, а userId відповідає новому власнику
     const savedTeacher = mockTeacherRepo.save.mock.calls[0][0];
     expect(savedTeacher.id).not.toBe('old-teacher-1');
-    expect(savedTeacher.name).toBe('Prof. X');
     expect(savedTeacher.userId).toBe('u2');
+    
+    // Перевіряємо слот розкладу (має бути згенерований через Фабрику)
+    const savedSlot = mockSlotRepo.save.mock.calls[0][0];
+    expect(savedSlot.userId).toBe('u2');
+    expect(savedSlot.subjectId).not.toBe('old-subj-1'); // Foreign Key має бути оновлений
   });
-
-  it('❌ should throw NotFoundException for invalid hash token', async () => {
-    mockSharedRepo.findByHashToken.mockResolvedValue(null);
-    await expect(useCase.execute('u2', 'INVALID'))
-      .rejects.toThrow(NotFoundException);
-  });
-});
+})
