@@ -1,15 +1,14 @@
-// File: src/schedule/infrastructure/prisma-teacher.repository.ts
 import { Injectable } from '@nestjs/common';
-import { ITeacherRepository } from '../../../domain/repositories/teacher.repository.interface';
-import { TeacherEntity } from '../../../domain/entities/teacher.entity';
+import { ITeacherRepository, UpdateTeacherData } from '../../../domain/repositories/teacher.repository.interface';
+import { TeacherEntity, TeacherProps } from '../../../domain/entities/teacher.entity';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 @Injectable()
 export class PrismaTeacherRepository implements ITeacherRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async save(teacher: TeacherEntity): Promise<void> {
-    await this.prisma.teacher.upsert({
+  async save(teacher: TeacherEntity): Promise<TeacherEntity> {
+    const savedData = await this.prisma.teacher.upsert({
       where: { id: teacher.id },
       update: {
         name: teacher.name,
@@ -25,13 +24,15 @@ export class PrismaTeacherRepository implements ITeacherRepository {
       },
     });
     console.log(`[PrismaTeacherRepository] Teacher '${teacher.name}' saved.`);
+    return this.toDomainEntity(savedData);
   }
 
-  async update(id: string, data: Partial<{ name: string; photoUrl: string | null; contacts: string | null }>): Promise<void> {
-    await this.prisma.teacher.update({
+  async update(id: string, data: UpdateTeacherData): Promise<TeacherEntity> {
+    const updatedData = await this.prisma.teacher.update({
       where: { id },
       data,
     });
+    return this.toDomainEntity(updatedData);
   }
 
   async delete(id: string): Promise<void> {
@@ -41,11 +42,29 @@ export class PrismaTeacherRepository implements ITeacherRepository {
   async findById(id: string): Promise<TeacherEntity | null> {
     const d = await this.prisma.teacher.findUnique({ where: { id } });
     if (!d) return null;
-    return new TeacherEntity(d.id, d.name, d.userId, d.photoUrl ?? undefined, d.contacts ?? undefined);
+    return this.toDomainEntity(d);
   }
 
   async findByUserId(userId: string): Promise<TeacherEntity[]> {
     const data = await this.prisma.teacher.findMany({ where: { userId } });
-    return data.map(d => new TeacherEntity(d.id, d.name, d.userId, d.photoUrl ?? undefined, d.contacts ?? undefined));
+    return data.map(d => this.toDomainEntity(d));
+  }
+
+  // 💡 3. DRY: Централізований мапінг (Гідратація) через TeacherProps
+  private toDomainEntity(d: {
+    id: string;
+    userId: string;
+    name: string;
+    photoUrl: string | null;
+    contacts: string | null;
+  }): TeacherEntity {
+    const props: TeacherProps = {
+      id: d.id,
+      userId: d.userId,
+      name: d.name,
+      photoUrl: d.photoUrl ?? undefined, // null з БД перетворюємо на undefined для Домену
+      contacts: d.contacts ?? undefined,
+    };
+    return new TeacherEntity(props);
   }
 }

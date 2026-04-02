@@ -3,8 +3,8 @@ import {
   UseGuards, ParseIntPipe, DefaultValuePipe 
 } from '@nestjs/common';
 import { ScheduleSlotService } from '../../../application/services/schedule-slot.service';
-import { CreateScheduleSlotDto } from '../dtos/create-schedule-slot.dto';
-import { UpdateScheduleSlotDto } from '../dtos/update-schedule-slot.dto';
+import { CreateScheduleSlotDto } from '../dtos/schedule-slot/create-schedule-slot.dto';
+import { UpdateScheduleSlotDto } from '../dtos/schedule-slot/update-schedule-slot.dto';
 import { JwtAuthGuard } from '../../../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../../../shared/security/current-user.decorator';
 
