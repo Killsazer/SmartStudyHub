@@ -1,6 +1,5 @@
-// File: src/tasks/presentation/update-task.dto.ts
 import { IsString, IsOptional, MaxLength, IsEnum, IsDateString } from 'class-validator';
-import { TaskPriority } from '../domain/task.entity';
+import { TaskPriority } from '../../domain/task.entity';
 
 export class UpdateTaskDto {
   @IsString()

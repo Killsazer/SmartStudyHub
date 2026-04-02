@@ -1,15 +1,15 @@
-// File: src/tasks/infrastructure/prisma-task.repository.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { ITaskRepository } from '../domain/task.repository.interface';
-import { TaskEntity, TaskStatus, TaskPriority } from '../domain/task.entity';
+import { TaskEntity, TaskStatus, TaskPriority, TaskProps } from '../domain/task.entity';
 
 @Injectable()
 export class PrismaTaskRepository implements ITaskRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async save(task: TaskEntity): Promise<void> {
-    await this.prisma.task.upsert({
+  // 💡 1. Повертаємо збережену сутність
+  async save(task: TaskEntity): Promise<TaskEntity> {
+    const savedData = await this.prisma.task.upsert({
       where: { id: task.id },
       update: {
         title: task.title,
@@ -31,6 +31,8 @@ export class PrismaTaskRepository implements ITaskRepository {
         userId: task.userId
       }
     });
+
+    return this.toDomainEntity(savedData);
   }
 
   async findById(id: string): Promise<TaskEntity | null> {
@@ -48,10 +50,7 @@ export class PrismaTaskRepository implements ITaskRepository {
     await this.prisma.task.delete({ where: { id } });
   }
 
-  /**
-   * Maps a raw Prisma record to a TaskEntity domain object.
-   * Centralised to eliminate mapping duplication across find methods (DRY).
-   */
+  // 💡 2. DRY: Гідратація через об'єкт Props
   private toDomainEntity(d: {
     id: string;
     title: string;
@@ -62,15 +61,16 @@ export class PrismaTaskRepository implements ITaskRepository {
     deadline: Date | null;
     subjectId: string | null;
   }): TaskEntity {
-    return new TaskEntity(
-      d.id,
-      d.title,
-      d.status as TaskStatus,
-      d.priority as TaskPriority,
-      d.userId,
-      d.description ?? undefined,
-      d.deadline ?? undefined,
-      d.subjectId ?? undefined
-    );
+    const props: TaskProps = {
+      id: d.id,
+      title: d.title,
+      status: d.status as TaskStatus,
+      priority: d.priority as TaskPriority,
+      userId: d.userId,
+      description: d.description ?? undefined,
+      deadline: d.deadline ?? undefined,
+      subjectId: d.subjectId ?? undefined
+    };
+    return new TaskEntity(props);
   }
 }

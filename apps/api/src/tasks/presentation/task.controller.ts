@@ -1,9 +1,8 @@
-// File: src/tasks/presentation/task.controller.ts
 import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { TaskService } from '../application/task.service';
-import { CreateTaskDto } from './create-task.dto';
-import { UpdateTaskStatusDto } from './update-task-status.dto';
-import { UpdateTaskDto } from './update-task.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../shared/security/current-user.decorator';
 
@@ -18,15 +17,17 @@ export class TaskController {
     @Body() dto: CreateTaskDto
   ) {
     const task = await this.taskService.createTask(userId, dto);
-    return { status: 'success', data: { id: task.id, title: task.title } };
+    // 💡 Повертаємо повний об'єкт, фронтенд скаже "Дякую!"
+    return { status: 'success', data: task };
   }
 
   @Patch(':id/status')
   async updateTaskStatus(
+    @CurrentUser() userId: string,
     @Param('id') taskId: string,
     @Body() dto: UpdateTaskStatusDto
   ) {
-    await this.taskService.changeTaskStatus(taskId, dto.status);
+    await this.taskService.updateTaskStatus(userId, taskId, dto.status);
     return { status: 'success', message: `Task status securely updated to ${dto.status}` };
   }
 
@@ -37,7 +38,8 @@ export class TaskController {
     @Body() dto: UpdateTaskDto
   ) {
     const task = await this.taskService.updateTask(userId, taskId, dto);
-    return { status: 'success', data: { id: task.id, title: task.title } };
+    // 💡 Повертаємо повний об'єкт
+    return { status: 'success', data: task };
   }
 
   @Delete(':id')

@@ -1,26 +1,20 @@
-// File: src/tasks/application/task.service.ts
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { ITaskRepository } from '../domain/task.repository.interface';
 import { TaskEntity, TaskStatus, TaskPriority } from '../domain/task.entity';
-import { CreateTaskDto } from '../presentation/create-task.dto';
-import { UpdateTaskDto } from '../presentation/update-task.dto';
+import { CreateTaskDto } from '../presentation/dto/create-task.dto';
+import { UpdateTaskDto } from '../presentation/dto/update-task.dto';
 import { ChangeTaskStatusCommand } from '../domain/patterns/command/change-task-status.command';
 import { TaskStatusNotifier } from '../domain/patterns/observer/task-status.notifier';
 import { DeadlineAlertObserver } from '../domain/patterns/observer/deadline-alert.observer';
 import { TaskSortContext } from '../domain/patterns/strategy/task-sort.context';
-import { ITaskSortStrategy } from '../domain/patterns/strategy/task-sort.strategy';
-import { SortByDeadlineStrategy } from '../domain/patterns/strategy/sort-by-deadline.strategy';
-import { SortByPriorityStrategy } from '../domain/patterns/strategy/sort-by-priority.strategy';
-import { SortByTitleStrategy } from '../domain/patterns/strategy/sort-by-title.strategy';
+import { ITaskSortStrategy, SortByDeadlineStrategy, SortByPriorityStrategy, SortByTitleStrategy } from '../domain/patterns/strategy/task-sort.strategies';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class TaskService {
   private readonly statusNotifier: TaskStatusNotifier;
 
-  /**
-   * Map-based strategy lookup (KISS).
-   * Adding a new sort strategy requires only one new entry here — Open/Closed principle.
-   */
+  //cтворюємо мапу доступних стратегій
   private readonly strategyMap: ReadonlyMap<string, ITaskSortStrategy> = new Map([
     ['deadline', new SortByDeadlineStrategy()],
     ['priority', new SortByPriorityStrategy()],
@@ -36,26 +30,23 @@ export class TaskService {
   }
 
   async createTask(userId: string, dto: CreateTaskDto): Promise<TaskEntity> {
-    const task = new TaskEntity(
-      `task-${Date.now()}`,
-      dto.title,
-      TaskStatus.TODO,
-      dto.priority || TaskPriority.MEDIUM,
+    const task = new TaskEntity({
+      id: randomUUID(),
+      title: dto.title,
+      status: TaskStatus.TODO,
+      priority: dto.priority || TaskPriority.MEDIUM,
       userId,
-      dto.description,
-      dto.deadline ? new Date(dto.deadline) : undefined,
-      dto.subjectId
-    );
+      description: dto.description,
+      deadline: dto.deadline ? new Date(dto.deadline) : undefined,
+      subjectId: dto.subjectId
+    });
 
     await this.taskRepo.save(task);
     return task;
   }
 
-  async changeTaskStatus(taskId: string, newStatus: TaskStatus): Promise<void> {
-    const task = await this.taskRepo.findById(taskId);
-    if (!task) {
-      throw new NotFoundException(`Task with ID ${taskId} not found`);
-    }
+  async updateTaskStatus(userId: string, taskId: string, newStatus: TaskStatus): Promise<void> {
+    const task = await this.checkAccess(taskId, userId);
 
     const command = new ChangeTaskStatusCommand(task, newStatus);
     command.execute();
@@ -65,10 +56,7 @@ export class TaskService {
   }
 
   async updateTask(userId: string, taskId: string, dto: UpdateTaskDto): Promise<TaskEntity> {
-    const task = await this.taskRepo.findById(taskId);
-    if (!task) {
-      throw new NotFoundException(`Task with ID ${taskId} not found`);
-    }
+    const task = await this.checkAccess(taskId, userId);
 
     if (dto.title !== undefined) task.title = dto.title;
     if (dto.description !== undefined) task.description = dto.description;
@@ -80,10 +68,8 @@ export class TaskService {
   }
 
   async deleteTask(userId: string, taskId: string): Promise<void> {
-    const task = await this.taskRepo.findById(taskId);
-    if (!task) {
-      throw new NotFoundException(`Task with ID ${taskId} not found`);
-    }
+    await this.checkAccess(taskId, userId);
+
     await this.taskRepo.delete(taskId);
   }
 
@@ -96,10 +82,23 @@ export class TaskService {
 
     if (!sortType || tasks.length === 0) return tasks;
 
-    const strategy = this.strategyMap.get(sortType.toLowerCase());
+    const strategy = this.strategyMap.get(sortType.toLowerCase()); //шукаємо отриману стратегію в map
     if (!strategy) return tasks;
 
-    const context = new TaskSortContext(strategy);
-    return context.executeStrategy(tasks);
+    const context = new TaskSortContext(strategy); //створюємо контекст і передаємо йому стратегію
+    return context.executeStrategy(tasks); //виконуємо стратегію
+  }
+
+  private async checkAccess(taskId: string, userId: string): Promise<TaskEntity> {
+    const task = await this.taskRepo.findById(taskId);
+    if (!task) {
+      throw new NotFoundException(`Task with ID ${taskId} not found`);
+    }
+
+    if (task.userId !== userId) {
+      throw new ForbiddenException('Access denied: You can only modify your own tasks');
+    }
+
+    return task;
   }
 }
