@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { ISubjectRepository } from '../domain/subject.repository.interface';
-import type { ITeacherRepository } from '../../schedule/domain/teacher.repository.interface';
+import type { ITeacherRepository } from 'src/schedule/domain/repositories/teacher.repository.interface';
 import { StudyHubFacade } from '../domain/patterns/study-hub.facade';
 
 @Injectable()

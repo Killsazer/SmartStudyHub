@@ -1,7 +1,8 @@
 // GoF Pattern: Facade — adapted for new schedule-centric model
 import { SubjectEntity } from '../subject.entity';
 import { SubjectBuilder } from './subject.builder';
-import { ScheduleSlotFactory, ClassType } from '../../../schedule/domain/patterns/schedule-slot.factory';
+import { ScheduleSlotFactory } from 'src/schedule/domain/patterns/schedule-slot.factory';
+import { ClassType } from 'src/schedule/domain/entities/schedule-slot.entity';
 import { TaskEntity, TaskStatus, TaskPriority } from '../../../tasks/domain/task.entity';
 import { TeacherEntity } from '../../../schedule/domain/entities/teacher.entity';
 
@@ -14,13 +15,13 @@ export class StudyHubFacade {
     const teacherId = `teacher-onboard-${Date.now()}`;
 
     // Create a sample teacher via entity
-    const teacher = new TeacherEntity(
-      teacherId,
-      'System Admin',
-      userId,
-      undefined,
-      'support@studyhub.app',
-    );
+    const teacher = new TeacherEntity({
+      id: teacherId,
+      name: 'System Admin',
+      userId: userId,
+      photoUrl: undefined,
+      contacts: 'support@studyhub.app',
+    });
 
     const builder = new SubjectBuilder(subjectId, 'Welcome to Smart Study Hub', userId)
       .setColor('#4CAF50');

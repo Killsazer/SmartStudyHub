@@ -1,8 +1,7 @@
-// File: src/schedule/presentation/share.controller.ts
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { ExportScheduleUseCase } from '../../../application/use-cases/export-schedule.use-case';
 import { ImportScheduleUseCase } from '../../../application/use-cases/import-schedule.use-case';
-import { ImportScheduleDto } from '../dtos/import-schedule.dto';
+import { ImportScheduleDto } from '../dtos/operations/import-schedule.dto';
 import { JwtAuthGuard } from '../../../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../../../shared/security/current-user.decorator';
 

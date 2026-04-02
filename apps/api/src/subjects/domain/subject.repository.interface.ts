@@ -1,4 +1,4 @@
-// File: src/subjects/domain/subject.repository.interface.ts
+
 import { SubjectEntity } from './subject.entity';
 
 export interface ISubjectRepository {

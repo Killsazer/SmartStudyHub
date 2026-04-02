@@ -1,6 +1,6 @@
 import { 
   Controller, Post, Get, Patch, Delete, Body, Param, Query, 
-  UseGuards, ParseIntPipe, DefaultValuePipe 
+  UseGuards, ParseIntPipe,
 } from '@nestjs/common';
 import { ScheduleSlotService } from '../../../application/services/schedule-slot.service';
 import { CreateScheduleSlotDto } from '../dtos/schedule-slot/create-schedule-slot.dto';
