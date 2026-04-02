@@ -1,5 +1,7 @@
-// File: src/schedule/presentation/schedule-slot.controller.ts
-import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { 
+  Controller, Post, Get, Patch, Delete, Body, Param, Query, 
+  UseGuards, ParseIntPipe, DefaultValuePipe 
+} from '@nestjs/common';
 import { ScheduleSlotService } from '../../../application/services/schedule-slot.service';
 import { CreateScheduleSlotDto } from '../dtos/create-schedule-slot.dto';
 import { UpdateScheduleSlotDto } from '../dtos/update-schedule-slot.dto';
@@ -17,15 +19,14 @@ export class ScheduleSlotController {
     @Body() dto: CreateScheduleSlotDto,
   ) {
     const slot = await this.slotService.createSlot(userId, dto);
-    return { status: 'success', data: { id: slot.id } };
+    return { status: 'success', data: slot };
   }
 
   @Get()
   async getSlots(
     @CurrentUser() userId: string,
-    @Query('week') week?: string,
+    @Query('week', new ParseIntPipe({ optional: true })) weekNum?: number,
   ) {
-    const weekNum = week ? parseInt(week, 10) : undefined;
     const slots = await this.slotService.getSlots(userId, weekNum);
     return { status: 'success', data: slots };
   }
@@ -36,8 +37,8 @@ export class ScheduleSlotController {
     @Param('id') slotId: string,
     @Body() dto: UpdateScheduleSlotDto,
   ) {
-    await this.slotService.updateSlot(userId, slotId, dto);
-    return { status: 'success', message: 'Schedule slot updated' };
+    const updatedSlot = await this.slotService.updateSlot(userId, slotId, dto);
+    return { status: 'success', data: updatedSlot };
   }
 
   @Delete(':id')
@@ -46,6 +47,6 @@ export class ScheduleSlotController {
     @Param('id') slotId: string,
   ) {
     await this.slotService.deleteSlot(userId, slotId);
-    return { status: 'success', message: 'Schedule slot deleted' };
+    return { status: 'success', message: 'Schedule slot deleted successfully' };
   }
 }

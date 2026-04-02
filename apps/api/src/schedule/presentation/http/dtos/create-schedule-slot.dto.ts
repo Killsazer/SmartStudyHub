@@ -1,5 +1,4 @@
-// File: src/schedule/presentation/create-schedule-slot.dto.ts
-import { IsString, IsNotEmpty, IsOptional, IsInt, IsEnum, Min, Max } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsInt, IsEnum, Min, Max, Matches } from 'class-validator';
 import { ClassType } from '../../../domain/entities/schedule-slot.entity';
 
 export class CreateScheduleSlotDto {
@@ -23,10 +22,16 @@ export class CreateScheduleSlotDto {
 
   @IsString()
   @IsNotEmpty()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'startTime must be a valid time in HH:MM format',
+  })
   startTime: string;  // "HH:MM"
 
   @IsString()
   @IsNotEmpty()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'endTime must be a valid time in HH:MM format',
+  })
   endTime: string;    // "HH:MM"
 
   @IsEnum(ClassType)

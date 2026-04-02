@@ -1,8 +1,8 @@
-// File: src/schedule/infrastructure/prisma-schedule-slot.repository.ts
 import { Injectable } from '@nestjs/common';
-import { IScheduleSlotRepository } from '../domain/repositories/schedule-slot.repository.interface';
-import { ScheduleSlotEntity, ClassType } from '../domain/entities/schedule-slot.entity';
-import { PrismaService } from '../../shared/prisma/prisma.service';
+import { IScheduleSlotRepository, UpdateScheduleSlotData } from '../../../domain/repositories/schedule-slot.repository.interface';
+import { ScheduleSlotEntity, ClassType, ScheduleSlotProps } from '../../../domain/entities/schedule-slot.entity';
+import { ScheduleSlotFactory } from '../../../domain/patterns/schedule-slot.factory';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 interface SlotUpdateFields {
   weekNumber?: number;
@@ -19,8 +19,8 @@ interface SlotUpdateFields {
 export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async save(slot: ScheduleSlotEntity): Promise<void> {
-    await this.prisma.scheduleSlot.upsert({
+  async save(slot: ScheduleSlotEntity): Promise<ScheduleSlotEntity> {
+    const savedData = await this.prisma.scheduleSlot.upsert({
       where: { id: slot.id },
       update: {
         subjectId: slot.subjectId,
@@ -45,19 +45,13 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
         location: slot.location ?? null,
       },
     });
+
+    //Трансформуємо сирі дані з БД у нашу Доменну Сутність
+    return this.toDomainEntity(savedData);
   }
 
-  // 💡 Виправлено: classType: string -> classType: ClassType
-  async update(id: string, data: Partial<{
-    subjectId: string;
-    teacherId: string | null;
-    weekNumber: number;
-    dayOfWeek: number;
-    startTime: string;
-    endTime: string;
-    classType: ClassType; 
-    location: string | null;
-  }>): Promise<void> {
+  // Використовуємо наш чистий тип UpdateScheduleSlotData та повертаємо сутність
+  async update(id: string, data: UpdateScheduleSlotData): Promise<ScheduleSlotEntity> {
     const updateData: SlotUpdateFields = {};
     if (data.weekNumber !== undefined) updateData.weekNumber = data.weekNumber;
     if (data.dayOfWeek !== undefined) updateData.dayOfWeek = data.dayOfWeek;
@@ -69,7 +63,15 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
     if (data.teacherId !== undefined) {
       updateData.teacher = data.teacherId ? { connect: { id: data.teacherId } } : { disconnect: true };
     }
-    await this.prisma.scheduleSlot.update({ where: { id }, data: updateData });
+    
+    // Зберігаємо оновлений запис, який повертає Prisma
+    const updatedData = await this.prisma.scheduleSlot.update({ 
+      where: { id }, 
+      data: updateData 
+    });
+
+    // Віддаємо домену
+    return this.toDomainEntity(updatedData);
   }
 
   async delete(id: string): Promise<void> {
@@ -98,10 +100,6 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
     return data.map(d => this.toDomainEntity(d));
   }
 
-  /**
-   * Maps a raw Prisma record to a ScheduleSlotEntity domain object.
-   * Centralised to eliminate mapping duplication across find methods (DRY).
-   */
   private toDomainEntity(d: {
     id: string;
     userId: string;
@@ -114,10 +112,21 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
     classType: string;
     location: string | null;
   }): ScheduleSlotEntity {
-    return new ScheduleSlotEntity(
-      d.id, d.userId, d.subjectId, d.teacherId,
-      d.weekNumber, d.dayOfWeek, d.startTime, d.endTime,
-      d.classType as ClassType, d.location ?? undefined,
-    );
+    
+    // Збираємо "коробку" з даними для Фабрики
+    const props: ScheduleSlotProps = {
+      id: d.id,
+      userId: d.userId,
+      subjectId: d.subjectId,
+      teacherId: d.teacherId,
+      weekNumber: d.weekNumber,
+      dayOfWeek: d.dayOfWeek,
+      startTime: d.startTime,
+      endTime: d.endTime,
+      location: d.location ?? undefined,
+    };
+
+    // Делегуємо створення конкретного підкласу (Лекція, Лаба) Фабриці
+    return ScheduleSlotFactory.createSlot(d.classType as ClassType, props);
   }
 }
