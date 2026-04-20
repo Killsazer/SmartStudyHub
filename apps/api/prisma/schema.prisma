@@ -1,4 +1,4 @@
-generator client {
+eargenerator client {
   provider = "prisma-client-js"
 }
 
@@ -6,14 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
-// Типи занять для Factory Method (adapted: LessonType → ClassType)
 enum ClassType {
   LECTURE
   LAB
   PRACTICE
 }
 
-// Статуси та пріоритети для Strategy та Observer
 enum TaskStatus {
   TODO
   IN_PROGRESS
@@ -73,7 +71,7 @@ model Teacher {
   scheduleSlots ScheduleSlot[]
 }
 
-// Слот розкладу - для Factory Method (адаптований з Lesson)
+// Слот розкладу - для Factory Method
 model ScheduleSlot {
   id         String    @id @default(uuid())
   weekNumber Int       // 1 або 2
@@ -104,14 +102,17 @@ model SharedSchedule {
 
 // Завдання - основа для Command, Observer, Decorator
 model Task {
-  id          String       @id @default(uuid())
-  title       String
-  description String?
-  status      TaskStatus   @default(TODO)
-  priority    TaskPriority @default(MEDIUM)
-  deadline    DateTime?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id             String       @id @default(uuid())
+  title          String
+  description    String?
+  status         TaskStatus   @default(TODO)
+  priority       TaskPriority @default(MEDIUM)
+  deadline       DateTime?
+  
+  recurrenceDays Int?         
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   subjectId String?
   subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)

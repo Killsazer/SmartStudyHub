@@ -10,7 +10,6 @@ export enum TaskPriority {
   HIGH = 'HIGH',
 }
 
-// 💡 1. Вводимо Props для безпечного створення об'єктів
 export interface TaskProps {
   id: string;
   title: string;
@@ -20,9 +19,24 @@ export interface TaskProps {
   deadline?: Date;
   description?: string;
   subjectId?: string;
+  recurrenceDays?: number; //Інтервал повторення в днях
 }
 
-export class TaskEntity {
+export interface ITask {
+  readonly id: string;
+  title: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  readonly userId: string;
+  deadline?: Date;
+  description?: string;
+  subjectId?: string;
+  recurrenceDays?: number;
+  
+  completeTask(): ITask | null; 
+}
+
+export class TaskEntity implements ITask {
   public readonly id: string;
   public title: string;
   public status: TaskStatus;
@@ -31,6 +45,7 @@ export class TaskEntity {
   public deadline?: Date;
   public description?: string;
   public subjectId?: string;
+  public recurrenceDays?: number;
 
   constructor(props: TaskProps) {
     this.id = props.id;
@@ -41,13 +56,13 @@ export class TaskEntity {
     this.deadline = props.deadline;
     this.description = props.description;
     this.subjectId = props.subjectId;
+    this.recurrenceDays = props.recurrenceDays;
   }
 
-  // 💡 2. Метод тепер або мутує об'єкт (повертає void), або кидає помилку
-  completeTask(): void {
-    if (this.status === TaskStatus.DONE) {
-      throw new Error('Task is already completed');
+    completeTask(): ITask | null {
+      if (this.status === TaskStatus.DONE) return null;
+      
+      this.status = TaskStatus.DONE;
+      return null; // Звичайна таска нічого не генерує
     }
-    this.status = TaskStatus.DONE;
-  }
 }

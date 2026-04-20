@@ -21,7 +21,7 @@ export class TaskService {
   constructor(
     @Inject('ITaskRepository')
     private readonly taskRepo: ITaskRepository,
-    
+
     private readonly historyManager: CommandHistoryManager
   ) {}
 
@@ -43,15 +43,9 @@ export class TaskService {
 
   async updateTaskStatus(userId: string, taskId: string, newStatus: TaskStatus): Promise<void> {
     const task = await this.checkAccess(taskId, userId);
+    if (task.status === newStatus) return;
 
-    if (task.status === newStatus) {
-      return; 
-    }
-
-    //Створюємо команду
     const command = new ChangeTaskStatusCommand(task, newStatus, this.taskRepo);
-    
-    //Делегуємо виконання інвокеру
     await this.historyManager.execute(userId, command);
   }
 

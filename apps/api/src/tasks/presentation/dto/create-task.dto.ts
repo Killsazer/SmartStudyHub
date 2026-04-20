@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsDateString } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum, IsDateString, IsNumber, Min } from 'class-validator';
 import { TaskPriority } from '../../domain/task.entity';
 
 export class CreateTaskDto {
@@ -21,4 +21,9 @@ export class CreateTaskDto {
   @IsString()
   @IsOptional()
   subjectId?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  recurrenceDays?: number; 
 }

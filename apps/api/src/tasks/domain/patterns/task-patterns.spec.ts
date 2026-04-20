@@ -2,11 +2,11 @@
 // Covers: Command, CommandHistory, Observer, Decorator (Recurring), Singleton
 import { TaskEntity, TaskStatus, TaskPriority } from '../task.entity';
 import { ChangeTaskStatusCommand } from './command/change-task-status.command';
-import { CommandHistory } from './command/command-history';
+import { CommandHistory } from './command/command-history.manager';
 import { TaskStatusNotifier } from './observer/task-status.notifier';
 import { IObserver } from './observer/observer.interfaces';
 import { RecurringTaskDecorator } from './decorator/recurring-task.decorator';
-import { DeadlineNotificationManager } from './singleton/deadline-notification.manager';
+import { DeadlineNotificationManager } from './observer/deadline-notification.manager';
 
 // ═══════════════════════════════════════════════════════════════
 // COMMAND PATTERN
