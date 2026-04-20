@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards, Req, HttpStatus, HttpCode } from '@nestjs/common';
 import { TaskService } from '../application/task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
@@ -17,9 +17,19 @@ export class TaskController {
     @Body() dto: CreateTaskDto
   ) {
     const task = await this.taskService.createTask(userId, dto);
-    // 💡 Повертаємо повний об'єкт, фронтенд скаже "Дякую!"
+    // Повертаємо повний об'єкт, фронтенд скаже "Дякую!"
     return { status: 'success', data: task };
   }
+
+    @Post('undo')
+    @HttpCode(HttpStatus.OK)
+    async undoLastAction(
+      @CurrentUser() userId: string
+    ) { 
+      await this.taskService.undoLastStatusChange(userId);
+      return { status: 'success', message: 'Last action undone successfully' };
+    }
+
 
   @Patch(':id/status')
   async updateTaskStatus(

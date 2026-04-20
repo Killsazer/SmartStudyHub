@@ -1,46 +1,30 @@
-/**
- * ====================================================================
- * Патерн: Command (Поведінковий / Behavioral) — Конкретна команда
- * ====================================================================
- * Інкапсулює дію зміни статусу завдання як самостійний об'єкт.
- * Зберігає попередній стан для можливості відкату (undo).
- * Використовується в TaskService для надійної зміни статусу
- * з можливістю логування та збереження історії операцій.
- *
- * Ключові ознаки:
- * - Зберігає отримувача (task) та параметри дії (newStatus)
- * - `execute()` — виконує дію та зберігає стан для undo
- * - `undo()` — відкочує стан отримувача до попереднього
- * ====================================================================
- */
 import { ICommand } from './command.interface';
 import { TaskEntity, TaskStatus } from '../../task.entity';
+import { ITaskRepository } from '../../task.repository.interface';
 
 export class ChangeTaskStatusCommand implements ICommand {
-  /** Збережений попередній статус для можливості відкату */
-  private previousStatus: TaskStatus | null = null;
+  private previousStatus?: TaskStatus; 
 
   constructor(
-    /** Отримувач команди — об'єкт, над яким виконується дія */
     private readonly task: TaskEntity,
-    /** Новий статус, який буде встановлено */
-    private readonly newStatus: TaskStatus
+    private readonly newStatus: TaskStatus,
+    private readonly taskRepo: ITaskRepository,
   ) {}
 
-  /** Виконує команду: зберігає попередній стан та змінює статус */
-  execute(): void {
-    this.previousStatus = this.task.status;
+  async execute(): Promise<void> {
+    this.previousStatus = this.task.status; // Запам'ятовуємо стан для Undo
     this.task.status = this.newStatus;
-    console.log(`[ChangeTaskStatusCommand] Task '${this.task.title}' status changed to ${this.newStatus}`);
+    await this.taskRepo.save(this.task);
   }
 
-  /** Скасовує команду: відновлює попередній статус завдання */
-  undo(): void {
-    if (this.previousStatus === null) {
-      console.warn(`[ChangeTaskStatusCommand] Cannot undo: Command was never executed.`);
+  //Команда відкочує таску
+  async undo(): Promise<void> {
+    if (!this.previousStatus) {
+      console.warn('Неможливо відмінити команду, яка ще не виконувалась');
       return;
     }
+    
     this.task.status = this.previousStatus;
-    console.log(`[ChangeTaskStatusCommand] Undone: Task '${this.task.title}' reverted back to ${this.previousStatus}`);
+    await this.taskRepo.save(this.task); // Зберігаємо старий статус назад у БД
   }
 }

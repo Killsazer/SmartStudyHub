@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { ITaskRepository } from '../domain/task.repository.interface';
+import { CommandHistoryManager } from '../domain/patterns/command/command-history.manager';
 import { TaskEntity, TaskStatus, TaskPriority } from '../domain/task.entity';
 import { CreateTaskDto } from '../presentation/dto/create-task.dto';
 import { UpdateTaskDto } from '../presentation/dto/update-task.dto';
@@ -19,7 +20,9 @@ export class TaskService {
 
   constructor(
     @Inject('ITaskRepository')
-    private readonly taskRepo: ITaskRepository
+    private readonly taskRepo: ITaskRepository,
+    
+    private readonly historyManager: CommandHistoryManager
   ) {}
 
   async createTask(userId: string, dto: CreateTaskDto): Promise<TaskEntity> {
@@ -41,10 +44,19 @@ export class TaskService {
   async updateTaskStatus(userId: string, taskId: string, newStatus: TaskStatus): Promise<void> {
     const task = await this.checkAccess(taskId, userId);
 
-    const command = new ChangeTaskStatusCommand(task, newStatus);
-    command.execute();
+    if (task.status === newStatus) {
+      return; 
+    }
 
-    await this.taskRepo.save(task);
+    //Створюємо команду
+    const command = new ChangeTaskStatusCommand(task, newStatus, this.taskRepo);
+    
+    //Делегуємо виконання інвокеру
+    await this.historyManager.execute(userId, command);
+  }
+
+  async undoLastStatusChange(userId: string): Promise<void> {
+    await this.historyManager.undo(userId);
   }
 
   async updateTask(userId: string, taskId: string, dto: UpdateTaskDto): Promise<TaskEntity> {
