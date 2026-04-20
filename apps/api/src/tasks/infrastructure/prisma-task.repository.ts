@@ -7,7 +7,6 @@ import { TaskEntity, TaskStatus, TaskPriority, TaskProps } from '../domain/task.
 export class PrismaTaskRepository implements ITaskRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  // 💡 1. Повертаємо збережену сутність
   async save(task: TaskEntity): Promise<TaskEntity> {
     const savedData = await this.prisma.task.upsert({
       where: { id: task.id },
@@ -18,7 +17,8 @@ export class PrismaTaskRepository implements ITaskRepository {
         priority: task.priority,
         deadline: task.deadline,
         subjectId: task.subjectId,
-        userId: task.userId
+        userId: task.userId,
+        recurrenceDays: task.recurrenceDays // 💡 ДОДАНО
       },
       create: {
         id: task.id,
@@ -28,7 +28,8 @@ export class PrismaTaskRepository implements ITaskRepository {
         priority: task.priority,
         deadline: task.deadline ?? null,
         subjectId: task.subjectId ?? null,
-        userId: task.userId
+        userId: task.userId,
+        recurrenceDays: task.recurrenceDays ?? null // 💡 ДОДАНО
       }
     });
 
@@ -50,7 +51,7 @@ export class PrismaTaskRepository implements ITaskRepository {
     await this.prisma.task.delete({ where: { id } });
   }
 
-  // 💡 2. DRY: Гідратація через об'єкт Props
+  // 💡 DRY: Гідратація через об'єкт Props
   private toDomainEntity(d: {
     id: string;
     title: string;
@@ -60,6 +61,7 @@ export class PrismaTaskRepository implements ITaskRepository {
     description: string | null;
     deadline: Date | null;
     subjectId: string | null;
+    recurrenceDays: number | null;
   }): TaskEntity {
     const props: TaskProps = {
       id: d.id,
@@ -69,7 +71,8 @@ export class PrismaTaskRepository implements ITaskRepository {
       userId: d.userId,
       description: d.description ?? undefined,
       deadline: d.deadline ?? undefined,
-      subjectId: d.subjectId ?? undefined
+      subjectId: d.subjectId ?? undefined,
+      recurrenceDays: d.recurrenceDays ?? undefined
     };
     return new TaskEntity(props);
   }
