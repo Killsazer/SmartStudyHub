@@ -5,6 +5,7 @@ import { ScheduleSlotFactory } from 'src/schedule/domain/patterns/schedule-slot.
 import { ClassType } from 'src/schedule/domain/entities/schedule-slot.entity';
 import { TaskEntity, TaskStatus, TaskPriority } from '../../../tasks/domain/task.entity';
 import { TeacherEntity } from '../../../schedule/domain/entities/teacher.entity';
+import { randomUUID } from 'crypto';
 
 export class StudyHubFacade {
   public createOnboardingData(userId: string): {
@@ -45,16 +46,16 @@ export class StudyHubFacade {
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + 1);
 
-    const profileTask = new TaskEntity(
-      `task-onboard-${Date.now()}`,
-      'Complete your profile',
-      TaskStatus.TODO,
-      TaskPriority.HIGH,
+    const profileTask = new TaskEntity({
+      id: randomUUID(),
+      title: 'Complete your profile',
+      status: TaskStatus.TODO,
+      priority: TaskPriority.HIGH,
       userId,
-      'Add your avatar and fill out personal information to fully unlock the platform.',
+      description: 'Add your avatar and fill out personal information to fully unlock the platform.',
       deadline,
       subjectId,
-    );
+    });
 
     builder.addTask(profileTask);
 

@@ -4,16 +4,12 @@ import { TaskEntity, TaskStatus, TaskPriority } from '../domain/task.entity';
 import { CreateTaskDto } from '../presentation/dto/create-task.dto';
 import { UpdateTaskDto } from '../presentation/dto/update-task.dto';
 import { ChangeTaskStatusCommand } from '../domain/patterns/command/change-task-status.command';
-import { TaskStatusNotifier } from '../domain/patterns/observer/task-status.notifier';
-import { DeadlineAlertObserver } from '../domain/patterns/observer/deadline-alert.observer';
 import { TaskSortContext } from '../domain/patterns/strategy/task-sort.context';
 import { ITaskSortStrategy, SortByDeadlineStrategy, SortByPriorityStrategy, SortByTitleStrategy } from '../domain/patterns/strategy/task-sort.strategies';
 import { randomUUID } from 'crypto';
 
 @Injectable()
 export class TaskService {
-  private readonly statusNotifier: TaskStatusNotifier;
-
   //cтворюємо мапу доступних стратегій
   private readonly strategyMap: ReadonlyMap<string, ITaskSortStrategy> = new Map([
     ['deadline', new SortByDeadlineStrategy()],
@@ -24,10 +20,7 @@ export class TaskService {
   constructor(
     @Inject('ITaskRepository')
     private readonly taskRepo: ITaskRepository
-  ) {
-    this.statusNotifier = new TaskStatusNotifier();
-    this.statusNotifier.attach(new DeadlineAlertObserver());
-  }
+  ) {}
 
   async createTask(userId: string, dto: CreateTaskDto): Promise<TaskEntity> {
     const task = new TaskEntity({
@@ -52,7 +45,6 @@ export class TaskService {
     command.execute();
 
     await this.taskRepo.save(task);
-    this.statusNotifier.notify(task);
   }
 
   async updateTask(userId: string, taskId: string, dto: UpdateTaskDto): Promise<TaskEntity> {
