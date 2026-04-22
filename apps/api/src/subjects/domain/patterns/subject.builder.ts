@@ -6,7 +6,16 @@ export class SubjectBuilder {
   private subject: SubjectEntity;
 
   constructor(id: string, title: string, userId: string) {
-    this.subject = new SubjectEntity(id, title, userId);
+    if (!title || title.trim().length === 0) {
+      throw new Error('Subject title cannot be empty');
+    }
+    if (title.length > 100) {
+      throw new Error(`Subject title too long: ${title.length} chars (max 100)`);
+    }
+    if (!userId || userId.trim().length === 0) {
+      throw new Error('Subject userId cannot be empty');
+    }
+    this.subject = new SubjectEntity(id, title.trim(), userId);
   }
 
   setColor(color: string): SubjectBuilder {
@@ -28,10 +37,8 @@ export class SubjectBuilder {
     return this;
   }
 
-  // Фінальний метод Builder. Очищає внутрішній стан після побудови, щоб уникнути мутацій.
   build(): SubjectEntity {
     const result = this.subject;
-    // Захист від повторного використання того самого білдера (скидаємо стан)
     this.subject = new SubjectEntity(result.id, result.title, result.userId);
     return result;
   }

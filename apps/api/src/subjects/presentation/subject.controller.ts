@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards, Logger } from '@nestjs/common';
 import { SubjectService } from '../application/subject.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
@@ -8,15 +8,16 @@ import { CurrentUser } from '../../shared/security/current-user.decorator';
 @Controller('subjects')
 @UseGuards(JwtAuthGuard)
 export class SubjectController {
-  constructor(
-    private readonly subjectService: SubjectService,
-  ) {}
+  private readonly logger = new Logger(SubjectController.name);
+
+  constructor(private readonly subjectService: SubjectService) {}
 
   @Post()
   async createSubject(
     @CurrentUser() userId: string,
-    @Body() dto: CreateSubjectDto
+    @Body() dto: CreateSubjectDto,
   ) {
+    this.logger.log(`Create subject request from user: ${userId}`);
     const subjectId = await this.subjectService.createSubject(userId, dto);
     return { status: 'success', data: { id: subjectId } };
   }
@@ -31,7 +32,7 @@ export class SubjectController {
   async updateSubject(
     @CurrentUser() userId: string,
     @Param('id') subjectId: string,
-    @Body() dto: UpdateSubjectDto
+    @Body() dto: UpdateSubjectDto,
   ) {
     await this.subjectService.updateSubject(userId, subjectId, dto);
     return { status: 'success', message: 'Subject updated successfully' };
@@ -40,7 +41,7 @@ export class SubjectController {
   @Delete(':id')
   async deleteSubject(
     @CurrentUser() userId: string,
-    @Param('id') subjectId: string
+    @Param('id') subjectId: string,
   ) {
     await this.subjectService.deleteSubject(userId, subjectId);
     return { status: 'success', message: 'Subject deleted successfully' };

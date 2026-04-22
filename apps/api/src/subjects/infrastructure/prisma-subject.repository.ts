@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ISubjectRepository } from '../domain/subject.repository.interface';
 import { SubjectEntity } from '../domain/subject.entity';
 import { PrismaService } from '../../shared/prisma/prisma.service';
-import { ScheduleSlotFactory } from 'src/schedule/domain/patterns/schedule-slot.factory';
-import { TaskEntity } from 'src/tasks/domain/task.entity';
-import { ClassType, TaskPriority, TaskStatus } from '@prisma/client';
+import { ScheduleSlotFactory } from '../../schedule/domain/patterns/schedule-slot.factory';
+import { TaskEntity } from '../../tasks/domain/task.entity';
 
 @Injectable()
 export class PrismaSubjectRepository implements ISubjectRepository {
@@ -18,7 +17,6 @@ export class PrismaSubjectRepository implements ISubjectRepository {
         color: subject.color,
         userId: subject.userId,
         
-        // Каскадне збереження завдань (якщо Білдер їх додав)
         tasks: subject.tasks.length > 0 ? {
           create: subject.tasks.map(task => ({
             id: task.id,
@@ -27,11 +25,10 @@ export class PrismaSubjectRepository implements ISubjectRepository {
             status: task.status,
             priority: task.priority,
             deadline: task.deadline,
-            userId: subject.userId, // Зв'язок з юзером (з твоєї schema.prisma)
+            userId: subject.userId,
           }))
         } : undefined,
 
-        // Каскадне збереження розкладу (якщо Білдер його додав)
         scheduleSlots: subject.scheduleSlots.length > 0 ? {
           create: subject.scheduleSlots.map(slot => ({
             id: slot.id,
@@ -59,11 +56,9 @@ export class PrismaSubjectRepository implements ISubjectRepository {
   });
 
   return records.map((r) => {
-    // 1. Створюємо базовий агрегат
     const entity = new SubjectEntity(r.id, r.title, r.userId);
     entity.color = r.color ?? '#000000';
 
-    // 2. Правильний мапінг завдань (POJO -> Domain Entity)
     entity.tasks = (r.tasks ?? []).map(taskData => new TaskEntity({
       id: taskData.id,
       title: taskData.title,
@@ -75,8 +70,7 @@ export class PrismaSubjectRepository implements ISubjectRepository {
       subjectId: taskData.subjectId ?? undefined,
     }));
 
-    // 3. Правильний мапінг слотів 
-    entity.scheduleSlots = (r.scheduleSlots ?? []).map(slotData => 
+    entity.scheduleSlots = (r.scheduleSlots ?? []).map(slotData =>
       ScheduleSlotFactory.createSlot(slotData.classType as any, {
         id: slotData.id,
         weekNumber: slotData.weekNumber,
