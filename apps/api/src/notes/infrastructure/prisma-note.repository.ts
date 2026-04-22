@@ -1,8 +1,10 @@
-// File: src/notes/infrastructure/prisma-note.repository.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { INoteRepository } from '../domain/note.repository.interface';
 import { NoteEntity } from '../domain/note.entity';
+import { NoteBlock } from '../domain/patterns/composite/note-block';
+import { NoteSection } from '../domain/patterns/composite/note-section';
+import { NoteComponent } from '../domain/patterns/composite/note-component';
 
 @Injectable()
 export class PrismaNoteRepository implements INoteRepository {
@@ -44,10 +46,36 @@ export class PrismaNoteRepository implements INoteRepository {
     await this.prisma.note.delete({ where: { id } });
   }
 
-  /**
-   * Maps a raw Prisma record to a NoteEntity domain object.
-   * Centralised to eliminate mapping duplication across find methods (DRY).
-   */
+  async getNotesTree(userId: string): Promise<NoteComponent[]> {
+    const allNotes = await this.prisma.note.findMany({ where: { userId } });
+    
+    const map = new Map<string, NoteComponent>();
+    const roots: NoteComponent[] = [];
+
+    // Перший прохід: створюємо об'єкти
+    allNotes.forEach(n => {
+      const component = n.content
+        ? new NoteBlock(n.id, n.title, n.content, n.subjectId)
+        : new NoteSection(n.id, n.title, n.subjectId);
+      map.set(n.id, component);
+    });
+
+    // Другий прохід: зв'язуємо ієрархію
+    allNotes.forEach(n => {
+      const component = map.get(n.id);
+      if (n.parentId && map.has(n.parentId)) {
+        const parent = map.get(n.parentId);
+        if (parent instanceof NoteSection) {
+          parent.add(component!);
+        }
+      } else {
+        roots.push(component!);
+      }
+    });
+
+    return roots;
+  }
+
   private toDomainEntity(d: {
     id: string;
     title: string;

@@ -1,8 +1,7 @@
-// File: src/notes/presentation/note.controller.ts
 import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { NoteService } from '../application/note.service';
-import { CreateNoteDto } from './create-note.dto';
-import { UpdateNoteDto } from './update-note.dto';
+import { CreateNoteDto } from './dto/create-note.dto';
+import { UpdateNoteDto } from './dto/update-note.dto';
 import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../shared/security/current-user.decorator';
 
