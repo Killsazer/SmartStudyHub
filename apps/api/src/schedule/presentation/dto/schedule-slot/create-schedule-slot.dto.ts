@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsInt, IsEnum, Min, Max, Matches } from 'class-validator';
-import { ClassType } from '../../../../domain/entities/schedule-slot.entity';
+import { ClassType } from '../../../domain/entities/schedule-slot.entity';
 
 export class CreateScheduleSlotDto {
   @IsString()

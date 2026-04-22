@@ -2,8 +2,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { ISubjectRepository } from '../domain/subject.repository.interface';
 import { SubjectBuilder } from '../domain/patterns/subject.builder';
-import { CreateSubjectDto } from '../presentation/create-subject.dto';
-import { UpdateSubjectDto } from '../presentation/update-subject.dto';
+import { CreateSubjectDto } from '../presentation/dto/create-subject.dto';
+import { UpdateSubjectDto } from '../presentation/dto/update-subject.dto';
 
 @Injectable()
 export class SubjectService {

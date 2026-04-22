@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { TeacherController } from './presentation/http/controllers/teacher.controller';
-import { ScheduleSlotController } from './presentation/http/controllers/schedule-slot.controller';
-import { ShareController } from './presentation/http/controllers/share.controller';
+import { TeacherController } from './presentation/controllers/teacher.controller';
+import { ScheduleSlotController } from './presentation/controllers/schedule-slot.controller';
+import { ShareController } from './presentation/controllers/share.controller';
 import { TeacherService } from './application/services/teacher.service';
 import { ScheduleSlotService } from './application/services/schedule-slot.service';
 import { ExportScheduleUseCase } from './application/use-cases/export-schedule.use-case';

@@ -2,8 +2,8 @@ import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nest
 import type { IScheduleSlotRepository } from '../../domain/repositories/schedule-slot.repository.interface';
 import { ScheduleSlotEntity, ScheduleSlotProps } from '../../domain/entities/schedule-slot.entity';
 import { ScheduleSlotFactory } from '../../domain/patterns/schedule-slot.factory';
-import { CreateScheduleSlotDto } from '../../presentation/http/dto/schedule-slot/create-schedule-slot.dto';
-import { UpdateScheduleSlotDto } from '../../presentation/http/dto/schedule-slot/update-schedule-slot.dto';
+import { CreateScheduleSlotDto } from '../../presentation/dto/schedule-slot/create-schedule-slot.dto';
+import { UpdateScheduleSlotDto } from '../../presentation/dto/schedule-slot/update-schedule-slot.dto';
 import { randomUUID } from 'crypto';
 
 @Injectable()

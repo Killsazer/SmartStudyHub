@@ -1,9 +1,9 @@
 import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { TeacherService } from '../../../application/services/teacher.service';
+import { TeacherService } from '../../application/services/teacher.service';
 import { CreateTeacherDto } from '../dto/teacher/create-teacher.dto';
 import { UpdateTeacherDto } from '../dto/teacher/update-teacher.dto';  
-import { JwtAuthGuard } from '../../../../shared/security/jwt-auth.guard';
-import { CurrentUser } from '../../../../shared/security/current-user.decorator';
+import { JwtAuthGuard } from '../../../shared/security/jwt-auth.guard';
+import { CurrentUser } from '../../../shared/security/current-user.decorator';
 
 @Controller('teachers')
 @UseGuards(JwtAuthGuard)

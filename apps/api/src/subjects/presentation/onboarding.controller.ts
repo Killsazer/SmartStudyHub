@@ -1,7 +1,7 @@
 // File: src/subjects/presentation/onboarding.controller.ts
 import { Controller, Post, Body } from '@nestjs/common';
 import { OnboardingService } from '../application/onboarding.service';
-import { OnboardingDto } from './onboarding.dto';
+import { OnboardingDto } from './dto/onboarding.dto';
 
 @Controller('onboarding')
 export class OnboardingController {

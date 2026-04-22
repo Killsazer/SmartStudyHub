@@ -2,8 +2,8 @@
 import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { SubjectService } from '../application/subject.service';
 import { SubjectQueryService } from '../application/subject-query.service';
-import { CreateSubjectDto } from './create-subject.dto';
-import { UpdateSubjectDto } from './update-subject.dto';
+import { CreateSubjectDto } from './dto/create-subject.dto';
+import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../shared/security/current-user.decorator';
 

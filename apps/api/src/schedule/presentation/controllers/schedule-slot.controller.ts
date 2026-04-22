@@ -2,11 +2,11 @@ import {
   Controller, Post, Get, Patch, Delete, Body, Param, Query, 
   UseGuards, ParseIntPipe,
 } from '@nestjs/common';
-import { ScheduleSlotService } from '../../../application/services/schedule-slot.service';
+import { ScheduleSlotService } from '../../application/services/schedule-slot.service';
 import { CreateScheduleSlotDto } from '../dto/schedule-slot/create-schedule-slot.dto';
 import { UpdateScheduleSlotDto } from '../dto/schedule-slot/update-schedule-slot.dto';
-import { JwtAuthGuard } from '../../../../shared/security/jwt-auth.guard';
-import { CurrentUser } from '../../../../shared/security/current-user.decorator';
+import { JwtAuthGuard } from '../../../shared/security/jwt-auth.guard';
+import { CurrentUser } from '../../../shared/security/current-user.decorator';
 
 @Controller('schedule-slots')
 @UseGuards(JwtAuthGuard)

@@ -1,8 +1,8 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { ITeacherRepository } from '../../domain/repositories/teacher.repository.interface';
 import { TeacherEntity, TeacherProps } from '../../domain/entities/teacher.entity';
-import { CreateTeacherDto } from '../../presentation/http/dto/teacher/create-teacher.dto';
-import { UpdateTeacherDto } from '../../presentation/http/dto/teacher/update-teacher.dto';
+import { CreateTeacherDto } from '../../presentation/dto/teacher/create-teacher.dto';
+import { UpdateTeacherDto } from '../../presentation/dto/teacher/update-teacher.dto';
 import { randomUUID } from 'crypto';
 
 @Injectable()
