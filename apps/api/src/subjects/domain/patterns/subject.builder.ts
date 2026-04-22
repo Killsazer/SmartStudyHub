@@ -1,53 +1,38 @@
-/**
- * ====================================================================
- * Патерн: Builder (Породжувальний / Creational)
- * ====================================================================
- * Дозволяє покроково збирати складний об'єкт SubjectEntity,
- * додаючи до нього розклад, завдання та налаштування кольору.
- * Це зручніше за конструктор із 10+ параметрами — Builder дозволяє
- * конструювати різні конфігурації об'єкта через fluent-інтерфейс.
- *
- * Ключові ознаки патерну:
- * - Методи повертають `this` для ланцюгових викликів (fluent API)
- * - Фінальний метод `build()` повертає готовий об'єкт
- * ====================================================================
- */
+import { ScheduleSlotEntity } from '../../../schedule/domain/entities/schedule-slot.entity';
+import { TaskEntity } from '../../../tasks/domain/task.entity';
 import { SubjectEntity } from '../subject.entity';
 
 export class SubjectBuilder {
-  /** Внутрішній об'єкт, що поступово наповнюється через fluent-методи */
   private subject: SubjectEntity;
 
   constructor(id: string, title: string, userId: string) {
     this.subject = new SubjectEntity(id, title, userId);
-    this.subject.scheduleSlots = this.subject.scheduleSlots || [];
-    this.subject.tasks = this.subject.tasks || [];
   }
 
-  /** Крок Builder: задає колір предмета */
   setColor(color: string): SubjectBuilder {
+    const hexRegex = /^#([0-9A-F]{3}){1,2}$/i;
+    if (!hexRegex.test(color)) {
+      throw new Error(`Invalid color format: ${color}. Must be a valid HEX.`);
+    }
     this.subject.color = color;
     return this;
   }
 
-  /** Крок Builder: додає слот розкладу до агрегату */
-  addScheduleSlot(slot: unknown): SubjectBuilder {
+  addScheduleSlot(slot: ScheduleSlotEntity): SubjectBuilder {
     this.subject.scheduleSlots.push(slot);
     return this;
   }
 
-  /** Крок Builder: додає завдання до агрегату */
-  addTask(task: unknown): SubjectBuilder {
+  addTask(task: TaskEntity): SubjectBuilder {
     this.subject.tasks.push(task);
     return this;
   }
 
-  /**
-   * Фінальний метод Builder — повертає повністю зібраний об'єкт.
-   * Після виклику build() подальша модифікація через Builder неможлива
-   * без створення нового екземпляра.
-   */
+  // Фінальний метод Builder. Очищає внутрішній стан після побудови, щоб уникнути мутацій.
   build(): SubjectEntity {
-    return this.subject;
+    const result = this.subject;
+    // Захист від повторного використання того самого білдера (скидаємо стан)
+    this.subject = new SubjectEntity(result.id, result.title, result.userId);
+    return result;
   }
 }

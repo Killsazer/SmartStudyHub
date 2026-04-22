@@ -1,19 +1,26 @@
-// File: src/subjects/subjects.module.ts
 import { Module } from '@nestjs/common';
-import { OnboardingController } from './presentation/controlers/onboarding.controller';
-import { SubjectController } from './presentation/controlers/subject.controller';
-import { OnboardingService } from './application/onboarding.service';
+import { SubjectController } from './presentation/subject.controller';
 import { SubjectService } from './application/subject.service';
-import { SubjectQueryService } from './application/subject-query.service';
+import { PrismaSubjectRepository } from './infrastructure/prisma-subject.repository';
 import { SharedProvidersModule } from '../shared/shared-providers.module';
 
 @Module({
-  imports: [SharedProvidersModule],
-  controllers: [OnboardingController, SubjectController],
+  imports: [
+    SharedProvidersModule 
+  ],
+  controllers: [
+    SubjectController 
+  ],
   providers: [
-    OnboardingService,
     SubjectService,
-    SubjectQueryService,
+    {
+      provide: 'ISubjectRepository',
+      useClass: PrismaSubjectRepository,
+    },
+  ],
+  exports: [
+    SubjectService,
+    'ISubjectRepository',
   ],
 })
 export class SubjectsModule {}

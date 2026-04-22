@@ -1,18 +1,15 @@
-// File: src/subjects/presentation/subject.controller.ts
 import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { SubjectService } from '../../application/subject.service';
-import { SubjectQueryService } from '../../application/subject-query.service';
-import { CreateSubjectDto } from '../dto/create-subject.dto';
-import { UpdateSubjectDto } from '../dto/update-subject.dto';
-import { JwtAuthGuard } from '../../../shared/security/jwt-auth.guard';
-import { CurrentUser } from '../../../shared/security/current-user.decorator';
+import { SubjectService } from '../application/subject.service';
+import { CreateSubjectDto } from './dto/create-subject.dto';
+import { UpdateSubjectDto } from './dto/update-subject.dto';
+import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
+import { CurrentUser } from '../../shared/security/current-user.decorator';
 
 @Controller('subjects')
 @UseGuards(JwtAuthGuard)
 export class SubjectController {
   constructor(
     private readonly subjectService: SubjectService,
-    private readonly subjectQueryService: SubjectQueryService
   ) {}
 
   @Post()
@@ -26,7 +23,7 @@ export class SubjectController {
 
   @Get()
   async getSubjects(@CurrentUser() userId: string) {
-    const subjects = await this.subjectQueryService.getSubjectsByUser(userId);
+    const subjects = await this.subjectService.getSubjectsByUser(userId);
     return { status: 'success', data: subjects };
   }
 
