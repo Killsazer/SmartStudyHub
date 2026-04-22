@@ -1,4 +1,3 @@
-// GoF Pattern: Facade — adapted for new schedule-centric model
 import { SubjectEntity } from '../subject.entity';
 import { SubjectBuilder } from './subject.builder';
 import { ScheduleSlotFactory } from 'src/schedule/domain/patterns/schedule-slot.factory';

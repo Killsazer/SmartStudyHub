@@ -1,11 +1,11 @@
 // File: src/subjects/presentation/subject.controller.ts
 import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { SubjectService } from '../application/subject.service';
-import { SubjectQueryService } from '../application/subject-query.service';
-import { CreateSubjectDto } from './dto/create-subject.dto';
-import { UpdateSubjectDto } from './dto/update-subject.dto';
-import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
-import { CurrentUser } from '../../shared/security/current-user.decorator';
+import { SubjectService } from '../../application/subject.service';
+import { SubjectQueryService } from '../../application/subject-query.service';
+import { CreateSubjectDto } from '../dto/create-subject.dto';
+import { UpdateSubjectDto } from '../dto/update-subject.dto';
+import { JwtAuthGuard } from '../../../shared/security/jwt-auth.guard';
+import { CurrentUser } from '../../../shared/security/current-user.decorator';
 
 @Controller('subjects')
 @UseGuards(JwtAuthGuard)
