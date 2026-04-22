@@ -1,10 +1,12 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger, BadRequestException } from '@nestjs/common';
 import type { ISubjectRepository } from '../../subjects/domain/subject.repository.interface';
-import type { ITeacherRepository } from 'src/schedule/domain/repositories/teacher.repository.interface';
+import type { ITeacherRepository } from '../../schedule/domain/repositories/teacher.repository.interface';
 import { OnboardingFacade } from '../domain/patterns/onboarding.facade';
 
 @Injectable()
 export class OnboardingService {
+  private readonly logger = new Logger(OnboardingService.name);
+
   constructor(
     private readonly onboardingFacade: OnboardingFacade,
     
@@ -16,19 +18,18 @@ export class OnboardingService {
   ) {}
 
   public async processNewUserOnboarding(userId: string): Promise<void> {
-    try {
-      console.log(`[OnboardingService] Starting onboarding for user: ${userId}`);
-
-      const { subject, teacher } = this.onboardingFacade.createInitialStudyData(userId);
-
-      await this.teacherRepository.save(teacher);
-
-      await this.subjectRepository.save(subject);
-
-      console.log(`[OnboardingService] Successfully generated initial data for user: ${userId}`);
-    } catch (error) {
-      console.error(`[OnboardingService] Failed to process onboarding:`, error);
-      throw error; 
+    if (!userId || typeof userId !== 'string') {
+      throw new BadRequestException('Valid userId is required for onboarding');
     }
+
+    this.logger.log(`Starting onboarding for user: ${userId}`);
+
+    const { subject, teacher } = this.onboardingFacade.createInitialStudyData(userId);
+
+    await this.teacherRepository.save(teacher);
+
+    await this.subjectRepository.save(subject);
+
+    this.logger.log(`Successfully completed onboarding for user: ${userId}`);
   }
 }

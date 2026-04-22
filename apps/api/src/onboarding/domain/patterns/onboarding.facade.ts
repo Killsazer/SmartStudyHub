@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import { SubjectEntity } from '../../../subjects/domain/subject.entity';
 import { SubjectBuilder } from '../../../subjects/domain/patterns/subject.builder';
 import { ScheduleSlotFactory } from '../../../schedule/domain/patterns/schedule-slot.factory';
@@ -7,7 +6,6 @@ import { TaskEntity, TaskStatus, TaskPriority } from '../../../tasks/domain/task
 import { TeacherEntity } from '../../../schedule/domain/entities/teacher.entity';
 import { randomUUID } from 'crypto';
 
-@Injectable()
 export class OnboardingFacade {
   
   public createInitialStudyData(userId: string): {
@@ -17,7 +15,6 @@ export class OnboardingFacade {
     const subjectId = randomUUID();
     const teacherId = randomUUID();
 
-    // 1. Створюємо системного вчителя
     const teacher = new TeacherEntity({
       id: teacherId,
       name: 'StudyHub Guide',
@@ -25,11 +22,9 @@ export class OnboardingFacade {
       contacts: 'welcome@studyhub.app',
     });
 
-    // 2. Ініціалізуємо Будівельник для предмета
     const builder = new SubjectBuilder(subjectId, 'Intro to Smart Study', userId)
       .setColor('#4CAF50');
 
-    // 3. Створюємо привітальне заняття через Фабрику
     const welcomeSlot = ScheduleSlotFactory.createSlot(ClassType.LECTURE, {
       id: randomUUID(),
       userId,
@@ -42,7 +37,6 @@ export class OnboardingFacade {
       location: 'Virtual Classroom',
     });
 
-    // 4. Створюємо перше завдання
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + 3);
 
@@ -57,11 +51,9 @@ export class OnboardingFacade {
       subjectId,
     });
 
-    // 5. Компонуємо все в агрегат предмета
     builder.addScheduleSlot(welcomeSlot);
     builder.addTask(firstTask);
 
-    // Повертаємо зібраний результат
     return {
       subject: builder.build(),
       teacher,
