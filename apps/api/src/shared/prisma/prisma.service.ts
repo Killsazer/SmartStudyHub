@@ -1,4 +1,3 @@
-// File: src/shared/prisma/prisma.service.ts
 import 'dotenv/config';
 import { Global, Module, Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';

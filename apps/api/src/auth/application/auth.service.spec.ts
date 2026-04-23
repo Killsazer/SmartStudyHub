@@ -1,4 +1,3 @@
-// File: src/auth/application/auth.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
@@ -37,14 +36,13 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     jest.clearAllMocks();
-    // Re-set default mock behaviors after clearAllMocks
     bcrypt.genSalt.mockResolvedValue('salt');
     bcrypt.hash.mockResolvedValue('hashedPassword');
     bcrypt.compare.mockResolvedValue(true);
     mockJwtService.sign.mockReturnValue('mockToken123');
   });
 
-  // ──────────────── REGISTER ────────────────
+  // Register 
 
   describe('register', () => {
     const validDto = { email: 'new@kpi.ua', password: 'secureP@ss1', firstName: 'Vadym', lastName: 'Student' };
@@ -54,19 +52,16 @@ describe('AuthService', () => {
 
       const result = await service.register(validDto);
 
-      // bcrypt was called correctly
       expect(bcrypt.genSalt).toHaveBeenCalledTimes(1);
       expect(bcrypt.hash).toHaveBeenCalledWith('secureP@ss1', 'salt');
       
-      // User saved with hashed password (not plain text!)
       expect(mockUserRepo.save).toHaveBeenCalledTimes(1);
       const savedUser = mockUserRepo.save.mock.calls[0][0];
       expect(savedUser).toBeInstanceOf(UserEntity);
       expect(savedUser.email).toBe('new@kpi.ua');
       expect(savedUser.passwordHash).toBe('hashedPassword');
-      expect(savedUser.passwordHash).not.toBe('secureP@ss1');  // Security check
+      expect(savedUser.passwordHash).not.toBe('secureP@ss1'); 
       
-      // Token generated with correct payload
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         expect.objectContaining({ email: 'new@kpi.ua' })
       );
@@ -80,11 +75,10 @@ describe('AuthService', () => {
 
       await expect(service.register(validDto)).rejects.toThrow(ConflictException);
       
-      // User should NOT be saved
       expect(mockUserRepo.save).not.toHaveBeenCalled();
     });
 
-    it('🔄 should generate user ID with correct prefix', async () => {
+    it('should generate user ID with correct prefix', async () => {
       mockUserRepo.findByEmail.mockResolvedValue(null);
 
       await service.register(validDto);
@@ -93,7 +87,7 @@ describe('AuthService', () => {
       expect(savedUser.id).toMatch(/^user-\d+$/);
     });
 
-    it('🔄 should propagate repository errors', async () => {
+    it('should propagate repository errors', async () => {
       mockUserRepo.findByEmail.mockResolvedValue(null);
       mockUserRepo.save.mockRejectedValue(new Error('DB connection lost'));
 
@@ -101,7 +95,7 @@ describe('AuthService', () => {
     });
   });
 
-  // ──────────────── LOGIN ────────────────
+  // Login
 
   describe('login', () => {
     const loginDto = { email: 'vadym@kpi.ua', password: 'correct-password' };
@@ -121,16 +115,16 @@ describe('AuthService', () => {
       mockUserRepo.findByEmail.mockResolvedValue(null);
 
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      expect(bcrypt.compare).not.toHaveBeenCalled(); // Should not even check password
+      expect(bcrypt.compare).not.toHaveBeenCalled();
     });
 
     it('❌ should throw UnauthorizedException when password is wrong', async () => {
       const user = new UserEntity('u1', 'vadym@kpi.ua', 'hashedPwd', 'Vadym', 'S', new Date(), new Date());
       mockUserRepo.findByEmail.mockResolvedValue(user);
-      bcrypt.compare.mockResolvedValue(false); // Wrong password
+      bcrypt.compare.mockResolvedValue(false);
 
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      expect(mockJwtService.sign).not.toHaveBeenCalled(); // Token should NOT be generated
+      expect(mockJwtService.sign).not.toHaveBeenCalled();
     });
   });
 });

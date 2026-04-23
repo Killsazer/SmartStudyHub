@@ -1,4 +1,3 @@
-// File: src/auth/infrastructure/prisma-user.repository.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { IUserRepository } from '../domain/user.repository.interface';
@@ -39,10 +38,6 @@ export class PrismaUserRepository implements IUserRepository {
     });
   }
 
-  /**
-   * Maps a raw Prisma record to a UserEntity domain object.
-   * Centralised to eliminate mapping duplication across find methods (DRY).
-   */
   private toDomainEntity(data: {
     id: string;
     email: string;

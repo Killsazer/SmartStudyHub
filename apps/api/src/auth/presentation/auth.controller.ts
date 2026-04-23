@@ -1,4 +1,3 @@
-// File: src/auth/presentation/auth.controller.ts
 import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';

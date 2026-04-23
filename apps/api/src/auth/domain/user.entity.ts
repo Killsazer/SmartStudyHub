@@ -1,4 +1,3 @@
-// File: src/auth/domain/user.entity.ts
 export class UserEntity {
   constructor(
     public readonly id: string,

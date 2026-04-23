@@ -1,4 +1,3 @@
-// File: src/auth/application/auth.service.ts
 import { Injectable, Inject, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -6,6 +5,7 @@ import type { IUserRepository } from '../domain/user.repository.interface';
 import { UserEntity } from '../domain/user.entity';
 import { CreateUserDto } from '../presentation/dto/create-user.dto';
 import { LoginUserDto } from '../presentation/dto/login-user.dto';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +21,7 @@ export class AuthService {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(dto.password, salt);
 
-    const userId = `user-${Date.now()}`;
+    const userId = randomUUID();
     const user = new UserEntity(userId, dto.email, hash, dto.firstName, dto.lastName, new Date(), new Date());
     
     await this.userRepo.save(user);

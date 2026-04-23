@@ -58,10 +58,7 @@ describe('Smart Study Hub (e2e)', () => {
     await app.close();
   });
 
-  // ═══════════════════════════════════════════════════════════════
-  // AUTH FLOW
-  // ═══════════════════════════════════════════════════════════════
-
+  // Auth flow
   describe('Auth Flow', () => {
     it('✅ /auth/register (POST) — creates user and returns token', async () => {
       prismaMock.user.findUnique.mockResolvedValueOnce(null);
@@ -104,7 +101,7 @@ describe('Smart Study Hub (e2e)', () => {
       prismaMock.user.findUnique.mockResolvedValueOnce({
         id: 'u1', email: 'e2e@kpi.ua', password: 'hash', firstName: 'P', lastName: 'S'
       });
-      bcrypt.compare.mockResolvedValueOnce(false); // Wrong password for this test only
+      bcrypt.compare.mockResolvedValueOnce(false);
 
       await request(app.getHttpServer())
         .post('/auth/login')
@@ -113,9 +110,7 @@ describe('Smart Study Hub (e2e)', () => {
     });
   });
 
-  // ═══════════════════════════════════════════════════════════════
-  // PROTECTED ROUTES — SUBJECTS
-  // ═══════════════════════════════════════════════════════════════
+  // Protected routes — subjects
 
   describe('Subjects Flow', () => {
     it('❌ /subjects (GET) without token returns 401 Unauthorized', () => {
@@ -139,9 +134,7 @@ describe('Smart Study Hub (e2e)', () => {
     });
   });
 
-  // ═══════════════════════════════════════════════════════════════
-  // TASKS FLOW — CRUD + Command/Observer + Strategy
-  // ═══════════════════════════════════════════════════════════════
+  // Tasks flow
 
   describe('Tasks Flow', () => {
     it('✅ /tasks (POST) creates Task for Subject', async () => {
@@ -193,9 +186,7 @@ describe('Smart Study Hub (e2e)', () => {
     });
   });
 
-  // ═══════════════════════════════════════════════════════════════
-  // NOTES FLOW — CRUD + Composite Tree
-  // ═══════════════════════════════════════════════════════════════
+  // Notes flow
 
   describe('Notes Flow', () => {
     it('✅ /notes (POST) creates a note', async () => {
@@ -225,9 +216,8 @@ describe('Smart Study Hub (e2e)', () => {
         .expect(200);
         
       expect(res.body.status).toBe('success');
-      expect(res.body.data.length).toBe(2); // folder-1 as section + block-2 as standalone
+      expect(res.body.data.length).toBe(2);
 
-      // Verify Composite structure
       const folder = res.body.data.find((n: any) => n.id === 'folder-1');
       expect(folder.type).toBe('section');
       expect(folder.children.length).toBe(1);

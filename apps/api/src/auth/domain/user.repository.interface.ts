@@ -1,4 +1,3 @@
-// File: src/auth/domain/user.repository.interface.ts
 import { UserEntity } from './user.entity';
 
 export interface IUserRepository {
