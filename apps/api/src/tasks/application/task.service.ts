@@ -1,17 +1,19 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import type { ITaskRepository } from '../domain/task.repository.interface';
 import { CommandHistoryManager } from '../domain/patterns/command/command-history.manager';
-import { TaskEntity, TaskStatus, TaskPriority } from '../domain/task.entity';
+import { TaskEntity, TaskStatus, TaskPriority, ITask } from '../domain/task.entity';
 import { CreateTaskDto } from '../presentation/dto/create-task.dto';
 import { UpdateTaskDto } from '../presentation/dto/update-task.dto';
 import { ChangeTaskStatusCommand } from '../domain/patterns/command/change-task-status.command';
 import { TaskSortContext } from '../domain/patterns/strategy/task-sort.context';
 import { ITaskSortStrategy, SortByDeadlineStrategy, SortByPriorityStrategy, SortByTitleStrategy } from '../domain/patterns/strategy/task-sort.strategies';
 import { randomUUID } from 'crypto';
+import { OverdueTaskDecorator } from '../domain/patterns/decorator/overdue-task.decorator';
 
 @Injectable()
 export class TaskService {
-  //cтворюємо мапу доступних стратегій
+  private readonly logger = new Logger(TaskService.name);
+
   private readonly strategyMap: ReadonlyMap<string, ITaskSortStrategy> = new Map([
     ['deadline', new SortByDeadlineStrategy()],
     ['priority', new SortByPriorityStrategy()],
@@ -22,7 +24,8 @@ export class TaskService {
     @Inject('ITaskRepository')
     private readonly taskRepo: ITaskRepository,
 
-    private readonly historyManager: CommandHistoryManager
+    @Inject('CommandHistoryManager')
+    private readonly historyManager: CommandHistoryManager,
   ) {}
 
   async createTask(userId: string, dto: CreateTaskDto): Promise<TaskEntity> {
@@ -34,10 +37,12 @@ export class TaskService {
       userId,
       description: dto.description,
       deadline: dto.deadline ? new Date(dto.deadline) : undefined,
-      subjectId: dto.subjectId
+      subjectId: dto.subjectId,
+      recurrenceDays: dto.recurrenceDays,
     });
 
     await this.taskRepo.save(task);
+    this.logger.log(`Created task '${dto.title}' for user: ${userId}`);
     return task;
   }
 
@@ -60,6 +65,7 @@ export class TaskService {
     if (dto.description !== undefined) task.description = dto.description;
     if (dto.priority !== undefined) task.priority = dto.priority;
     if (dto.deadline !== undefined) task.deadline = dto.deadline ? new Date(dto.deadline) : undefined;
+    if (dto.recurrenceDays !== undefined) task.recurrenceDays = dto.recurrenceDays;
 
     await this.taskRepo.save(task);
     return task;
@@ -67,24 +73,27 @@ export class TaskService {
 
   async deleteTask(userId: string, taskId: string): Promise<void> {
     await this.checkAccess(taskId, userId);
-
     await this.taskRepo.delete(taskId);
   }
 
-  async getUserTasks(userId: string, sortType?: string, subjectId?: string): Promise<TaskEntity[]> {
+  async getUserTasks(userId: string, sortType?: string, subjectId?: string): Promise<ITask[]> {
     let tasks = await this.taskRepo.findByUserId(userId);
 
     if (subjectId) {
       tasks = tasks.filter(t => t.subjectId === subjectId);
     }
 
-    if (!sortType || tasks.length === 0) return tasks;
+    let resultTasks = tasks;
 
-    const strategy = this.strategyMap.get(sortType.toLowerCase()); //шукаємо отриману стратегію в map
-    if (!strategy) return tasks;
+    if (sortType && tasks.length > 0) {
+      const strategy = this.strategyMap.get(sortType.toLowerCase());
+      if (strategy) {
+        const context = new TaskSortContext(strategy);
+        resultTasks = context.executeStrategy(tasks);
+      }
+    }
 
-    const context = new TaskSortContext(strategy); //створюємо контекст і передаємо йому стратегію
-    return context.executeStrategy(tasks); //виконуємо стратегію
+    return resultTasks.map(task => new OverdueTaskDecorator(task));
   }
 
   private async checkAccess(taskId: string, userId: string): Promise<TaskEntity> {

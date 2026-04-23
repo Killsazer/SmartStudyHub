@@ -4,7 +4,6 @@ export interface ITaskSortStrategy {
   sort(tasks: TaskEntity[]): TaskEntity[];
 }
 
-//Стратегія: Дедлайн
 export class SortByDeadlineStrategy implements ITaskSortStrategy {
   sort(tasks: TaskEntity[]): TaskEntity[] {
     return [...tasks].sort((a, b) => {
@@ -16,7 +15,6 @@ export class SortByDeadlineStrategy implements ITaskSortStrategy {
   }
 }
 
-//Стратегія: Пріоритет
 export class SortByPriorityStrategy implements ITaskSortStrategy {
   private readonly priorityWeight: Record<TaskPriority, number> = {
     [TaskPriority.HIGH]: 3,
@@ -33,7 +31,6 @@ export class SortByPriorityStrategy implements ITaskSortStrategy {
   }
 }
 
-//Стратегія: Назва
 export class SortByTitleStrategy implements ITaskSortStrategy {
   sort(tasks: TaskEntity[]): TaskEntity[] {
     return [...tasks].sort((a, b) => a.title.localeCompare(b.title));

@@ -18,7 +18,7 @@ export class PrismaTaskRepository implements ITaskRepository {
         deadline: task.deadline,
         subjectId: task.subjectId,
         userId: task.userId,
-        recurrenceDays: task.recurrenceDays // 💡 ДОДАНО
+        recurrenceDays: task.recurrenceDays,
       },
       create: {
         id: task.id,
@@ -29,7 +29,7 @@ export class PrismaTaskRepository implements ITaskRepository {
         deadline: task.deadline ?? null,
         subjectId: task.subjectId ?? null,
         userId: task.userId,
-        recurrenceDays: task.recurrenceDays ?? null // 💡 ДОДАНО
+        recurrenceDays: task.recurrenceDays ?? null,
       }
     });
 
@@ -51,7 +51,6 @@ export class PrismaTaskRepository implements ITaskRepository {
     await this.prisma.task.delete({ where: { id } });
   }
 
-  // 💡 DRY: Гідратація через об'єкт Props
   private toDomainEntity(d: {
     id: string;
     title: string;

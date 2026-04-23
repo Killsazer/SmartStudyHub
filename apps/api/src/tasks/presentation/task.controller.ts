@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards, Req, HttpStatus, HttpCode } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards, HttpStatus, HttpCode, Logger } from '@nestjs/common';
 import { TaskService } from '../application/task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
@@ -9,53 +9,51 @@ import { CurrentUser } from '../../shared/security/current-user.decorator';
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
 export class TaskController {
+  private readonly logger = new Logger(TaskController.name);
+
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
   async createTask(
     @CurrentUser() userId: string,
-    @Body() dto: CreateTaskDto
+    @Body() dto: CreateTaskDto,
   ) {
+    this.logger.log(`Create task request from user: ${userId}`);
     const task = await this.taskService.createTask(userId, dto);
-    // Повертаємо повний об'єкт, фронтенд скаже "Дякую!"
     return { status: 'success', data: task };
   }
 
-    @Post('undo')
-    @HttpCode(HttpStatus.OK)
-    async undoLastAction(
-      @CurrentUser() userId: string
-    ) { 
-      await this.taskService.undoLastStatusChange(userId);
-      return { status: 'success', message: 'Last action undone successfully' };
-    }
-
+  @Post('undo')
+  @HttpCode(HttpStatus.OK)
+  async undoLastAction(@CurrentUser() userId: string) {
+    await this.taskService.undoLastStatusChange(userId);
+    return { status: 'success', message: 'Last action undone successfully' };
+  }
 
   @Patch(':id/status')
   async updateTaskStatus(
     @CurrentUser() userId: string,
     @Param('id') taskId: string,
-    @Body() dto: UpdateTaskStatusDto
+    @Body() dto: UpdateTaskStatusDto,
   ) {
     await this.taskService.updateTaskStatus(userId, taskId, dto.status);
-    return { status: 'success', message: `Task status securely updated to ${dto.status}` };
+    return { status: 'success', message: `Task status updated to ${dto.status}` };
   }
 
   @Patch(':id')
   async updateTask(
     @CurrentUser() userId: string,
     @Param('id') taskId: string,
-    @Body() dto: UpdateTaskDto
+    @Body() dto: UpdateTaskDto,
   ) {
     const task = await this.taskService.updateTask(userId, taskId, dto);
-    // 💡 Повертаємо повний об'єкт
     return { status: 'success', data: task };
   }
 
   @Delete(':id')
   async deleteTask(
     @CurrentUser() userId: string,
-    @Param('id') taskId: string
+    @Param('id') taskId: string,
   ) {
     await this.taskService.deleteTask(userId, taskId);
     return { status: 'success', message: 'Task deleted successfully' };
@@ -65,7 +63,7 @@ export class TaskController {
   async getUserTasks(
     @CurrentUser() userId: string,
     @Query('sort') sortType?: string,
-    @Query('subjectId') subjectId?: string
+    @Query('subjectId') subjectId?: string,
   ) {
     const tasks = await this.taskService.getUserTasks(userId, sortType, subjectId);
     return { status: 'success', data: tasks };

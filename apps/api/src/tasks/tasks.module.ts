@@ -8,11 +8,15 @@ import { CommandHistoryManager } from './domain/patterns/command/command-history
   controllers: [TaskController],
   providers: [
     TaskService,
-    CommandHistoryManager,
     {
       provide: 'ITaskRepository',
       useClass: PrismaTaskRepository,
     },
+    {
+      provide: 'CommandHistoryManager',
+      useClass: CommandHistoryManager,
+    },
   ],
 })
 export class TasksModule {}
+
