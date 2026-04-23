@@ -18,8 +18,8 @@ export class SubjectController {
     @Body() dto: CreateSubjectDto,
   ) {
     this.logger.log(`Create subject request from user: ${userId}`);
-    const subjectId = await this.subjectService.createSubject(userId, dto);
-    return { status: 'success', data: { id: subjectId } };
+    const subject = await this.subjectService.createSubject(userId, dto);
+    return { status: 'success', data: subject };
   }
 
   @Get()

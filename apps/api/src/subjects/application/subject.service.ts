@@ -14,7 +14,7 @@ export class SubjectService {
     private readonly subjectRepo: ISubjectRepository,
   ) {}
 
-  public async createSubject(userId: string, dto: CreateSubjectDto): Promise<string> {
+  public async createSubject(userId: string, dto: CreateSubjectDto): Promise<SubjectEntity> {
     const subjectId = randomUUID();
 
     const subject = new SubjectEntity(subjectId, dto.title, userId);
@@ -23,7 +23,7 @@ export class SubjectService {
     }
     await this.subjectRepo.save(subject);
     
-    return subject.id;
+    return subject;
   }
 
 

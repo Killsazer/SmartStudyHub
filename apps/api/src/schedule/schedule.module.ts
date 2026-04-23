@@ -7,10 +7,11 @@ import { PrismaScheduleSlotRepository } from './infrastructure/persistence/prism
 import { PrismaSharedScheduleRepository } from './infrastructure/persistence/prisma/prisma-shared-schedule.repository';
 import { SharedProvidersModule } from '../shared/shared-providers.module';
 import { TeachersModule } from '../teachers/teachers.module';
+import { SubjectsModule } from '../subjects/subjects.module';
 import { ScheduleSlotService } from './application/schedule-slot.service';
 
 @Module({
-  imports: [SharedProvidersModule, TeachersModule],
+  imports: [SharedProvidersModule, TeachersModule, SubjectsModule],
   controllers: [ScheduleSlotController, ShareController],
   providers: [
     ScheduleSlotService,

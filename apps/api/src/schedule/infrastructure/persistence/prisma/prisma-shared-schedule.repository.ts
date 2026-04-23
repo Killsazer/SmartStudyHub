@@ -16,7 +16,6 @@ export class PrismaSharedScheduleRepository implements ISharedScheduleRepository
         userId: data.userId,
       },
     });
-    console.log(`[PrismaSharedScheduleRepo] Shared schedule saved with hash: ${data.hashToken}`);
   }
 
   async findByHashToken(hashToken: string): Promise<SharedScheduleData | null> {

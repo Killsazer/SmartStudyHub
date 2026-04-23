@@ -1,6 +1,6 @@
-import { 
-  Controller, Post, Get, Patch, Delete, Body, Param, Query, 
-  UseGuards, ParseIntPipe,
+import {
+  Controller, Post, Get, Patch, Delete, Body, Param, Query,
+  UseGuards, ParseIntPipe, Logger,
 } from '@nestjs/common';
 import { ScheduleSlotService } from '../../application/schedule-slot.service';
 import { CreateScheduleSlotDto } from '../dto/schedule-slot/create-schedule-slot.dto';
@@ -11,6 +11,8 @@ import { CurrentUser } from '../../../shared/security/current-user.decorator';
 @Controller('schedule-slots')
 @UseGuards(JwtAuthGuard)
 export class ScheduleSlotController {
+  private readonly logger = new Logger(ScheduleSlotController.name);
+
   constructor(private readonly slotService: ScheduleSlotService) {}
 
   @Post()
@@ -18,6 +20,7 @@ export class ScheduleSlotController {
     @CurrentUser() userId: string,
     @Body() dto: CreateScheduleSlotDto,
   ) {
+    this.logger.log(`Create schedule slot request from user: ${userId}`);
     const slot = await this.slotService.createSlot(userId, dto);
     return { status: 'success', data: slot };
   }

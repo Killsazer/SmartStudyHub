@@ -46,11 +46,9 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
       },
     });
 
-    //Трансформуємо сирі дані з БД у нашу Доменну Сутність
     return this.toDomainEntity(savedData);
   }
 
-  // Використовуємо наш чистий тип UpdateScheduleSlotData та повертаємо сутність
   async update(id: string, data: UpdateScheduleSlotData): Promise<ScheduleSlotEntity> {
     const updateData: SlotUpdateFields = {};
     if (data.weekNumber !== undefined) updateData.weekNumber = data.weekNumber;
@@ -64,13 +62,11 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
       updateData.teacher = data.teacherId ? { connect: { id: data.teacherId } } : { disconnect: true };
     }
     
-    // Зберігаємо оновлений запис, який повертає Prisma
     const updatedData = await this.prisma.scheduleSlot.update({ 
       where: { id }, 
       data: updateData 
     });
 
-    // Віддаємо домену
     return this.toDomainEntity(updatedData);
   }
 
@@ -113,7 +109,6 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
     location: string | null;
   }): ScheduleSlotEntity {
     
-    // Збираємо "коробку" з даними для Фабрики
     const props: ScheduleSlotProps = {
       id: d.id,
       userId: d.userId,
@@ -126,7 +121,6 @@ export class PrismaScheduleSlotRepository implements IScheduleSlotRepository {
       location: d.location ?? undefined,
     };
 
-    // Делегуємо створення конкретного підкласу (Лекція, Лаба) Фабриці
     return ScheduleSlotFactory.createSlot(d.classType as ClassType, props);
   }
 }

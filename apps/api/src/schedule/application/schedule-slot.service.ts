@@ -1,5 +1,6 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../domain/repositories/schedule-slot.repository.interface';
+import type { ITeacherRepository } from '../../teachers/domain/teacher.repository.interface';
 import { ScheduleSlotEntity, ScheduleSlotProps } from '../domain/schedule-slot.entity';
 import { ScheduleSlotFactory } from '../domain/patterns/schedule-slot.factory';
 import { CreateScheduleSlotDto } from '../presentation/dto/schedule-slot/create-schedule-slot.dto';
@@ -8,15 +9,26 @@ import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ScheduleSlotService {
+  private readonly logger = new Logger(ScheduleSlotService.name);
+
   constructor(
     @Inject('IScheduleSlotRepository')
     private readonly slotRepo: IScheduleSlotRepository,
+
+    @Inject('ITeacherRepository')
+    private readonly teacherRepo: ITeacherRepository,
   ) {}
 
   async createSlot(userId: string, dto: CreateScheduleSlotDto): Promise<ScheduleSlotEntity> {
+    if (dto.teacherId) {
+      const teacher = await this.teacherRepo.findById(dto.teacherId);
+      if (!teacher) {
+        throw new NotFoundException(`Teacher with ID ${dto.teacherId} not found`);
+      }
+    }
+
     const slotId = randomUUID();
-    
-    // 1. Пакуємо сирі дані з DTO у доменний контракт Props
+
     const props: ScheduleSlotProps = {
       id: slotId,
       userId,
@@ -31,7 +43,7 @@ export class ScheduleSlotService {
 
     const entity = ScheduleSlotFactory.createSlot(dto.classType, props);
 
-    console.log(`[ScheduleSlotService] Factory created: ${entity.getSlotDetails()}`);
+    this.logger.log(`Factory created slot: ${entity.getSlotDetails()}`);
 
     await this.slotRepo.save(entity);
     return entity;
@@ -40,12 +52,18 @@ export class ScheduleSlotService {
   async updateSlot(userId: string, slotId: string, dto: UpdateScheduleSlotDto): Promise<ScheduleSlotEntity> {
     await this.checkAccess(slotId, userId);
     
+    if (dto.teacherId) {
+      const teacher = await this.teacherRepo.findById(dto.teacherId);
+      if (!teacher) {
+        throw new NotFoundException(`Teacher with ID ${dto.teacherId} not found`);
+      }
+    }
+
     return await this.slotRepo.update(slotId, dto);
   }
 
   async deleteSlot(userId: string, slotId: string): Promise<void> {
     await this.checkAccess(slotId, userId);
-    
     await this.slotRepo.delete(slotId);
   }
 

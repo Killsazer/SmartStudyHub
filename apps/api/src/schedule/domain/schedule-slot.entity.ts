@@ -4,7 +4,6 @@ export enum ClassType {
   PRACTICE = 'PRACTICE',
 }
 
-// Props для безпечної гідратації сутності
 export interface ScheduleSlotProps {
   id: string;
   userId: string;
@@ -17,19 +16,17 @@ export interface ScheduleSlotProps {
   location?: string;
 }
 
-// Базова доменна сутність. Вона ж виступає "Абстрактним продуктом" для патерна Factory Method.
 export abstract class ScheduleSlotEntity {
   public readonly id: string;
   public readonly userId: string;
   public subjectId: string;
   public teacherId: string | null;
-  public weekNumber: number;    
-  public dayOfWeek: number;     
-  public startTime: string;     
-  public endTime: string;       
+  public weekNumber: number;
+  public dayOfWeek: number;
+  public startTime: string;
+  public endTime: string;
   public location?: string;
 
-  // Кожен підклас зобов'язаний визначити свій тип
   abstract readonly classType: ClassType;
 
   constructor(props: ScheduleSlotProps) {
@@ -44,6 +41,5 @@ export abstract class ScheduleSlotEntity {
     this.location = props.location;
   }
 
-  // Поліморфний метод, який реалізується по-різному в залежності від типу заняття
   abstract getSlotDetails(): string;
 }

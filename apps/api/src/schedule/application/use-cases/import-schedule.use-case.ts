@@ -1,21 +1,20 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../../domain/repositories/schedule-slot.repository.interface';
-import type { ITeacherRepository } from '../../../teachers/domain/teacher.repository.interface';
-import type { ISubjectRepository } from '../../../subjects/domain/subject.repository.interface';
 import type { ISharedScheduleRepository } from '../../domain/repositories/shared-schedule.repository.interface';
 import { ClassType } from '../../domain/schedule-slot.entity';
 import { ScheduleSlotFactory } from '../../domain/patterns/schedule-slot.factory';
-import { TeacherEntity, TeacherProps } from '../../../teachers/domain/teacher.entity';
-import { SubjectEntity } from '../../../subjects/domain/subject.entity';
 import { randomUUID } from 'crypto';
+import { TeacherService } from '../../../teachers/application/teacher.service';
+import { SubjectService } from '../../../subjects/application/subject.service';
 
 @Injectable()
 export class ImportScheduleUseCase {
   constructor(
     @Inject('IScheduleSlotRepository') private readonly slotRepo: IScheduleSlotRepository,
-    @Inject('ITeacherRepository') private readonly teacherRepo: ITeacherRepository,
-    @Inject('ISubjectRepository') private readonly subjectRepo: ISubjectRepository,
     @Inject('ISharedScheduleRepository') private readonly sharedRepo: ISharedScheduleRepository,
+    
+    private readonly teacherService: TeacherService,
+    private readonly subjectService: SubjectService,
   ) {}
 
   async execute(userId: string, hashToken: string): Promise<void> {
@@ -27,23 +26,20 @@ export class ImportScheduleUseCase {
     const teacherIdMap = new Map<string, string>();
 
     for (const subj of snapshot.subjects) {
-      const newId = randomUUID();
-      subjectIdMap.set(subj.id, newId);
-      
-      const entity = new SubjectEntity(newId, subj.title, userId);
-      entity.color = subj.color || '#000000';
-      await this.subjectRepo.save(entity);
+      const createdSubject = await this.subjectService.createSubject(userId, {
+        title: subj.title,
+        color: subj.color || '#000000',
+      });
+      subjectIdMap.set(subj.id, createdSubject.id);
     }
 
     for (const teacher of snapshot.teachers) {
-      const newId = randomUUID();
-      teacherIdMap.set(teacher.id, newId);
-      
-      const props: TeacherProps = {
-        id: newId, name: teacher.name, userId: userId,
-        photoUrl: teacher.photoUrl, contacts: teacher.contacts,
-      };
-      await this.teacherRepo.save(new TeacherEntity(props));
+      const createdTeacher = await this.teacherService.createTeacher(userId, {
+        name: teacher.name,
+        photoUrl: teacher.photoUrl,
+        contacts: teacher.contacts,
+      });
+      teacherIdMap.set(teacher.id, createdTeacher.id);
     }
 
     for (const slot of snapshot.slots) {
@@ -63,6 +59,7 @@ export class ImportScheduleUseCase {
         endTime: slot.endTime,
         location: slot.location,
       });
+      
       await this.slotRepo.save(entity);
     }
   }
