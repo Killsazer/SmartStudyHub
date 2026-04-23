@@ -1,8 +1,8 @@
 import { OnboardingFacade } from './onboarding.facade';
 import { SubjectEntity } from '../../../subjects/domain/subject.entity';
-import { TeacherEntity } from '../../../schedule/domain/entities/teacher.entity';
+import { TeacherEntity } from '../../../teachers/domain/teacher.entity';
 import { TaskStatus, TaskPriority } from '../../../tasks/domain/task.entity';
-import { ClassType } from '../../../schedule/domain/entities/schedule-slot.entity';
+import { ClassType } from '../../../schedule/domain/schedule-slot.entity';
 
 describe('OnboardingFacade', () => {
   let facade: OnboardingFacade;

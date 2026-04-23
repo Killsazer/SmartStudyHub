@@ -1,6 +1,6 @@
 import { Injectable, Inject, Logger, BadRequestException } from '@nestjs/common';
 import type { ISubjectRepository } from '../../subjects/domain/subject.repository.interface';
-import type { ITeacherRepository } from '../../schedule/domain/repositories/teacher.repository.interface';
+import type { ITeacherRepository } from '../../teachers/domain/teacher.repository.interface';
 import { OnboardingFacade } from '../domain/patterns/onboarding.facade';
 
 @Injectable()

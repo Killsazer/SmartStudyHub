@@ -1,9 +1,9 @@
 import { SubjectEntity } from '../../../subjects/domain/subject.entity';
 import { SubjectBuilder } from '../../../subjects/domain/patterns/subject.builder';
 import { ScheduleSlotFactory } from '../../../schedule/domain/patterns/schedule-slot.factory';
-import { ClassType } from '../../../schedule/domain/entities/schedule-slot.entity';
+import { ClassType } from '../../../schedule/domain/schedule-slot.entity';
 import { TaskEntity, TaskStatus, TaskPriority } from '../../../tasks/domain/task.entity';
-import { TeacherEntity } from '../../../schedule/domain/entities/teacher.entity';
+import { TeacherEntity } from '../../../teachers/domain/teacher.entity';
 import { randomUUID } from 'crypto';
 
 export class OnboardingFacade {

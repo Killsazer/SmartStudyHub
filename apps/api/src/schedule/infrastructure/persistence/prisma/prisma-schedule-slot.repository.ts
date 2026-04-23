@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IScheduleSlotRepository, UpdateScheduleSlotData } from '../../../domain/repositories/schedule-slot.repository.interface';
-import { ScheduleSlotEntity, ClassType, ScheduleSlotProps } from '../../../domain/entities/schedule-slot.entity';
+import { ScheduleSlotEntity, ClassType, ScheduleSlotProps } from '../../../domain/schedule-slot.entity';
 import { ScheduleSlotFactory } from '../../../domain/patterns/schedule-slot.factory';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 

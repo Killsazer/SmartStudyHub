@@ -1,11 +1,11 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../../domain/repositories/schedule-slot.repository.interface';
-import type { ITeacherRepository } from '../../domain/repositories/teacher.repository.interface';
+import type { ITeacherRepository } from '../../../teachers/domain/teacher.repository.interface';
 import type { ISubjectRepository } from '../../../subjects/domain/subject.repository.interface';
 import type { ISharedScheduleRepository } from '../../domain/repositories/shared-schedule.repository.interface';
-import { ClassType } from '../../domain/entities/schedule-slot.entity';
+import { ClassType } from '../../domain/schedule-slot.entity';
 import { ScheduleSlotFactory } from '../../domain/patterns/schedule-slot.factory';
-import { TeacherEntity, TeacherProps } from '../../domain/entities/teacher.entity';
+import { TeacherEntity, TeacherProps } from '../../../teachers/domain/teacher.entity';
 import { SubjectEntity } from '../../../subjects/domain/subject.entity';
 import { randomUUID } from 'crypto';
 

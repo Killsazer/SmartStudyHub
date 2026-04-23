@@ -1,4 +1,4 @@
-import { ClassType, ScheduleSlotEntity } from '../entities/schedule-slot.entity';
+import { ClassType, ScheduleSlotEntity } from '../schedule-slot.entity';
 
 export type UpdateScheduleSlotData = Partial<{
   subjectId: string;

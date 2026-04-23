@@ -3,7 +3,7 @@ import { BadRequestException } from '@nestjs/common';
 import { OnboardingService } from './onboarding.service';
 import { OnboardingFacade } from '../domain/patterns/onboarding.facade';
 import { SubjectEntity } from '../../subjects/domain/subject.entity';
-import { TeacherEntity } from '../../schedule/domain/entities/teacher.entity';
+import { TeacherEntity } from '../../teachers/domain/teacher.entity';
 import { TaskEntity, TaskStatus, TaskPriority } from '../../tasks/domain/task.entity';
 
 describe('OnboardingService', () => {

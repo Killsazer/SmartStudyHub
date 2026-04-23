@@ -2,7 +2,7 @@ import { SubjectBuilder } from './subject.builder';
 import { SubjectEntity } from '../subject.entity';
 import { TaskEntity, TaskStatus, TaskPriority } from '../../../tasks/domain/task.entity';
 import { ScheduleSlotFactory } from '../../../schedule/domain/patterns/schedule-slot.factory';
-import { ClassType } from '../../../schedule/domain/entities/schedule-slot.entity';
+import { ClassType } from '../../../schedule/domain/schedule-slot.entity';
 
 describe('SubjectBuilder', () => {
   const defaultProps = { id: 'subj-1', title: 'Clean Architecture', userId: 'u1' };

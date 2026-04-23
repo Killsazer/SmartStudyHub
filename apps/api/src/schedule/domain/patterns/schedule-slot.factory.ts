@@ -1,4 +1,4 @@
-import { ClassType, ScheduleSlotEntity, ScheduleSlotProps } from '../entities/schedule-slot.entity';
+import { ClassType, ScheduleSlotEntity, ScheduleSlotProps } from '../schedule-slot.entity';
 
 export class LectureSlot extends ScheduleSlotEntity {
   readonly classType = ClassType.LECTURE;

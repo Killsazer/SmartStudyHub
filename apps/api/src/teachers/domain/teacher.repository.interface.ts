@@ -1,4 +1,4 @@
-import { TeacherEntity } from '../entities/teacher.entity';
+import { TeacherEntity } from './teacher.entity';
 
 export type UpdateTeacherData = Partial<{
   name: string;

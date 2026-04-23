@@ -4,11 +4,13 @@ import { ScheduleModule } from '../schedule/schedule.module';
 import { OnboardingController } from './presentation/onboarding.controller';
 import { OnboardingService } from './application/onboarding.service';
 import { OnboardingFacade } from './domain/patterns/onboarding.facade';
+import { TeachersModule } from '../teachers/teachers.module';
 
 @Module({
   imports: [
     SubjectsModule,
     ScheduleModule,
+    TeachersModule,
   ],
   controllers: [OnboardingController],
   providers: [

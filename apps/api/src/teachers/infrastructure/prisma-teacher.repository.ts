@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ITeacherRepository, UpdateTeacherData } from '../../../domain/repositories/teacher.repository.interface';
-import { TeacherEntity, TeacherProps } from '../../../domain/entities/teacher.entity';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
+import { ITeacherRepository, UpdateTeacherData } from '../domain/teacher.repository.interface';
+import { TeacherEntity, TeacherProps } from '../domain/teacher.entity';
+import { PrismaService } from '../../shared/prisma/prisma.service';
 
 @Injectable()
 export class PrismaTeacherRepository implements ITeacherRepository {

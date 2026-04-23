@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../../domain/repositories/schedule-slot.repository.interface';
-import type { ITeacherRepository } from '../../domain/repositories/teacher.repository.interface';
+import type { ITeacherRepository } from '../../../teachers/domain/teacher.repository.interface';
 import type { ISubjectRepository } from '../../../subjects/domain/subject.repository.interface';
 import type { ISharedScheduleRepository, ScheduleSnapshotData } from '../../domain/repositories/shared-schedule.repository.interface';
 import { randomBytes, randomUUID } from 'crypto';

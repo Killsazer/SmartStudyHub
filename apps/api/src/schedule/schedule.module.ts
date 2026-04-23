@@ -1,28 +1,21 @@
 import { Module } from '@nestjs/common';
-import { TeacherController } from './presentation/controllers/teacher.controller';
 import { ScheduleSlotController } from './presentation/controllers/schedule-slot.controller';
 import { ShareController } from './presentation/controllers/share.controller';
-import { TeacherService } from './application/services/teacher.service';
-import { ScheduleSlotService } from './application/services/schedule-slot.service';
 import { ExportScheduleUseCase } from './application/use-cases/export-schedule.use-case';
 import { ImportScheduleUseCase } from './application/use-cases/import-schedule.use-case';
-import { PrismaTeacherRepository } from './infrastructure/persistence/prisma/prisma-teacher.repository';
 import { PrismaScheduleSlotRepository } from './infrastructure/persistence/prisma/prisma-schedule-slot.repository';
 import { PrismaSharedScheduleRepository } from './infrastructure/persistence/prisma/prisma-shared-schedule.repository';
 import { SharedProvidersModule } from '../shared/shared-providers.module';
+import { TeachersModule } from '../teachers/teachers.module';
+import { ScheduleSlotService } from './application/schedule-slot.service';
 
 @Module({
-  imports: [SharedProvidersModule],
-  controllers: [TeacherController, ScheduleSlotController, ShareController],
+  imports: [SharedProvidersModule, TeachersModule],
+  controllers: [ScheduleSlotController, ShareController],
   providers: [
-    TeacherService,
     ScheduleSlotService,
     ExportScheduleUseCase,
     ImportScheduleUseCase,
-    {
-      provide: 'ITeacherRepository',
-      useClass: PrismaTeacherRepository,
-    },
     {
       provide: 'IScheduleSlotRepository',
       useClass: PrismaScheduleSlotRepository,
@@ -33,8 +26,7 @@ import { SharedProvidersModule } from '../shared/shared-providers.module';
     },
   ],
   exports: [
-    'ITeacherRepository', 
-    'IScheduleSlotRepository'
+    'IScheduleSlotRepository' 
   ],
 })
 export class ScheduleModule {}

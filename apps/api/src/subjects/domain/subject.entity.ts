@@ -1,4 +1,4 @@
-import { ScheduleSlotEntity } from '../../schedule/domain/entities/schedule-slot.entity';
+import { ScheduleSlotEntity } from '../../schedule/domain/schedule-slot.entity';
 import { TaskEntity } from '../../tasks/domain/task.entity';
 import { NoteComponent } from '../../notes/domain/patterns/composite/note-component';
 
