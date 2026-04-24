@@ -23,7 +23,6 @@ export class PrismaTeacherRepository implements ITeacherRepository {
         userId: teacher.userId,
       },
     });
-    console.log(`[PrismaTeacherRepository] Teacher '${teacher.name}' saved.`);
     return this.toDomainEntity(savedData);
   }
 
@@ -50,7 +49,6 @@ export class PrismaTeacherRepository implements ITeacherRepository {
     return data.map(d => this.toDomainEntity(d));
   }
 
-  // 💡 3. DRY: Централізований мапінг (Гідратація) через TeacherProps
   private toDomainEntity(d: {
     id: string;
     userId: string;
@@ -62,7 +60,7 @@ export class PrismaTeacherRepository implements ITeacherRepository {
       id: d.id,
       userId: d.userId,
       name: d.name,
-      photoUrl: d.photoUrl ?? undefined, // null з БД перетворюємо на undefined для Домену
+      photoUrl: d.photoUrl ?? undefined,
       contacts: d.contacts ?? undefined,
     };
     return new TeacherEntity(props);

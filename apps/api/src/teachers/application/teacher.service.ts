@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import type { ITeacherRepository } from '../domain/teacher.repository.interface';
 import { TeacherEntity, TeacherProps } from '../domain/teacher.entity';
 import { CreateTeacherDto } from '../presentation/dto/create-teacher.dto';
@@ -7,6 +7,8 @@ import { randomUUID } from 'crypto';
 
 @Injectable()
 export class TeacherService {
+  private readonly logger = new Logger(TeacherService.name);
+
   constructor(
     @Inject('ITeacherRepository')
     private readonly teacherRepo: ITeacherRepository,
@@ -26,20 +28,16 @@ export class TeacherService {
     const teacher = new TeacherEntity(props);
     
     await this.teacherRepo.save(teacher);
-    console.log(`[TeacherService] Created teacher '${teacher.name}' for user: ${userId}`);
+    this.logger.log(`Created teacher '${teacher.name}' for user: ${userId}`);
     
     return teacher;
   }
 
-  // 💡 2. Додали userId та повертаємо Promise<TeacherEntity>
   async updateTeacher(userId: string, teacherId: string, dto: UpdateTeacherDto): Promise<TeacherEntity> {
     await this.checkAccess(teacherId, userId);
-    
-    // Припускаємо, що репозиторій (як і для слотів) ми навчимо повертати оновлену сутність
     return await this.teacherRepo.update(teacherId, dto);
   }
 
-  // 💡 3. Додали userId для перевірки прав
   async deleteTeacher(userId: string, teacherId: string): Promise<void> {
     await this.checkAccess(teacherId, userId);
     await this.teacherRepo.delete(teacherId);

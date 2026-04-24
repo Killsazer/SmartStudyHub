@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards, Logger } from '@nestjs/common';
 import { TeacherService } from '../application/teacher.service';
 import { CreateTeacherDto } from '../presentation/dto/create-teacher.dto';
 import { UpdateTeacherDto } from '../presentation/dto/update-teacher.dto';  
@@ -8,6 +8,8 @@ import { CurrentUser } from '../../shared/security/current-user.decorator';
 @Controller('teachers')
 @UseGuards(JwtAuthGuard)
 export class TeacherController {
+  private readonly logger = new Logger(TeacherController.name);
+
   constructor(private readonly teacherService: TeacherService) {}
 
   @Post()
@@ -15,8 +17,8 @@ export class TeacherController {
     @CurrentUser() userId: string,
     @Body() dto: CreateTeacherDto,
   ) {
+    this.logger.log(`Create teacher request from user: ${userId}`);
     const teacher = await this.teacherService.createTeacher(userId, dto);
-    // 💡 Повертаємо всю сутність для зручності фронтенду
     return { status: 'success', data: teacher };
   }
 
