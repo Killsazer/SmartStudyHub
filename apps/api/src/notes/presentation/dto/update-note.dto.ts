@@ -1,4 +1,3 @@
-// File: src/notes/presentation/update-note.dto.ts
 import { IsString, IsOptional, MaxLength } from 'class-validator';
 
 export class UpdateNoteDto {

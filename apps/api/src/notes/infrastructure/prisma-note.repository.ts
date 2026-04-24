@@ -18,7 +18,7 @@ export class PrismaNoteRepository implements INoteRepository {
         content: note.content,
         parentId: note.parentId,
         userId: note.userId,
-        subjectId: note.subjectId
+        subjectId: note.subjectId,
       },
       create: {
         id: note.id,
@@ -26,8 +26,8 @@ export class PrismaNoteRepository implements INoteRepository {
         content: note.content ?? null,
         parentId: note.parentId ?? null,
         userId: note.userId,
-        subjectId: note.subjectId ?? null
-      }
+        subjectId: note.subjectId ?? null,
+      },
     });
   }
 
@@ -48,11 +48,10 @@ export class PrismaNoteRepository implements INoteRepository {
 
   async getNotesTree(userId: string): Promise<NoteComponent[]> {
     const allNotes = await this.prisma.note.findMany({ where: { userId } });
-    
+
     const map = new Map<string, NoteComponent>();
     const roots: NoteComponent[] = [];
 
-    // Перший прохід: створюємо об'єкти
     allNotes.forEach(n => {
       const component = n.content
         ? new NoteBlock(n.id, n.title, n.content, n.subjectId)
@@ -60,16 +59,15 @@ export class PrismaNoteRepository implements INoteRepository {
       map.set(n.id, component);
     });
 
-    // Другий прохід: зв'язуємо ієрархію
     allNotes.forEach(n => {
-      const component = map.get(n.id);
+      const component = map.get(n.id)!;
       if (n.parentId && map.has(n.parentId)) {
-        const parent = map.get(n.parentId);
+        const parent = map.get(n.parentId)!;
         if (parent instanceof NoteSection) {
-          parent.add(component!);
+          parent.add(component);
         }
       } else {
-        roots.push(component!);
+        roots.push(component);
       }
     });
 
@@ -90,7 +88,7 @@ export class PrismaNoteRepository implements INoteRepository {
       d.userId,
       d.content ?? undefined,
       d.parentId ?? undefined,
-      d.subjectId ?? undefined
+      d.subjectId ?? undefined,
     );
   }
 }

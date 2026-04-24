@@ -11,7 +11,7 @@ export abstract class NoteComponent {
   constructor(
     public readonly id: string,
     public title: string,
-    public subjectId: string | null = null
+    public subjectId: string | null = null,
   ) {}
 
   add(component: NoteComponent): void {
@@ -21,6 +21,8 @@ export abstract class NoteComponent {
   remove(componentId: string): void {
     throw new Error('This component does not support removing children.');
   }
+
+  abstract getItemCount(): number;
 
   abstract toJSON(): INoteNode;
 }

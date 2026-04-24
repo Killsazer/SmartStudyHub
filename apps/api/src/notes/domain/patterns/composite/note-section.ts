@@ -15,13 +15,21 @@ export class NoteSection extends NoteComponent {
     this.children = this.children.filter((child) => child.id !== componentId);
   }
 
+  getChildren(): ReadonlyArray<NoteComponent> {
+    return this.children;
+  }
+
+  override getItemCount(): number {
+    return this.children.reduce((sum, child) => sum + child.getItemCount(), 0);
+  }
+
   override toJSON(): INoteNode {
     return {
       id: this.id,
       type: 'section',
       title: this.title,
       children: this.children.map((child) => child.toJSON()),
-      subjectId: this.subjectId
+      subjectId: this.subjectId,
     };
   }
 }

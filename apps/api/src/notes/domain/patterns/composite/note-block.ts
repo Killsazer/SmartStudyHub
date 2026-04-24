@@ -4,10 +4,22 @@ export class NoteBlock extends NoteComponent {
   constructor(
     id: string,
     title: string,
-    private content: string,
-    subjectId: string | null = null
+    private _content: string,
+    subjectId: string | null = null,
   ) {
     super(id, title, subjectId);
+  }
+
+  get content(): string {
+    return this._content;
+  }
+
+  set content(value: string) {
+    this._content = value;
+  }
+
+  override getItemCount(): number {
+    return 1;
   }
 
   override toJSON(): INoteNode {
@@ -15,8 +27,8 @@ export class NoteBlock extends NoteComponent {
       id: this.id,
       type: 'block',
       title: this.title,
-      content: this.content,
-      subjectId: this.subjectId
+      content: this._content,
+      subjectId: this.subjectId,
     };
   }
 }
