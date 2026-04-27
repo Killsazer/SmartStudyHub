@@ -12,6 +12,6 @@ import { PrismaTeacherRepository } from './infrastructure/prisma-teacher.reposit
       useClass: PrismaTeacherRepository,
     },
   ],
-  exports: [TeacherService, 'ITeacherRepository'], 
+  exports: [TeacherService], 
 })
 export class TeachersModule {}

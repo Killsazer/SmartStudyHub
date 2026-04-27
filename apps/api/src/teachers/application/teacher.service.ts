@@ -33,6 +33,10 @@ export class TeacherService {
     return teacher;
   }
 
+  async findTeacherById(teacherId: string): Promise<TeacherEntity | null> {
+    return this.teacherRepo.findById(teacherId);
+  }
+
   async updateTeacher(userId: string, teacherId: string, dto: UpdateTeacherDto): Promise<TeacherEntity> {
     await this.checkAccess(teacherId, userId);
     return await this.teacherRepo.update(teacherId, dto);
