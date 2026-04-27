@@ -7,6 +7,13 @@ import { CreateUserDto } from '../presentation/dto/create-user.dto';
 import { LoginUserDto } from '../presentation/dto/login-user.dto';
 import { randomUUID } from 'crypto';
 
+export interface UserProfileResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -22,7 +29,15 @@ export class AuthService {
     const hash = await bcrypt.hash(dto.password, salt);
 
     const userId = randomUUID();
-    const user = new UserEntity(userId, dto.email, hash, dto.firstName, dto.lastName, new Date(), new Date());
+    const user = new UserEntity({
+      id: userId,
+      email: dto.email,
+      passwordHash: hash,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
     
     await this.userRepo.save(user);
 
@@ -39,7 +54,7 @@ export class AuthService {
     return this.generateToken(user);
   }
 
-  async getProfile(userId: string) {
+  async getProfile(userId: string): Promise<UserProfileResponse> {
     const user = await this.userRepo.findById(userId);
     if (!user) throw new UnauthorizedException('User not found');
     return { 
@@ -50,7 +65,7 @@ export class AuthService {
     };
   }
 
-  private generateToken(user: UserEntity) {
+  private generateToken(user: UserEntity): { accessToken: string } {
     const payload = { sub: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName };
     return { accessToken: this.jwtService.sign(payload) };
   }

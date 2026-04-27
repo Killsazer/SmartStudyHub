@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { IUserRepository } from '../domain/user.repository.interface';
-import { UserEntity } from '../domain/user.entity';
+import { UserEntity, UserProps } from '../domain/user.entity';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
@@ -19,8 +19,8 @@ export class PrismaUserRepository implements IUserRepository {
     return this.toDomainEntity(data);
   }
 
-  async save(user: UserEntity): Promise<void> {
-    await this.prisma.user.upsert({
+  async save(user: UserEntity): Promise<UserEntity> {
+    const savedData = await this.prisma.user.upsert({
       where: { id: user.id },
       update: {
         email: user.email,
@@ -36,6 +36,8 @@ export class PrismaUserRepository implements IUserRepository {
         lastName: user.lastName
       }
     });
+
+    return this.toDomainEntity(savedData);
   }
 
   private toDomainEntity(data: {
@@ -47,14 +49,15 @@ export class PrismaUserRepository implements IUserRepository {
     createdAt: Date;
     updatedAt: Date;
   }): UserEntity {
-    return new UserEntity(
-      data.id,
-      data.email,
-      data.password,
-      data.firstName,
-      data.lastName,
-      data.createdAt,
-      data.updatedAt
-    );
+    const props: UserProps = {
+      id: data.id,
+      email: data.email,
+      passwordHash: data.password,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+    };
+    return new UserEntity(props);
   }
 }

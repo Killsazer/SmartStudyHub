@@ -10,7 +10,7 @@ import { PrismaUserRepository } from './infrastructure/prisma-user.repository';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'super-secret-key-kursach',
+      secret: process.env.JWT_SECRET ?? (() => { throw new Error('JWT_SECRET is required'); })(),
       signOptions: { expiresIn: '24h' },
     }),
   ],
