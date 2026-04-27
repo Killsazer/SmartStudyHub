@@ -1,7 +1,5 @@
-import { Injectable, Inject, Logger, BadRequestException } from '@nestjs/common';
-import type { ISubjectRepository } from '../../subjects/domain/subject.repository.interface';
-import type { ITeacherRepository } from '../../teachers/domain/teacher.repository.interface';
-import { OnboardingFacade } from '../domain/patterns/onboarding.facade';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { OnboardingFacade } from './onboarding.facade';
 
 @Injectable()
 export class OnboardingService {
@@ -9,12 +7,6 @@ export class OnboardingService {
 
   constructor(
     private readonly onboardingFacade: OnboardingFacade,
-    
-    @Inject('ISubjectRepository')
-    private readonly subjectRepository: ISubjectRepository,
-    
-    @Inject('ITeacherRepository')
-    private readonly teacherRepository: ITeacherRepository,
   ) {}
 
   public async processNewUserOnboarding(userId: string): Promise<void> {
@@ -24,11 +16,7 @@ export class OnboardingService {
 
     this.logger.log(`Starting onboarding for user: ${userId}`);
 
-    const { subject, teacher } = this.onboardingFacade.createInitialStudyData(userId);
-
-    await this.teacherRepository.save(teacher);
-
-    await this.subjectRepository.save(subject);
+    await this.onboardingFacade.createInitialStudyData(userId);
 
     this.logger.log(`Successfully completed onboarding for user: ${userId}`);
   }

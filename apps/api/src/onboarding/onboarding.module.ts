@@ -3,7 +3,7 @@ import { SubjectsModule } from '../subjects/subjects.module';
 import { ScheduleModule } from '../schedule/schedule.module';
 import { OnboardingController } from './presentation/onboarding.controller';
 import { OnboardingService } from './application/onboarding.service';
-import { OnboardingFacade } from './domain/patterns/onboarding.facade';
+import { OnboardingFacade } from './application/onboarding.facade';
 import { TeachersModule } from '../teachers/teachers.module';
 
 @Module({

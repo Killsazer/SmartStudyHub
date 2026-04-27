@@ -2,6 +2,7 @@ import { Controller, Post, UseGuards, HttpCode, HttpStatus, Logger } from '@nest
 import { OnboardingService } from '../application/onboarding.service';
 import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../shared/security/current-user.decorator';
+import { ApiResponse } from '../../shared/types/api-response.interface';
 
 @Controller('onboarding')
 @UseGuards(JwtAuthGuard)
@@ -12,7 +13,7 @@ export class OnboardingController {
 
   @Post()
   @HttpCode(HttpStatus.OK)
-  async startOnboarding(@CurrentUser() userId: string) {
+  async startOnboarding(@CurrentUser() userId: string): Promise<ApiResponse<{ userId: string }>> {
     this.logger.log(`Onboarding request received for user: ${userId}`);
 
     await this.onboardingService.processNewUserOnboarding(userId);
