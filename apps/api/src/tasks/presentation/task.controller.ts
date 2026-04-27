@@ -5,6 +5,8 @@ import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../shared/security/current-user.decorator';
+import { ApiResponse } from '../../shared/types/api-response.interface';
+import { TaskEntity, ITask } from '../domain/task.entity';
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
@@ -17,7 +19,7 @@ export class TaskController {
   async createTask(
     @CurrentUser() userId: string,
     @Body() dto: CreateTaskDto,
-  ) {
+  ): Promise<ApiResponse<TaskEntity>> {
     this.logger.log(`Create task request from user: ${userId}`);
     const task = await this.taskService.createTask(userId, dto);
     return { status: 'success', data: task };
@@ -25,7 +27,7 @@ export class TaskController {
 
   @Post('undo')
   @HttpCode(HttpStatus.OK)
-  async undoLastAction(@CurrentUser() userId: string) {
+  async undoLastAction(@CurrentUser() userId: string): Promise<ApiResponse> {
     await this.taskService.undoLastStatusChange(userId);
     return { status: 'success', message: 'Last action undone successfully' };
   }
@@ -35,7 +37,7 @@ export class TaskController {
     @CurrentUser() userId: string,
     @Param('id') taskId: string,
     @Body() dto: UpdateTaskStatusDto,
-  ) {
+  ): Promise<ApiResponse> {
     await this.taskService.updateTaskStatus(userId, taskId, dto.status);
     return { status: 'success', message: `Task status updated to ${dto.status}` };
   }
@@ -45,7 +47,7 @@ export class TaskController {
     @CurrentUser() userId: string,
     @Param('id') taskId: string,
     @Body() dto: UpdateTaskDto,
-  ) {
+  ): Promise<ApiResponse<TaskEntity>> {
     const task = await this.taskService.updateTask(userId, taskId, dto);
     return { status: 'success', data: task };
   }
@@ -54,7 +56,7 @@ export class TaskController {
   async deleteTask(
     @CurrentUser() userId: string,
     @Param('id') taskId: string,
-  ) {
+  ): Promise<ApiResponse> {
     await this.taskService.deleteTask(userId, taskId);
     return { status: 'success', message: 'Task deleted successfully' };
   }
@@ -64,7 +66,7 @@ export class TaskController {
     @CurrentUser() userId: string,
     @Query('sort') sortType?: string,
     @Query('subjectId') subjectId?: string,
-  ) {
+  ): Promise<ApiResponse<ITask[]>> {
     const tasks = await this.taskService.getUserTasks(userId, sortType, subjectId);
     return { status: 'success', data: tasks };
   }

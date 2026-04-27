@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common';
 import type { ITaskRepository } from '../domain/task.repository.interface';
 import { CommandHistoryManager } from '../domain/patterns/command/command-history.manager';
 import { TaskEntity, TaskStatus, TaskPriority, ITask } from '../domain/task.entity';
@@ -24,7 +24,6 @@ export class TaskService {
     @Inject('ITaskRepository')
     private readonly taskRepo: ITaskRepository,
 
-    @Inject('CommandHistoryManager')
     private readonly historyManager: CommandHistoryManager,
   ) {}
 
@@ -55,7 +54,11 @@ export class TaskService {
   }
 
   async undoLastStatusChange(userId: string): Promise<void> {
-    await this.historyManager.undo(userId);
+    try {
+      await this.historyManager.undo(userId);
+    } catch {
+      throw new BadRequestException('No actions to undo');
+    }
   }
 
   async updateTask(userId: string, taskId: string, dto: UpdateTaskDto): Promise<TaskEntity> {
@@ -77,7 +80,7 @@ export class TaskService {
   }
 
   async getUserTasks(userId: string, sortType?: string, subjectId?: string): Promise<ITask[]> {
-    let tasks = await this.taskRepo.findByUserId(userId);
+    let tasks: ITask[] = await this.taskRepo.findByUserId(userId);
 
     if (subjectId) {
       tasks = tasks.filter(t => t.subjectId === subjectId);

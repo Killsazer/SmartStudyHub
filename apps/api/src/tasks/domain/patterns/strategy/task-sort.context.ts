@@ -1,10 +1,10 @@
 import { ITaskSortStrategy } from './task-sort.strategies';
-import { TaskEntity } from '../../task.entity';
+import { ITask } from '../../task.entity';
 
 export class TaskSortContext {
   constructor(private readonly strategy: ITaskSortStrategy) {}
 
-  executeStrategy(tasks: TaskEntity[]): TaskEntity[] {
+  executeStrategy(tasks: ITask[]): ITask[] {
     return this.strategy.sort(tasks);
   }
 }

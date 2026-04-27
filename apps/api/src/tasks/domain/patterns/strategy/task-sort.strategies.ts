@@ -1,11 +1,11 @@
-import { TaskEntity, TaskPriority } from '../../task.entity';
+import { ITask, TaskPriority } from '../../task.entity';
 
 export interface ITaskSortStrategy {
-  sort(tasks: TaskEntity[]): TaskEntity[];
+  sort(tasks: ITask[]): ITask[];
 }
 
 export class SortByDeadlineStrategy implements ITaskSortStrategy {
-  sort(tasks: TaskEntity[]): TaskEntity[] {
+  sort(tasks: ITask[]): ITask[] {
     return [...tasks].sort((a, b) => {
       if (!a.deadline && !b.deadline) return 0;
       if (!a.deadline) return 1;
@@ -22,7 +22,7 @@ export class SortByPriorityStrategy implements ITaskSortStrategy {
     [TaskPriority.LOW]: 1,
   };
 
-  sort(tasks: TaskEntity[]): TaskEntity[] {
+  sort(tasks: ITask[]): ITask[] {
     return [...tasks].sort((a, b) => {
       const weightA = this.priorityWeight[a.priority] || 0;
       const weightB = this.priorityWeight[b.priority] || 0;
@@ -32,7 +32,7 @@ export class SortByPriorityStrategy implements ITaskSortStrategy {
 }
 
 export class SortByTitleStrategy implements ITaskSortStrategy {
-  sort(tasks: TaskEntity[]): TaskEntity[] {
+  sort(tasks: ITask[]): ITask[] {
     return [...tasks].sort((a, b) => a.title.localeCompare(b.title));
   }
 }

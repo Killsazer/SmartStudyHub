@@ -1,5 +1,7 @@
+import { Injectable } from '@nestjs/common';
 import { ICommand } from './command.interface';
 
+@Injectable()
 export class CommandHistoryManager {
   private histories: Map<string, ICommand[]> = new Map();
 
