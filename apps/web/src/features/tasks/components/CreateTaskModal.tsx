@@ -27,7 +27,7 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
       setPriority(initialData?.priority || 'MEDIUM');
       
       if (initialData?.deadline) {
-        // Convert to YYYY-MM-DDThh:mm for datetime-local
+        // Convert to YYYY-MM-DDThh:mm
         try {
           const date = new Date(initialData.deadline);
           // Adjust for local timezone offset

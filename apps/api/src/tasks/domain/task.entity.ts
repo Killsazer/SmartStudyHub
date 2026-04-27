@@ -19,7 +19,7 @@ export interface TaskProps {
   deadline?: Date;
   description?: string;
   subjectId?: string;
-  recurrenceDays?: number; //Інтервал повторення в днях
+  recurrenceDays?: number;
 }
 
 export interface ITask {
@@ -63,6 +63,6 @@ export class TaskEntity implements ITask {
       if (this.status === TaskStatus.DONE) return null;
       
       this.status = TaskStatus.DONE;
-      return null; // Звичайна таска нічого не генерує
+      return null; 
     }
 }

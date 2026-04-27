@@ -1,4 +1,3 @@
-// File: src/features/schedule/api/schedule.api.ts
 import { apiClient } from '../../../shared/api/client';
 
 export interface Teacher {

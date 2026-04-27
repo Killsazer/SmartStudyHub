@@ -1,4 +1,3 @@
-// File: src/features/schedule/components/CreateSlotModal.tsx
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { createScheduleSlot, updateScheduleSlot, Teacher, ClassType, ScheduleSlot } from '../api/schedule.api';

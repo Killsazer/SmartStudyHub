@@ -25,14 +25,14 @@ export class CreateScheduleSlotDto {
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
     message: 'startTime must be a valid time in HH:MM format',
   })
-  startTime: string;  // "HH:MM"
+  startTime: string;
 
   @IsString()
   @IsNotEmpty()
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
     message: 'endTime must be a valid time in HH:MM format',
   })
-  endTime: string;    // "HH:MM"
+  endTime: string;
 
   @IsEnum(ClassType)
   classType: ClassType;

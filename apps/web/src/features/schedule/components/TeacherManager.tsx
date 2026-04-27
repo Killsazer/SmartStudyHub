@@ -1,4 +1,3 @@
-// File: src/features/schedule/components/TeacherManager.tsx
 import React, { useState } from 'react';
 import { X, UserPlus, FileEdit, Trash2, Mail, Link as LinkIcon } from 'lucide-react';
 import { Teacher, createTeacher, deleteTeacher, updateTeacher } from '../api/schedule.api';

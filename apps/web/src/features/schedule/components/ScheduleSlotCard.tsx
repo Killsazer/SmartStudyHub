@@ -1,4 +1,3 @@
-// File: src/features/schedule/components/ScheduleSlotCard.tsx
 import React from 'react';
 import { ScheduleSlot, Teacher, ClassType } from '../api/schedule.api';
 import { SubjectItem } from '../../subjects/api/subjects.api';

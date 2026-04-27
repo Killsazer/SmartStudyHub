@@ -41,7 +41,6 @@ model User {
   sharedSchedules SharedSchedule[]
 }
 
-// Предмет (Subject) - збираємо через Builder
 model Subject {
   id        String   @id @default(uuid())
   title     String
@@ -57,7 +56,6 @@ model Subject {
   scheduleSlots ScheduleSlot[]
 }
 
-// Викладач - профіль з контактами та фото
 model Teacher {
   id        String   @id @default(uuid())
   name      String
@@ -71,15 +69,14 @@ model Teacher {
   scheduleSlots ScheduleSlot[]
 }
 
-// Слот розкладу - для Factory Method
 model ScheduleSlot {
   id         String    @id @default(uuid())
-  weekNumber Int       // 1 або 2
-  dayOfWeek  Int       // 1-7 (Пн-Нд)
-  startTime  String    // "08:30" формат HH:MM
-  endTime    String    // "10:05" формат HH:MM
+  weekNumber Int
+  dayOfWeek  Int
+  startTime  String
+  endTime    String
   classType  ClassType
-  location   String?   // Аудиторія або лінк
+  location   String?
 
   userId    String
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -89,7 +86,6 @@ model ScheduleSlot {
   teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
 }
 
-// Спільний розклад - для імпорту/експорту через хеш-код
 model SharedSchedule {
   id           String   @id @default(uuid())
   hashToken    String   @unique
@@ -100,7 +96,6 @@ model SharedSchedule {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// Завдання - основа для Command, Observer, Decorator
 model Task {
   id             String       @id @default(uuid())
   title          String
@@ -121,15 +116,13 @@ model Task {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// Нотатки - основа для патерна Composite (ієрархія)
 model Note {
   id        String   @id @default(uuid())
   title     String
-  content   String?  // Текст або JSON-структура
+  content   String?  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Self-relation для створення дерева нотаток (розділи та підрозділи)
   parentId String?
   parent   Note?    @relation("NoteHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   children Note[]   @relation("NoteHierarchy")

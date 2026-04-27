@@ -1,4 +1,3 @@
-// File: src/features/schedule/components/ShareSchedule.tsx
 import React, { useState } from 'react';
 import { Share2, DownloadCloud, UploadCloud, Copy, Check, X } from 'lucide-react';
 import { exportSchedule, importSchedule } from '../api/schedule.api';

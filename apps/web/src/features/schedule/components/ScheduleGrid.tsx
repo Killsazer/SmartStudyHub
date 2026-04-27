@@ -1,4 +1,3 @@
-// File: src/features/schedule/components/ScheduleGrid.tsx
 import React from 'react';
 import { ScheduleSlot, Teacher } from '../api/schedule.api';
 import { ScheduleSlotCard } from './ScheduleSlotCard';
