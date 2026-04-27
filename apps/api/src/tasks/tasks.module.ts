@@ -14,5 +14,8 @@ import { CommandHistoryManager } from './domain/patterns/command/command-history
       useClass: PrismaTaskRepository,
     },
   ],
+  exports: [
+    TaskService,
+  ],
 })
 export class TasksModule {}

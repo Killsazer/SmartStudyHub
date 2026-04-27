@@ -5,12 +5,14 @@ import { OnboardingController } from './presentation/onboarding.controller';
 import { OnboardingService } from './application/onboarding.service';
 import { OnboardingFacade } from './application/onboarding.facade';
 import { TeachersModule } from '../teachers/teachers.module';
+import { TasksModule } from 'src/tasks/tasks.module';
 
 @Module({
   imports: [
     SubjectsModule,
     ScheduleModule,
     TeachersModule,
+    TasksModule,
   ],
   controllers: [OnboardingController],
   providers: [
