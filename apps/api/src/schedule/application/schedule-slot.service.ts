@@ -1,10 +1,10 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../domain/repositories/schedule-slot.repository.interface';
-import type { ITeacherRepository } from '../../teachers/domain/teacher.repository.interface';
 import { ScheduleSlotEntity, ScheduleSlotProps } from '../domain/schedule-slot.entity';
 import { ScheduleSlotFactory } from '../domain/patterns/schedule-slot.factory';
 import { CreateScheduleSlotDto } from '../presentation/dto/schedule-slot/create-schedule-slot.dto';
 import { UpdateScheduleSlotDto } from '../presentation/dto/schedule-slot/update-schedule-slot.dto';
+import { TeacherService } from '../../teachers/application/teacher.service';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -15,13 +15,12 @@ export class ScheduleSlotService {
     @Inject('IScheduleSlotRepository')
     private readonly slotRepo: IScheduleSlotRepository,
 
-    @Inject('ITeacherRepository')
-    private readonly teacherRepo: ITeacherRepository,
+    private readonly teacherService: TeacherService,
   ) {}
 
   async createSlot(userId: string, dto: CreateScheduleSlotDto): Promise<ScheduleSlotEntity> {
     if (dto.teacherId) {
-      const teacher = await this.teacherRepo.findById(dto.teacherId);
+      const teacher = await this.teacherService.findTeacherById(dto.teacherId);
       if (!teacher) {
         throw new NotFoundException(`Teacher with ID ${dto.teacherId} not found`);
       }
@@ -53,7 +52,7 @@ export class ScheduleSlotService {
     await this.checkAccess(slotId, userId);
     
     if (dto.teacherId) {
-      const teacher = await this.teacherRepo.findById(dto.teacherId);
+      const teacher = await this.teacherService.findTeacherById(dto.teacherId);
       if (!teacher) {
         throw new NotFoundException(`Teacher with ID ${dto.teacherId} not found`);
       }

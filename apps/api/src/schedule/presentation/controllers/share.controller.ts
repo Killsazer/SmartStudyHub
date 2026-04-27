@@ -4,6 +4,7 @@ import { ImportScheduleUseCase } from '../../application/use-cases/import-schedu
 import { ImportScheduleDto } from '../dto/operations/import-schedule.dto';
 import { JwtAuthGuard } from '../../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../../shared/security/current-user.decorator';
+import { ApiResponse } from '../../../shared/types/api-response.interface';
 
 @Controller('schedule')
 @UseGuards(JwtAuthGuard)
@@ -14,7 +15,7 @@ export class ShareController {
   ) {}
 
   @Post('export')
-  async exportSchedule(@CurrentUser() userId: string) {
+  async exportSchedule(@CurrentUser() userId: string): Promise<ApiResponse<{ hashToken: string }>> {
     const hashToken = await this.exportUseCase.execute(userId);
     return { status: 'success', data: { hashToken } };
   }
@@ -23,7 +24,7 @@ export class ShareController {
   async importSchedule(
     @CurrentUser() userId: string,
     @Body() dto: ImportScheduleDto,
-  ) {
+  ): Promise<ApiResponse> {
     await this.importUseCase.execute(userId, dto.hashToken);
     return { status: 'success', message: 'Schedule imported successfully' };
   }

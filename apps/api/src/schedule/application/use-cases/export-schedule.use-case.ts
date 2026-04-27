@@ -1,24 +1,24 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../../domain/repositories/schedule-slot.repository.interface';
-import type { ITeacherRepository } from '../../../teachers/domain/teacher.repository.interface';
-import type { ISubjectRepository } from '../../../subjects/domain/subject.repository.interface';
 import type { ISharedScheduleRepository, ScheduleSnapshotData } from '../../domain/repositories/shared-schedule.repository.interface';
+import { TeacherService } from '../../../teachers/application/teacher.service';
+import { SubjectService } from '../../../subjects/application/subject.service';
 import { randomBytes, randomUUID } from 'crypto';
 
 @Injectable()
 export class ExportScheduleUseCase {
   constructor(
     @Inject('IScheduleSlotRepository') private readonly slotRepo: IScheduleSlotRepository,
-    @Inject('ITeacherRepository') private readonly teacherRepo: ITeacherRepository,
-    @Inject('ISubjectRepository') private readonly subjectRepo: ISubjectRepository,
     @Inject('ISharedScheduleRepository') private readonly sharedRepo: ISharedScheduleRepository,
+    private readonly teacherService: TeacherService,
+    private readonly subjectService: SubjectService,
   ) {}
 
   async execute(userId: string): Promise<string> {
     const [slots, teachers, subjects] = await Promise.all([
       this.slotRepo.findByUserId(userId),
-      this.teacherRepo.findByUserId(userId),
-      this.subjectRepo.findByUserId(userId),
+      this.teacherService.getTeachers(userId),
+      this.subjectService.getSubjectsByUser(userId),
     ]);
 
     const snapshotData: ScheduleSnapshotData = {

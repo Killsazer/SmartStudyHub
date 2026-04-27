@@ -5,13 +5,12 @@ import { ExportScheduleUseCase } from './application/use-cases/export-schedule.u
 import { ImportScheduleUseCase } from './application/use-cases/import-schedule.use-case';
 import { PrismaScheduleSlotRepository } from './infrastructure/persistence/prisma/prisma-schedule-slot.repository';
 import { PrismaSharedScheduleRepository } from './infrastructure/persistence/prisma/prisma-shared-schedule.repository';
-import { SharedProvidersModule } from '../shared/shared-providers.module';
 import { TeachersModule } from '../teachers/teachers.module';
 import { SubjectsModule } from '../subjects/subjects.module';
 import { ScheduleSlotService } from './application/schedule-slot.service';
 
 @Module({
-  imports: [SharedProvidersModule, TeachersModule, SubjectsModule],
+  imports: [TeachersModule, SubjectsModule],
   controllers: [ScheduleSlotController, ShareController],
   providers: [
     ScheduleSlotService,
@@ -27,7 +26,7 @@ import { ScheduleSlotService } from './application/schedule-slot.service';
     },
   ],
   exports: [
-    'IScheduleSlotRepository' 
+    ScheduleSlotService,
   ],
 })
 export class ScheduleModule {}

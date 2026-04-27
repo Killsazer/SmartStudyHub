@@ -7,8 +7,8 @@ import type { Prisma } from '@prisma/client';
 export class PrismaSharedScheduleRepository implements ISharedScheduleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async save(data: SharedScheduleData): Promise<void> {
-    await this.prisma.sharedSchedule.create({
+  async save(data: SharedScheduleData): Promise<SharedScheduleData> {
+    const savedData = await this.prisma.sharedSchedule.create({
       data: {
         id: data.id,
         hashToken: data.hashToken,
@@ -16,6 +16,13 @@ export class PrismaSharedScheduleRepository implements ISharedScheduleRepository
         userId: data.userId,
       },
     });
+
+    return {
+      id: savedData.id,
+      hashToken: savedData.hashToken,
+      snapshotData: savedData.snapshotData as unknown as ScheduleSnapshotData,
+      userId: savedData.userId,
+    };
   }
 
   async findByHashToken(hashToken: string): Promise<SharedScheduleData | null> {

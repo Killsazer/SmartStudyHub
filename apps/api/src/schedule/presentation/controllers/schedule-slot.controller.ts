@@ -7,6 +7,8 @@ import { CreateScheduleSlotDto } from '../dto/schedule-slot/create-schedule-slot
 import { UpdateScheduleSlotDto } from '../dto/schedule-slot/update-schedule-slot.dto';
 import { JwtAuthGuard } from '../../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../../shared/security/current-user.decorator';
+import { ApiResponse } from '../../../shared/types/api-response.interface';
+import { ScheduleSlotEntity } from '../../domain/schedule-slot.entity';
 
 @Controller('schedule-slots')
 @UseGuards(JwtAuthGuard)
@@ -19,7 +21,7 @@ export class ScheduleSlotController {
   async createSlot(
     @CurrentUser() userId: string,
     @Body() dto: CreateScheduleSlotDto,
-  ) {
+  ): Promise<ApiResponse<ScheduleSlotEntity>> {
     this.logger.log(`Create schedule slot request from user: ${userId}`);
     const slot = await this.slotService.createSlot(userId, dto);
     return { status: 'success', data: slot };
@@ -29,7 +31,7 @@ export class ScheduleSlotController {
   async getSlots(
     @CurrentUser() userId: string,
     @Query('week', new ParseIntPipe({ optional: true })) weekNum?: number,
-  ) {
+  ): Promise<ApiResponse<ScheduleSlotEntity[]>> {
     const slots = await this.slotService.getSlots(userId, weekNum);
     return { status: 'success', data: slots };
   }
@@ -39,7 +41,7 @@ export class ScheduleSlotController {
     @CurrentUser() userId: string,
     @Param('id') slotId: string,
     @Body() dto: UpdateScheduleSlotDto,
-  ) {
+  ): Promise<ApiResponse<ScheduleSlotEntity>> {
     const updatedSlot = await this.slotService.updateSlot(userId, slotId, dto);
     return { status: 'success', data: updatedSlot };
   }
@@ -48,7 +50,7 @@ export class ScheduleSlotController {
   async deleteSlot(
     @CurrentUser() userId: string,
     @Param('id') slotId: string,
-  ) {
+  ): Promise<ApiResponse> {
     await this.slotService.deleteSlot(userId, slotId);
     return { status: 'success', message: 'Schedule slot deleted successfully' };
   }

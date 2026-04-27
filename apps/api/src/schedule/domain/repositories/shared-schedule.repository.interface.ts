@@ -21,6 +21,6 @@ export interface SharedScheduleData {
 }
 
 export interface ISharedScheduleRepository {
-  save(data: SharedScheduleData): Promise<void>;
+  save(data: SharedScheduleData): Promise<SharedScheduleData>;
   findByHashToken(hashToken: string): Promise<SharedScheduleData | null>;
 }
