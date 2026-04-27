@@ -20,14 +20,14 @@ export class NoteService {
       await this.checkAccess(dto.parentId, userId);
     }
     
-    const note = new NoteEntity(
-      randomUUID(),
-      dto.title,
+    const note = new NoteEntity({
+      id: randomUUID(),
+      title: dto.title,
       userId,
-      dto.content,
-      dto.parentId,
-      dto.subjectId,
-    );
+      content: dto.content,
+      parentId: dto.parentId,
+      subjectId: dto.subjectId,
+    });
     await this.noteRepo.save(note);
     this.logger.log(`Created note '${dto.title}' for user: ${userId}`);
     return note;

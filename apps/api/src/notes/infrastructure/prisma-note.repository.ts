@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { INoteRepository } from '../domain/note.repository.interface';
-import { NoteEntity } from '../domain/note.entity';
+import { NoteEntity, NoteProps } from '../domain/note.entity';
 import { NoteBlock } from '../domain/patterns/composite/note-block';
 import { NoteSection } from '../domain/patterns/composite/note-section';
 import { NoteComponent } from '../domain/patterns/composite/note-component';
@@ -10,8 +10,8 @@ import { NoteComponent } from '../domain/patterns/composite/note-component';
 export class PrismaNoteRepository implements INoteRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async save(note: NoteEntity): Promise<void> {
-    await this.prisma.note.upsert({
+  async save(note: NoteEntity): Promise<NoteEntity> {
+    const savedData = await this.prisma.note.upsert({
       where: { id: note.id },
       update: {
         title: note.title,
@@ -29,6 +29,8 @@ export class PrismaNoteRepository implements INoteRepository {
         subjectId: note.subjectId ?? null,
       },
     });
+
+    return this.toDomainEntity(savedData);
   }
 
   async findByUserId(userId: string): Promise<NoteEntity[]> {
@@ -82,13 +84,14 @@ export class PrismaNoteRepository implements INoteRepository {
     parentId: string | null;
     subjectId: string | null;
   }): NoteEntity {
-    return new NoteEntity(
-      d.id,
-      d.title,
-      d.userId,
-      d.content ?? undefined,
-      d.parentId ?? undefined,
-      d.subjectId ?? undefined,
-    );
+    const props: NoteProps = {
+      id: d.id,
+      title: d.title,
+      userId: d.userId,
+      content: d.content ?? undefined,
+      parentId: d.parentId ?? undefined,
+      subjectId: d.subjectId ?? undefined,
+    };
+    return new NoteEntity(props);
   }
 }
