@@ -8,9 +8,10 @@ import { TasksModule } from './tasks/tasks.module';
 import { NotesModule } from './notes/notes.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
+import { TeachersModule } from './teachers/teachers.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, SubjectsModule, TasksModule, NotesModule, ScheduleModule, OnboardingModule],
+  imports: [PrismaModule, AuthModule, SubjectsModule, TasksModule, NotesModule, ScheduleModule, OnboardingModule, TeachersModule],
   controllers: [AppController],
   providers: [AppService],
 })
