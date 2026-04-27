@@ -1,16 +1,20 @@
-import { ScheduleSlotEntity } from '../../schedule/domain/schedule-slot.entity';
-import { TaskEntity } from '../../tasks/domain/task.entity';
-import { NoteComponent } from '../../notes/domain/patterns/composite/note-component';
+export interface SubjectProps {
+  id: string;
+  title: string;
+  userId: string;
+  color?: string;
+}
 
 export class SubjectEntity {
-  public color: string = '#000000';
-  public scheduleSlots: ScheduleSlotEntity[] = [];
-  public tasks: TaskEntity[] = [];
-  public notes: NoteComponent[] = [];
+  public readonly id: string;
+  public title: string;
+  public readonly userId: string;
+  public color: string;
 
-  constructor(
-    public readonly id: string,
-    public title: string,
-    public readonly userId: string,
-  ) {}
+  constructor(props: SubjectProps) {
+    this.id = props.id;
+    this.title = props.title;
+    this.userId = props.userId;
+    this.color = props.color ?? '#000000';
+  }
 }

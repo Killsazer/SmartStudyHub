@@ -1,11 +1,13 @@
-import { ScheduleSlotEntity } from '../../../schedule/domain/schedule-slot.entity';
-import { TaskEntity } from '../../../tasks/domain/task.entity';
 import { SubjectEntity } from '../subject.entity';
 
 export class SubjectBuilder {
-  private subject: SubjectEntity;
+  private color: string = '#000000';
 
-  constructor(id: string, title: string, userId: string) {
+  constructor(
+    private readonly id: string,
+    private readonly title: string,
+    private readonly userId: string,
+  ) {
     if (!title || title.trim().length === 0) {
       throw new Error('Subject title cannot be empty');
     }
@@ -15,7 +17,6 @@ export class SubjectBuilder {
     if (!userId || userId.trim().length === 0) {
       throw new Error('Subject userId cannot be empty');
     }
-    this.subject = new SubjectEntity(id, title.trim(), userId);
   }
 
   setColor(color: string): SubjectBuilder {
@@ -23,23 +24,16 @@ export class SubjectBuilder {
     if (!hexRegex.test(color)) {
       throw new Error(`Invalid color format: ${color}. Must be a valid HEX.`);
     }
-    this.subject.color = color;
-    return this;
-  }
-
-  addScheduleSlot(slot: ScheduleSlotEntity): SubjectBuilder {
-    this.subject.scheduleSlots.push(slot);
-    return this;
-  }
-
-  addTask(task: TaskEntity): SubjectBuilder {
-    this.subject.tasks.push(task);
+    this.color = color;
     return this;
   }
 
   build(): SubjectEntity {
-    const result = this.subject;
-    this.subject = new SubjectEntity(result.id, result.title, result.userId);
-    return result;
+    return new SubjectEntity({
+      id: this.id,
+      title: this.title.trim(),
+      userId: this.userId,
+      color: this.color,
+    });
   }
 }
