@@ -3,7 +3,6 @@ import { CommandHistoryManager } from '../../application/command/command-history
 import { TaskEntity, TaskStatus, TaskPriority } from '../task.entity';
 import { ITaskRepository } from '../task.repository.interface';
 import { RecurringTaskDecorator } from './decorator/recurring-task.decorator';
-import { TaskSortContext } from './strategy/task-sort.context';
 import { SortByDeadlineStrategy, SortByPriorityStrategy, SortByTitleStrategy } from './strategy/task-sort.strategies';
 
 const createTask = (overrides: Partial<import('../task.entity').TaskProps> = {}): TaskEntity =>
@@ -229,8 +228,7 @@ describe('Strategy Pattern — Sorting', () => {
   ];
 
   it('✅ SortByDeadline — nearest deadline first', () => {
-    const context = new TaskSortContext(new SortByDeadlineStrategy());
-    const sorted = context.executeStrategy(createTasks());
+    const sorted = new SortByDeadlineStrategy().sort(createTasks());
 
     expect(sorted[0].id).toBe('2');
     expect(sorted[1].id).toBe('3');
@@ -238,8 +236,7 @@ describe('Strategy Pattern — Sorting', () => {
   });
 
   it('✅ SortByPriority — highest priority first', () => {
-    const context = new TaskSortContext(new SortByPriorityStrategy());
-    const sorted = context.executeStrategy(createTasks());
+    const sorted = new SortByPriorityStrategy().sort(createTasks());
 
     expect(sorted[0].priority).toBe(TaskPriority.HIGH);
     expect(sorted[1].priority).toBe(TaskPriority.MEDIUM);
@@ -247,8 +244,7 @@ describe('Strategy Pattern — Sorting', () => {
   });
 
   it('✅ SortByTitle — alphabetical order', () => {
-    const context = new TaskSortContext(new SortByTitleStrategy());
-    const sorted = context.executeStrategy(createTasks());
+    const sorted = new SortByTitleStrategy().sort(createTasks());
 
     expect(sorted[0].title).toBe('Alpha');
     expect(sorted[1].title).toBe('Beta');
@@ -261,8 +257,7 @@ describe('Strategy Pattern — Sorting', () => {
       createTask({ id: '2', title: 'Has deadline', deadline: new Date('2026-01-01') }),
     ];
 
-    const context = new TaskSortContext(new SortByDeadlineStrategy());
-    const sorted = context.executeStrategy(tasks);
+    const sorted = new SortByDeadlineStrategy().sort(tasks);
 
     expect(sorted[0].id).toBe('2');
     expect(sorted[1].id).toBe('1');
@@ -272,15 +267,13 @@ describe('Strategy Pattern — Sorting', () => {
     const tasks = createTasks();
     const originalFirstId = tasks[0].id;
 
-    const context = new TaskSortContext(new SortByTitleStrategy());
-    context.executeStrategy(tasks);
+    new SortByTitleStrategy().sort(tasks);
 
     expect(tasks[0].id).toBe(originalFirstId);
   });
 
   it('✅ should handle empty array', () => {
-    const context = new TaskSortContext(new SortByDeadlineStrategy());
-    const sorted = context.executeStrategy([]);
+    const sorted = new SortByDeadlineStrategy().sort([]);
 
     expect(sorted).toEqual([]);
   });

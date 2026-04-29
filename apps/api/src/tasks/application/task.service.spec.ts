@@ -3,6 +3,8 @@ import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { TaskEntity, TaskStatus, TaskPriority } from '../domain/task.entity';
 import { OverdueTaskDecorator } from '../domain/patterns/decorator/overdue-task.decorator';
+import { TaskSortKey } from '../domain/patterns/strategy/task-sort.strategies';
+import { CommandHistoryManager } from './command/command-history.manager';
 
 describe('TaskService', () => {
   let service: TaskService;
@@ -36,7 +38,7 @@ describe('TaskService', () => {
       providers: [
         TaskService,
         { provide: 'ITaskRepository', useValue: mockTaskRepo },
-        { provide: 'CommandHistoryManager', useValue: mockHistoryManager },
+        { provide: CommandHistoryManager, useValue: mockHistoryManager },
       ],
     }).compile();
 
@@ -134,7 +136,7 @@ describe('TaskService', () => {
 
     it('✅ Strategy: deadline — nearest first', async () => {
       mockTaskRepo.findByUserId.mockResolvedValue(createTasks());
-      const sorted = await service.getUserTasks('u1', 'deadline');
+      const sorted = await service.getUserTasks('u1', TaskSortKey.DEADLINE);
 
       expect(sorted[0].id).toBe('2');
       expect(sorted[2].id).toBe('1');
@@ -142,7 +144,7 @@ describe('TaskService', () => {
 
     it('✅ Strategy: priority — highest first', async () => {
       mockTaskRepo.findByUserId.mockResolvedValue(createTasks());
-      const sorted = await service.getUserTasks('u1', 'priority');
+      const sorted = await service.getUserTasks('u1', TaskSortKey.PRIORITY);
 
       expect(sorted[0].priority).toBe(TaskPriority.HIGH);
       expect(sorted[2].priority).toBe(TaskPriority.LOW);
@@ -150,7 +152,7 @@ describe('TaskService', () => {
 
     it('✅ Strategy: title — alphabetical', async () => {
       mockTaskRepo.findByUserId.mockResolvedValue(createTasks());
-      const sorted = await service.getUserTasks('u1', 'title');
+      const sorted = await service.getUserTasks('u1', TaskSortKey.TITLE);
 
       expect(sorted[0].title).toBe('Alpha');
       expect(sorted[2].title).toBe('Gamma');
@@ -168,17 +170,17 @@ describe('TaskService', () => {
       expect(result[0].id).toBe('1');
     });
 
-    it('✅ should return original order for unknown sortType', async () => {
+    it('✅ should return original order if sortType bypasses validation', async () => {
       const tasks = createTasks();
       mockTaskRepo.findByUserId.mockResolvedValue(tasks);
 
-      const result = await service.getUserTasks('u1', 'unknown');
+      const result = await service.getUserTasks('u1', 'unknown' as TaskSortKey);
       expect(result).toEqual(tasks.map(task => new OverdueTaskDecorator(task)));
     });
 
     it('✅ should return empty array when user has no tasks', async () => {
       mockTaskRepo.findByUserId.mockResolvedValue([]);
-      const result = await service.getUserTasks('u1', 'deadline');
+      const result = await service.getUserTasks('u1', TaskSortKey.DEADLINE);
       expect(result).toEqual([]);
     });
   });

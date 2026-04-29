@@ -1,5 +1,11 @@
 import { ITask, TaskPriority } from '../../task.entity';
 
+export enum TaskSortKey {
+  DEADLINE = 'deadline',
+  PRIORITY = 'priority',
+  TITLE = 'title',
+}
+
 export interface ITaskSortStrategy {
   sort(tasks: ITask[]): ITask[];
 }

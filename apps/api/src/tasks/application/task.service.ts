@@ -5,8 +5,13 @@ import { TaskEntity, TaskStatus, TaskPriority, ITask } from '../domain/task.enti
 import { CreateTaskDto } from '../presentation/dto/create-task.dto';
 import { UpdateTaskDto } from '../presentation/dto/update-task.dto';
 import { ChangeTaskStatusCommand } from '../domain/patterns/command/change-task-status.command';
-import { TaskSortContext } from '../domain/patterns/strategy/task-sort.context';
-import { ITaskSortStrategy, SortByDeadlineStrategy, SortByPriorityStrategy, SortByTitleStrategy } from '../domain/patterns/strategy/task-sort.strategies';
+import {
+  ITaskSortStrategy,
+  SortByDeadlineStrategy,
+  SortByPriorityStrategy,
+  SortByTitleStrategy,
+  TaskSortKey,
+} from '../domain/patterns/strategy/task-sort.strategies';
 import { randomUUID } from 'crypto';
 import { OverdueTaskDecorator } from '../domain/patterns/decorator/overdue-task.decorator';
 
@@ -14,10 +19,10 @@ import { OverdueTaskDecorator } from '../domain/patterns/decorator/overdue-task.
 export class TaskService {
   private readonly logger = new Logger(TaskService.name);
 
-  private readonly strategyMap: ReadonlyMap<string, ITaskSortStrategy> = new Map([
-    ['deadline', new SortByDeadlineStrategy()],
-    ['priority', new SortByPriorityStrategy()],
-    ['title', new SortByTitleStrategy()],
+  private readonly strategyMap: ReadonlyMap<TaskSortKey, ITaskSortStrategy> = new Map([
+    [TaskSortKey.DEADLINE, new SortByDeadlineStrategy()],
+    [TaskSortKey.PRIORITY, new SortByPriorityStrategy()],
+    [TaskSortKey.TITLE, new SortByTitleStrategy()],
   ]);
 
   constructor(
@@ -79,7 +84,7 @@ export class TaskService {
     await this.taskRepo.delete(taskId);
   }
 
-  async getUserTasks(userId: string, sortType?: string, subjectId?: string): Promise<ITask[]> {
+  async getUserTasks(userId: string, sortType?: TaskSortKey, subjectId?: string): Promise<ITask[]> {
     let tasks: ITask[] = await this.taskRepo.findByUserId(userId);
 
     if (subjectId) {
@@ -89,10 +94,9 @@ export class TaskService {
     let resultTasks = tasks;
 
     if (sortType && tasks.length > 0) {
-      const strategy = this.strategyMap.get(sortType.toLowerCase());
+      const strategy = this.strategyMap.get(sortType);
       if (strategy) {
-        const context = new TaskSortContext(strategy);
-        resultTasks = context.executeStrategy(tasks);
+        resultTasks = strategy.sort(tasks);
       }
     }
 

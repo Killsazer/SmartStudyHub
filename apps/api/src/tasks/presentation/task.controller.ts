@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards, HttpStatus, HttpCode, Logger } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, ParseEnumPipe, Query, UseGuards, HttpStatus, HttpCode, Logger } from '@nestjs/common';
 import { TaskService } from '../application/task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../../shared/security/jwt-auth.guard';
 import { CurrentUser } from '../../shared/security/current-user.decorator';
 import { ApiResponse } from '../../shared/types/api-response.interface';
 import { TaskEntity, ITask } from '../domain/task.entity';
+import { TaskSortKey } from '../domain/patterns/strategy/task-sort.strategies';
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
@@ -64,7 +65,7 @@ export class TaskController {
   @Get()
   async getUserTasks(
     @CurrentUser() userId: string,
-    @Query('sort') sortType?: string,
+    @Query('sort', new ParseEnumPipe(TaskSortKey, { optional: true })) sortType?: TaskSortKey,
     @Query('subjectId') subjectId?: string,
   ): Promise<ApiResponse<ITask[]>> {
     const tasks = await this.taskService.getUserTasks(userId, sortType, subjectId);
