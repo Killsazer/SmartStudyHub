@@ -40,6 +40,10 @@ export class PrismaUserRepository implements IUserRepository {
     return this.toDomainEntity(savedData);
   }
 
+  async delete(id: string): Promise<void> {
+    await this.prisma.user.delete({ where: { id } });
+  }
+
   private toDomainEntity(data: {
     id: string;
     email: string;

@@ -65,6 +65,10 @@ export class AuthService {
     };
   }
 
+  async deleteAccount(userId: string): Promise<void> {
+    await this.userRepo.delete(userId);
+  }
+
   private generateToken(user: UserEntity): { accessToken: string } {
     const payload = { sub: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName };
     return { accessToken: this.jwtService.sign(payload) };

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { LogOut, Users, FolderOpen, CalendarDays, ChevronDown } from 'lucide-react';
+import { LogOut, Users, FolderOpen, CalendarDays, ChevronDown, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../features/auth/AuthContext';
 import { getSubjects, SubjectItem } from '../features/subjects/api/subjects.api';
@@ -22,7 +22,7 @@ import { WelcomeModal } from '../features/onboarding/components/WelcomeModal';
 
 const DashboardPage = () => {
   const { t } = useTranslation();
-  const { logout, user } = useAuth();
+  const { logout, user, deleteAccount } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   const profileRef = useRef<HTMLDivElement>(null);
@@ -214,6 +214,25 @@ const DashboardPage = () => {
                     >
                       <LogOut className="w-4 h-4" />
                       {t('sign_out')}
+                    </button>
+                    <button
+                      onMouseDown={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (window.confirm(t('delete_account_confirm', 'Are you sure you want to delete your account? All your data will be permanently lost.'))) {
+                          setIsProfileOpen(false);
+                          try {
+                            await deleteAccount();
+                            toast.success(t('account_deleted', 'Account deleted successfully'));
+                          } catch (err) {
+                            toast.error(t('error_deleting_account', 'Failed to delete account'));
+                          }
+                        }
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors mt-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {t('delete_account', 'Видалити акаунт')}
                     </button>
                   </div>
                 </div>

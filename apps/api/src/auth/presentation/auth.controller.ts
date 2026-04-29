@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Delete } from '@nestjs/common';
 import { AuthService, UserProfileResponse } from '../application/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -27,5 +27,12 @@ export class AuthController {
   async getProfile(@CurrentUser() userId: string): Promise<ApiResponse<UserProfileResponse>> {
     const data = await this.authService.getProfile(userId);
     return { status: 'success', data };
+  }
+
+  @Delete('me')
+  @UseGuards(JwtAuthGuard)
+  async deleteAccount(@CurrentUser() userId: string): Promise<ApiResponse> {
+    await this.authService.deleteAccount(userId);
+    return { status: 'success', message: 'Account deleted successfully' };
   }
 }
