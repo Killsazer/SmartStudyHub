@@ -2,15 +2,12 @@ import { randomUUID } from 'crypto';
 import { ITask, TaskStatus, TaskEntity, TaskPriority } from '../../task.entity';
 
 export abstract class TaskDecorator implements ITask {
-  constructor(protected wrappee: ITask) {}
+  constructor(protected readonly wrappee: ITask) {}
 
   get id(): string { return this.wrappee.id; }
   get title(): string { return this.wrappee.title; }
-  set title(value: string) { this.wrappee.title = value; }
   get status(): TaskStatus { return this.wrappee.status; }
-  set status(value: TaskStatus) { this.wrappee.status = value; }
   get priority(): TaskPriority { return this.wrappee.priority; }
-  set priority(value: TaskPriority) { this.wrappee.priority = value; }
   get userId(): string { return this.wrappee.userId; }
   get deadline(): Date | undefined { return this.wrappee.deadline; }
   get description(): string | undefined { return this.wrappee.description; }
@@ -21,20 +18,8 @@ export abstract class TaskDecorator implements ITask {
     return this.wrappee.completeTask();
   }
 
-  toJSON(): any {
-    const data = this.wrappee.toJSON ? this.wrappee.toJSON() : { ...this.wrappee };
-    return {
-      ...data,
-      id: this.id,
-      title: this.title,
-      status: this.status,
-      priority: this.priority,
-      userId: this.userId,
-      deadline: this.deadline,
-      description: this.description,
-      subjectId: this.subjectId,
-      recurrenceDays: this.recurrenceDays,
-    };
+  toJSON(): Record<string, unknown> {
+    return this.wrappee.toJSON ? this.wrappee.toJSON() : { ...this.wrappee };
   }
 }
 
@@ -50,13 +35,27 @@ export class RecurringTaskDecorator extends TaskDecorator {
     super.completeTask();
 
     const nextDeadline = this.calculateNextDeadline(this.deadline);
+    
+    const wrappeeData = this.wrappee.toJSON ? this.wrappee.toJSON() : this.wrappee;
+
     return new TaskEntity({
-      ...this.wrappee,
+      ...wrappeeData,
       id: randomUUID(),
       status: TaskStatus.TODO,
       deadline: nextDeadline,
       recurrenceDays: this._recurrenceDays,
     });
+  }
+  
+  get nextDeadline(): Date {
+    return this.calculateNextDeadline(this.deadline);
+  }
+
+  override toJSON(): Record<string, unknown> & { nextDeadline: Date } {
+    return {
+      ...super.toJSON(),
+      nextDeadline: this.nextDeadline,
+    };
   }
 
   private calculateNextDeadline(currentDeadline?: Date): Date {

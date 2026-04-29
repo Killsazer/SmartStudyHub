@@ -24,7 +24,7 @@ export class SubjectService {
 
     await this.subjectRepo.save(subject);
     
-    this.logger.log(`Created subject via Builder: ${subject.title}`);
+    this.logger.log(`Created subject: ${subject.title}`);
     return subject;
   }
 

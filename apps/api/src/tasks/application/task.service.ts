@@ -14,6 +14,8 @@ import {
 } from '../domain/patterns/strategy/task-sort.strategies';
 import { randomUUID } from 'crypto';
 import { OverdueTaskDecorator } from '../domain/patterns/decorator/overdue-task.decorator';
+import { RecurringTaskDecorator } from '../domain/patterns/decorator/recurring-task.decorator';
+import { NothingToUndoError } from './command/nothing-to-undo.error';
 
 @Injectable()
 export class TaskService {
@@ -61,8 +63,11 @@ export class TaskService {
   async undoLastStatusChange(userId: string): Promise<void> {
     try {
       await this.historyManager.undo(userId);
-    } catch {
-      throw new BadRequestException('No actions to undo');
+    } catch (error: any) {
+      if (error instanceof NothingToUndoError) {
+        throw new BadRequestException('No actions to undo');
+      }
+      throw error;
     }
   }
 
@@ -100,7 +105,18 @@ export class TaskService {
       }
     }
 
-    return resultTasks.map(task => new OverdueTaskDecorator(task));
+    return resultTasks.map(task => {
+      let decoratedTask: ITask = task;
+
+      if (task.recurrenceDays && task.recurrenceDays > 0) {
+        decoratedTask = new RecurringTaskDecorator(decoratedTask, task.recurrenceDays);
+      }
+
+      decoratedTask = new OverdueTaskDecorator(decoratedTask);
+
+      return decoratedTask;
+    });
+
   }
 
   private async checkAccess(taskId: string, userId: string): Promise<TaskEntity> {

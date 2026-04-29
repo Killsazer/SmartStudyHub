@@ -34,7 +34,7 @@ export interface ITask {
   recurrenceDays?: number;
   
   completeTask(): ITask | null; 
-  toJSON(): any;
+  toJSON(): Record<string, unknown>;
 }
 
 export class TaskEntity implements ITask {
@@ -67,7 +67,7 @@ export class TaskEntity implements ITask {
       return null; 
     }
 
-    toJSON(): any {
+    toJSON(): Record<string, unknown> {
       return {
         id: this.id,
         title: this.title,

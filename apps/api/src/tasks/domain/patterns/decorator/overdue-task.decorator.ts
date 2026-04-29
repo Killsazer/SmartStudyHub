@@ -1,9 +1,8 @@
-import { TaskEntity, TaskStatus } from '../../task.entity';
-
+import { ITask, TaskStatus } from '../../task.entity';
 import { TaskDecorator } from './recurring-task.decorator'; 
 
 export class OverdueTaskDecorator extends TaskDecorator {
-  constructor(protected readonly wrappee: TaskEntity) {
+  constructor(protected readonly wrappee: ITask) {
     super(wrappee);
   }
 
@@ -15,9 +14,9 @@ export class OverdueTaskDecorator extends TaskDecorator {
     return deadline.getTime() < new Date().getTime();
   }
 
-  toJSON(): any {
+  toJSON(): Record<string, unknown> & { isOverdue: boolean } {
     return {
-      ...super.toJSON(),
+      ...(super.toJSON()),
       isOverdue: this.isOverdue,
     };
   }
