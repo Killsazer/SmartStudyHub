@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Folder, FolderOpen, FileText, Plus, ChevronRight, ChevronDown, Edit2, Trash2 } from 'lucide-react';
+import { Folder, FolderOpen, FileText, Plus, ChevronRight, ChevronDown, Edit2, Trash2, Clock, Hash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NoteComponent } from '../api/notes.api';
 
@@ -42,6 +42,22 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
         <span className={`text-sm ${isSection ? 'font-medium text-zinc-800 dark:text-zinc-200' : 'text-zinc-600 dark:text-zinc-300'}`}>
           {node.title}
         </span>
+
+        {/* METRICS BADGES */}
+        <div className="flex items-center gap-2 ml-3 opacity-80">
+          {(node.wordCount ?? 0) > 0 && (
+            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
+              <Hash className="w-3 h-3" />
+              {node.wordCount} words
+            </span>
+          )}
+          {(node.readingMinutes ?? 0) > 0 && (
+            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
+              <Clock className="w-3 h-3" />
+              {node.readingMinutes} min read
+            </span>
+          )}
+        </div>
 
         <div className="ml-auto opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all">
           {isSection && (

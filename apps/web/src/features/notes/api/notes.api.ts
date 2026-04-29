@@ -7,6 +7,8 @@ export interface NoteComponent {
   content: string | null;
   parentId: string | null;
   subjectId: string | null;
+  wordCount: number;
+  readingMinutes: number;
   children?: NoteComponent[];
 }
 
