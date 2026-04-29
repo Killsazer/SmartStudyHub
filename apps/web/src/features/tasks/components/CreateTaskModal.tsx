@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { createTask, updateTask, Task } from '../api/tasks.api';
+import { X, Repeat } from 'lucide-react';
+import { createTask, updateTask, Task, TaskPriority } from '../api/tasks.api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -16,8 +16,10 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('MEDIUM');
+  const [priority, setPriority] = useState<TaskPriority>('MEDIUM');
   const [deadline, setDeadline] = useState('');
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceDays, setRecurrenceDays] = useState(7);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -40,6 +42,14 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
       } else {
         setDeadline('');
       }
+
+      if (initialData?.recurrenceDays) {
+        setIsRecurring(true);
+        setRecurrenceDays(initialData.recurrenceDays);
+      } else {
+        setIsRecurring(false);
+        setRecurrenceDays(7);
+      }
     }
   }, [isOpen, initialData]);
 
@@ -54,6 +64,7 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
         description,
         priority,
         deadline: deadline ? new Date(deadline).toISOString() : undefined,
+        recurrenceDays: isRecurring ? recurrenceDays : 0,
       };
 
       if (initialData) {
@@ -110,7 +121,7 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('priority')}</label>
             <select
               value={priority}
-              onChange={(e) => setPriority(e.target.value)}
+              onChange={(e) => setPriority(e.target.value as TaskPriority)}
               className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
               <option value="LOW">{t('priority_low')}</option>
@@ -127,6 +138,34 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
               onChange={(e) => setDeadline(e.target.value)}
               className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsRecurring(!isRecurring)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                isRecurring 
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400' 
+                  : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+              }`}
+            >
+              <Repeat className="w-4 h-4" />
+              {t('recurring_task', 'Повторюване завдання')}
+            </button>
+            
+            {isRecurring && (
+              <select
+                value={recurrenceDays}
+                onChange={(e) => setRecurrenceDays(Number(e.target.value))}
+                className="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                <option value={1}>{t('every_day', 'Щодня')}</option>
+                <option value={7}>{t('every_week', 'Щотижня')}</option>
+                <option value={14}>{t('every_2_weeks', 'Кожні 2 тижні')}</option>
+                <option value={30}>{t('every_month', 'Щомісяця')}</option>
+              </select>
+            )}
           </div>
 
           <div className="pt-4 flex justify-end gap-3">

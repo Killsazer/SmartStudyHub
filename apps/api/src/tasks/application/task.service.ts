@@ -42,7 +42,7 @@ export class TaskService {
       description: dto.description,
       deadline: dto.deadline ? new Date(dto.deadline) : undefined,
       subjectId: dto.subjectId,
-      recurrenceDays: dto.recurrenceDays,
+      recurrenceDays: dto.recurrenceDays === 0 ? undefined : dto.recurrenceDays,
     });
 
     await this.taskRepo.save(task);
@@ -73,7 +73,7 @@ export class TaskService {
     if (dto.description !== undefined) task.description = dto.description;
     if (dto.priority !== undefined) task.priority = dto.priority;
     if (dto.deadline !== undefined) task.deadline = dto.deadline ? new Date(dto.deadline) : undefined;
-    if (dto.recurrenceDays !== undefined) task.recurrenceDays = dto.recurrenceDays;
+    if (dto.recurrenceDays !== undefined) task.recurrenceDays = dto.recurrenceDays === 0 ? undefined : dto.recurrenceDays;
 
     await this.taskRepo.save(task);
     return task;

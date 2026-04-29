@@ -24,6 +24,5 @@ export class CreateTaskDto {
 
   @IsNumber()
   @IsOptional()
-  @Min(1)
   recurrenceDays?: number; 
 }
