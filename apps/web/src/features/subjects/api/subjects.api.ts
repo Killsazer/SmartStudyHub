@@ -24,3 +24,7 @@ export const updateSubject = async (id: string, data: Partial<{ title: string; c
 export const deleteSubject = async (id: string): Promise<void> => {
   await apiClient.delete(`/subjects/${id}`);
 };
+
+export const deleteAllSubjects = async (): Promise<void> => {
+  await apiClient.delete('/subjects/all');
+};

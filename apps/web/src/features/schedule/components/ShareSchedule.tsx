@@ -37,7 +37,7 @@ export const ShareSchedule: React.FC<Props> = ({ onImportComplete }) => {
 
     setLoading(true);
     try {
-      await importSchedule(importToken);
+      await importSchedule(importToken.toLowerCase());
       toast.success('Розклад успішно імпортовано!');
       setIsOpen(false);
       setImportToken('');

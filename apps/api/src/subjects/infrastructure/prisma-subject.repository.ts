@@ -56,6 +56,12 @@ export class PrismaSubjectRepository implements ISubjectRepository {
     });
   }
 
+  async deleteAll(userId: string): Promise<void> {
+    await this.prisma.subject.deleteMany({
+      where: { userId },
+    });
+  }
+
   private toDomainEntity(d: {
     id: string;
     title: string;

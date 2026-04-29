@@ -6,4 +6,5 @@ export interface ISubjectRepository {
   delete(id: string): Promise<void>;
   findById(id: string): Promise<SubjectEntity | null>;
   findByUserId(userId: string): Promise<SubjectEntity[]>;
+  deleteAll(userId: string): Promise<void>;
 }

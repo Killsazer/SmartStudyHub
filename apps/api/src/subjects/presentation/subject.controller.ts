@@ -40,6 +40,12 @@ export class SubjectController {
     return { status: 'success', message: 'Subject updated successfully', data: subject };
   }
 
+  @Delete('all')
+  async deleteAllSubjects(@CurrentUser() userId: string): Promise<ApiResponse> {
+    await this.subjectService.deleteAllSubjects(userId);
+    return { status: 'success', message: 'All subjects deleted successfully' };
+  }
+
   @Delete(':id')
   async deleteSubject(
     @CurrentUser() userId: string,

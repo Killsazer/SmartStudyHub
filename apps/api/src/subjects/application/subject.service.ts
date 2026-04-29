@@ -44,6 +44,10 @@ export class SubjectService {
     return this.subjectRepo.findByUserId(userId);
   }
 
+  public async deleteAllSubjects(userId: string): Promise<void> {
+    await this.subjectRepo.deleteAll(userId);
+  }
+
   private async checkAccess(subjectId: string, userId: string): Promise<SubjectEntity> {
     const subject = await this.subjectRepo.findById(subjectId);
     if (!subject) {

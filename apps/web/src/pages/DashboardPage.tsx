@@ -16,7 +16,7 @@ import { SlotDetailSidebar } from '../features/schedule/components/SlotDetailSid
 
 import { SubjectCard } from '../features/subjects/components/SubjectCard';
 import { CreateSubjectModal } from '../features/subjects/components/CreateSubjectModal';
-import { createSubject, updateSubject, deleteSubject } from '../features/subjects/api/subjects.api';
+import { createSubject, updateSubject, deleteSubject, deleteAllSubjects } from '../features/subjects/api/subjects.api';
 import { getTasks } from '../features/tasks/api/tasks.api';
 import { WelcomeModal } from '../features/onboarding/components/WelcomeModal';
 
@@ -347,7 +347,26 @@ const DashboardPage = () => {
             </div>
             
             <div className="p-6 overflow-y-auto flex-1">
-              <div className="flex justify-end mb-6">
+              <div className="flex justify-end gap-3 mb-6">
+                {subjects.length > 0 && (
+                  <button
+                    onClick={async () => {
+                      if (window.confirm(t('delete_all_subjects_confirm', 'Ви дійсно хочете видалити всі предмети? Це також видалить всі пов\'язані завдання та розклад!'))) {
+                        try {
+                          await deleteAllSubjects();
+                          toast.success(t('all_subjects_deleted', 'Всі предмети видалено'));
+                          fetchData();
+                        } catch (err) {
+                          toast.error(t('error', 'Сталася помилка'));
+                        }
+                      }
+                    }}
+                    className="bg-red-500/10 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg font-medium hover:bg-red-500/20 transition-colors flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {t('delete_all', 'Видалити всі')}
+                  </button>
+                )}
                 <button
                   onClick={() => { setEditingSubject(null); setIsCreateSubjectOpen(true); }}
                   className="bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-600 transition-colors"
