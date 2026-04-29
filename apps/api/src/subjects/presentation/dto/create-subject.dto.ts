@@ -4,7 +4,7 @@ export class CreateSubjectDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
-  title: string;
+  title!: string;
 
   @IsHexColor()
   @IsOptional()

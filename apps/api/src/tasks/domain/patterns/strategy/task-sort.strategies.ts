@@ -1,4 +1,4 @@
-import { ITask, TaskPriority } from '../../task.entity';
+import { ITask, TaskPriority, TaskStatus } from '../../task.entity';
 
 export enum TaskSortKey {
   DEADLINE = 'deadline',
@@ -10,9 +10,20 @@ export interface ITaskSortStrategy {
   sort(tasks: ITask[]): ITask[];
 }
 
+function compareStatus(a: ITask, b: ITask): number {
+  const isADone = a.status === TaskStatus.DONE;
+  const isBDone = b.status === TaskStatus.DONE;
+  if (isADone && !isBDone) return 1;
+  if (!isADone && isBDone) return -1;
+  return 0;
+}
+
 export class SortByDeadlineStrategy implements ITaskSortStrategy {
   sort(tasks: ITask[]): ITask[] {
     return [...tasks].sort((a, b) => {
+      const statusDiff = compareStatus(a, b);
+      if (statusDiff !== 0) return statusDiff;
+
       if (!a.deadline && !b.deadline) return 0;
       if (!a.deadline) return 1;
       if (!b.deadline) return -1;
@@ -30,6 +41,9 @@ export class SortByPriorityStrategy implements ITaskSortStrategy {
 
   sort(tasks: ITask[]): ITask[] {
     return [...tasks].sort((a, b) => {
+      const statusDiff = compareStatus(a, b);
+      if (statusDiff !== 0) return statusDiff;
+
       const weightA = this.priorityWeight[a.priority] || 0;
       const weightB = this.priorityWeight[b.priority] || 0;
       return weightB - weightA;
@@ -39,6 +53,11 @@ export class SortByPriorityStrategy implements ITaskSortStrategy {
 
 export class SortByTitleStrategy implements ITaskSortStrategy {
   sort(tasks: ITask[]): ITask[] {
-    return [...tasks].sort((a, b) => a.title.localeCompare(b.title));
+    return [...tasks].sort((a, b) => {
+      const statusDiff = compareStatus(a, b);
+      if (statusDiff !== 0) return statusDiff;
+
+      return a.title.localeCompare(b.title);
+    });
   }
 }

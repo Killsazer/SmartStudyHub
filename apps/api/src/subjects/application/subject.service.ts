@@ -4,7 +4,6 @@ import { SubjectEntity } from '../domain/subject.entity';
 import { CreateSubjectDto } from '../presentation/dto/create-subject.dto';
 import { UpdateSubjectDto } from '../presentation/dto/update-subject.dto';
 import { randomUUID } from 'crypto';
-import { SubjectBuilder } from '../domain/patterns/subject.builder';
 
 @Injectable()
 export class SubjectService {
@@ -16,9 +15,12 @@ export class SubjectService {
   ) {}
 
   public async createSubject(userId: string, dto: CreateSubjectDto): Promise<SubjectEntity> {
-    const subject = new SubjectBuilder(randomUUID(), dto.title, userId)
-      .setColor(dto.color ?? '#000000')
-      .build();
+    const subject = new SubjectEntity({
+      id: randomUUID(),
+      title: dto.title,
+      userId: userId,
+      color: dto.color ?? '#000000',
+    });
 
     await this.subjectRepo.save(subject);
     
