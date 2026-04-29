@@ -19,7 +19,7 @@ export abstract class TaskDecorator implements ITask {
   }
 
   toJSON(): Record<string, unknown> {
-    return this.wrappee.toJSON ? this.wrappee.toJSON() : { ...this.wrappee };
+    return this.wrappee.toJSON();
   }
 }
 
@@ -34,15 +34,15 @@ export class RecurringTaskDecorator extends TaskDecorator {
   override completeTask(): ITask | null {
     super.completeTask();
 
-    const nextDeadline = this.calculateNextDeadline(this.deadline);
-    
-    const wrappeeData = this.wrappee.toJSON ? this.wrappee.toJSON() : this.wrappee;
-
     return new TaskEntity({
-      ...wrappeeData,
       id: randomUUID(),
+      title: this.wrappee.title,
       status: TaskStatus.TODO,
-      deadline: nextDeadline,
+      priority: this.wrappee.priority,
+      userId: this.wrappee.userId,
+      description: this.wrappee.description,
+      subjectId: this.wrappee.subjectId,
+      deadline: this.calculateNextDeadline(this.deadline),
       recurrenceDays: this._recurrenceDays,
     });
   }
