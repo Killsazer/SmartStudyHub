@@ -1,8 +1,8 @@
 import { ChangeTaskStatusCommand } from './command/change-task-status.command';
-import { CommandHistoryManager } from './command/command-history.manager';
+import { CommandHistoryManager } from '../../application/command/command-history.manager';
 import { TaskEntity, TaskStatus, TaskPriority } from '../task.entity';
 import { ITaskRepository } from '../task.repository.interface';
-import { RecurringTaskDecorator, TaskDecorator } from './decorator/recurring-task.decorator';
+import { RecurringTaskDecorator } from './decorator/recurring-task.decorator';
 import { TaskSortContext } from './strategy/task-sort.context';
 import { SortByDeadlineStrategy, SortByPriorityStrategy, SortByTitleStrategy } from './strategy/task-sort.strategies';
 

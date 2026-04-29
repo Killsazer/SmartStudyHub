@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common';
 import type { ITaskRepository } from '../domain/task.repository.interface';
-import { CommandHistoryManager } from '../domain/patterns/command/command-history.manager';
+import { CommandHistoryManager } from './command/command-history.manager';
 import { TaskEntity, TaskStatus, TaskPriority, ITask } from '../domain/task.entity';
 import { CreateTaskDto } from '../presentation/dto/create-task.dto';
 import { UpdateTaskDto } from '../presentation/dto/update-task.dto';

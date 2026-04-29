@@ -27,10 +27,7 @@ export class SubjectService {
   }
 
   public async updateSubject(userId: string, subjectId: string, dto: UpdateSubjectDto): Promise<SubjectEntity> {
-    const subject = await this.checkAccess(subjectId, userId);
-
-    if (dto.title !== undefined) subject.title = dto.title;
-    if (dto.color !== undefined) subject.color = dto.color ?? '#000000';
+    await this.checkAccess(subjectId, userId);
 
     return await this.subjectRepo.update(subjectId, {
       title: dto.title,

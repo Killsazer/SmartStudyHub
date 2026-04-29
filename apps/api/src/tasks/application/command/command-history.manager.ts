@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ICommand } from './command.interface';
+import { ICommand } from '../../domain/patterns/command/command.interface';
 
 @Injectable()
 export class CommandHistoryManager {
