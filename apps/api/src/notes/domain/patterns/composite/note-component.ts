@@ -2,6 +2,8 @@ export interface INoteNode {
   id: string;
   type: 'section' | 'block';
   title: string;
+  wordCount: number;
+  readingMinutes: number;
   content?: string;
   subjectId?: string | null;
   children?: INoteNode[];
@@ -14,15 +16,11 @@ export abstract class NoteComponent {
     public subjectId: string | null = null,
   ) {}
 
-  add(component: NoteComponent): void {
-    throw new Error('This component does not support adding children.');
-  }
-
-  remove(componentId: string): void {
-    throw new Error('This component does not support removing children.');
-  }
-
   abstract getItemCount(): number;
+
+  abstract getWordCount(): number;
+
+  abstract getEstimatedReadingMinutes(): number;
 
   abstract toJSON(): INoteNode;
 }

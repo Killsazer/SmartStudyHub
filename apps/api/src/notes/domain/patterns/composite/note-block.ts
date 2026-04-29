@@ -1,5 +1,7 @@
 import { NoteComponent, INoteNode } from './note-component';
 
+const WORDS_PER_MINUTE = 200;
+
 export class NoteBlock extends NoteComponent {
   constructor(
     id: string,
@@ -22,6 +24,16 @@ export class NoteBlock extends NoteComponent {
     return 1;
   }
 
+  override getWordCount(): number {
+    const trimmed = this._content.trim();
+    if (!trimmed) return 0;
+    return trimmed.split(/\s+/).length;
+  }
+
+  override getEstimatedReadingMinutes(): number {
+    return Math.ceil(this.getWordCount() / WORDS_PER_MINUTE);
+  }
+
   override toJSON(): INoteNode {
     return {
       id: this.id,
@@ -29,6 +41,8 @@ export class NoteBlock extends NoteComponent {
       title: this.title,
       content: this._content,
       subjectId: this.subjectId,
+      wordCount: this.getWordCount(),
+      readingMinutes: this.getEstimatedReadingMinutes(),
     };
   }
 }

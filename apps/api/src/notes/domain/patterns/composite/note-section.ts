@@ -7,11 +7,11 @@ export class NoteSection extends NoteComponent {
     super(id, title, subjectId);
   }
 
-  override add(component: NoteComponent): void {
+  add(component: NoteComponent): void {
     this.children.push(component);
   }
 
-  override remove(componentId: string): void {
+  remove(componentId: string): void {
     this.children = this.children.filter((child) => child.id !== componentId);
   }
 
@@ -23,6 +23,14 @@ export class NoteSection extends NoteComponent {
     return this.children.reduce((sum, child) => sum + child.getItemCount(), 0);
   }
 
+  override getWordCount(): number {
+    return this.children.reduce((sum, child) => sum + child.getWordCount(), 0);
+  }
+
+  override getEstimatedReadingMinutes(): number {
+    return this.children.reduce((sum, child) => sum + child.getEstimatedReadingMinutes(), 0);
+  }
+
   override toJSON(): INoteNode {
     return {
       id: this.id,
@@ -30,6 +38,8 @@ export class NoteSection extends NoteComponent {
       title: this.title,
       children: this.children.map((child) => child.toJSON()),
       subjectId: this.subjectId,
+      wordCount: this.getWordCount(),
+      readingMinutes: this.getEstimatedReadingMinutes(),
     };
   }
 }
