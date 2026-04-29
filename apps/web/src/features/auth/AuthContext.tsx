@@ -27,9 +27,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchProfile = async () => {
     try {
       const res = await apiClient.get('/auth/me');
-      setUser(res.data);
+      setUser(res.data.data);
     } catch {
-      // Token is invalid or expired
       setUser(null);
     }
   };

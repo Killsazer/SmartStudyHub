@@ -20,7 +20,7 @@ const LoginPage = () => {
     try {
       const res = await apiClient.post('/auth/login', { email, password });
       toast.success('Login successful!');
-      login(res.data.accessToken);
+      login(res.data.data.accessToken);
     } catch (err: any) {
       const errorMsg = err.response?.data?.message;
       if (Array.isArray(errorMsg)) {

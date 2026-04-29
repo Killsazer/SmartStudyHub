@@ -33,7 +33,7 @@ const RegisterPage = () => {
     try {
       const res = await apiClient.post('/auth/register', formData);
       toast.success('Account created successfully!');
-      login(res.data.accessToken);
+      login(res.data.data.accessToken);
     } catch (err: any) {
       const errorMsg = err.response?.data?.message;
       
