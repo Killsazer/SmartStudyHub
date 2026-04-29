@@ -20,6 +20,22 @@ export abstract class TaskDecorator implements ITask {
   completeTask(): ITask | null {
     return this.wrappee.completeTask();
   }
+
+  toJSON(): any {
+    const data = this.wrappee.toJSON ? this.wrappee.toJSON() : { ...this.wrappee };
+    return {
+      ...data,
+      id: this.id,
+      title: this.title,
+      status: this.status,
+      priority: this.priority,
+      userId: this.userId,
+      deadline: this.deadline,
+      description: this.description,
+      subjectId: this.subjectId,
+      recurrenceDays: this.recurrenceDays,
+    };
+  }
 }
 
 export class RecurringTaskDecorator extends TaskDecorator {

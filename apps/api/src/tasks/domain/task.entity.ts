@@ -34,6 +34,7 @@ export interface ITask {
   recurrenceDays?: number;
   
   completeTask(): ITask | null; 
+  toJSON(): any;
 }
 
 export class TaskEntity implements ITask {
@@ -64,5 +65,19 @@ export class TaskEntity implements ITask {
       
       this.status = TaskStatus.DONE;
       return null; 
+    }
+
+    toJSON(): any {
+      return {
+        id: this.id,
+        title: this.title,
+        status: this.status,
+        priority: this.priority,
+        userId: this.userId,
+        deadline: this.deadline,
+        description: this.description,
+        subjectId: this.subjectId,
+        recurrenceDays: this.recurrenceDays,
+      };
     }
 }

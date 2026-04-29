@@ -7,23 +7,18 @@ export class OverdueTaskDecorator extends TaskDecorator {
     super(wrappee);
   }
 
-  get title(): string {
-    const baseTitle = this.wrappee.title;
+  get isOverdue(): boolean {
     const deadline = this.wrappee.deadline;
     if (!deadline || this.wrappee.status === TaskStatus.DONE) {
-      return baseTitle;
+      return false;
     }
-
-    const isOverdue = deadline.getTime() < new Date().getTime();
-
-    if (isOverdue) {
-      return `[ПРОСТРОЧЕНО] ${baseTitle}`;
-    }
-
-    return baseTitle;
+    return deadline.getTime() < new Date().getTime();
   }
 
-  set title(value: string) {
-    this.wrappee.title = value;
+  toJSON(): any {
+    return {
+      ...super.toJSON(),
+      isOverdue: this.isOverdue,
+    };
   }
 }
