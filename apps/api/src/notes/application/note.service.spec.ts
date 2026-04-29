@@ -2,8 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { NoteService } from './note.service';
 import { NoteEntity } from '../domain/note.entity';
-import { NoteSection } from '../domain/patterns/composite/note-section';
-import { NoteBlock } from '../domain/patterns/composite/note-block';
 
 describe('NoteService', () => {
   let service: NoteService;
@@ -14,7 +12,6 @@ describe('NoteService', () => {
       save: jest.fn().mockResolvedValue(undefined),
       findById: jest.fn(),
       delete: jest.fn().mockResolvedValue(undefined),
-      findByUserId: jest.fn(),
       getNotesTree: jest.fn(),
     };
 
@@ -31,7 +28,7 @@ describe('NoteService', () => {
   describe('createNote', () => {
     it('✅ should create a note and save it to repository', async () => {
       const dto = { title: 'Lecture 1', content: 'Intro to Clean Architecture', subjectId: 'subj-1' };
-      
+
       const result = await service.createNote('u1', dto);
 
       expect(result.id).toBeDefined();
@@ -44,7 +41,7 @@ describe('NoteService', () => {
 
     it('❌ should throw ForbiddenException if trying to create inside someone elses folder', async () => {
       const dto = { title: 'New Note', parentId: 'p-1' };
-      const parentNote = new NoteEntity('p-1', 'Parent Folder', 'other-user');
+      const parentNote = new NoteEntity({ id: 'p-1', title: 'Parent Folder', userId: 'other-user' });
       mockNoteRepo.findById.mockResolvedValue(parentNote);
 
       await expect(service.createNote('u1', dto)).rejects.toThrow(ForbiddenException);
@@ -53,7 +50,7 @@ describe('NoteService', () => {
 
   describe('updateNote', () => {
     it('✅ should update a note if user is the owner', async () => {
-      const existingNote = new NoteEntity('n1', 'Old Title', 'u1', 'Old Content');
+      const existingNote = new NoteEntity({ id: 'n1', title: 'Old Title', userId: 'u1', content: 'Old Content' });
       mockNoteRepo.findById.mockResolvedValue(existingNote);
 
       const result = await service.updateNote('u1', 'n1', { title: 'New Title', content: 'New Content' });
@@ -70,7 +67,7 @@ describe('NoteService', () => {
     });
 
     it('❌ should throw ForbiddenException if user is not the owner', async () => {
-      const existingNote = new NoteEntity('n1', 'Title', 'other-user');
+      const existingNote = new NoteEntity({ id: 'n1', title: 'Title', userId: 'other-user' });
       mockNoteRepo.findById.mockResolvedValue(existingNote);
 
       await expect(service.updateNote('u1', 'n1', { title: 'New' })).rejects.toThrow(ForbiddenException);
@@ -79,7 +76,7 @@ describe('NoteService', () => {
 
   describe('deleteNote', () => {
     it('✅ should delete a note if user is the owner', async () => {
-      const existingNote = new NoteEntity('n1', 'Title', 'u1');
+      const existingNote = new NoteEntity({ id: 'n1', title: 'Title', userId: 'u1' });
       mockNoteRepo.findById.mockResolvedValue(existingNote);
 
       await service.deleteNote('u1', 'n1');
@@ -94,7 +91,7 @@ describe('NoteService', () => {
     });
 
     it('❌ should throw ForbiddenException if user is not the owner', async () => {
-      const existingNote = new NoteEntity('n1', 'Title', 'other-user');
+      const existingNote = new NoteEntity({ id: 'n1', title: 'Title', userId: 'other-user' });
       mockNoteRepo.findById.mockResolvedValue(existingNote);
 
       await expect(service.deleteNote('u1', 'n1')).rejects.toThrow(ForbiddenException);
@@ -102,14 +99,12 @@ describe('NoteService', () => {
   });
 
   describe('getNotesTree', () => {
-    it('✅ should reconstruct and serialize the tree from composite roots', async () => {
-      const root1 = new NoteSection('f1', 'Folder 1');
-      const root2 = new NoteBlock('b1', 'Standalone Block', 'Content');
-      
-      const childBlock = new NoteBlock('b2', 'Child Block', 'Content');
-      root1.add(childBlock);
+    it('✅ should build a tree from flat entities and serialize it', async () => {
+      const folder = new NoteEntity({ id: 'f1', title: 'Folder 1', userId: 'u1' });
+      const standaloneBlock = new NoteEntity({ id: 'b1', title: 'Standalone Block', userId: 'u1', content: 'Content' });
+      const childBlock = new NoteEntity({ id: 'b2', title: 'Child Block', userId: 'u1', content: 'Content', parentId: 'f1' });
 
-      mockNoteRepo.getNotesTree.mockResolvedValue([root1, root2]);
+      mockNoteRepo.getNotesTree.mockResolvedValue([folder, standaloneBlock, childBlock]);
 
       const result = await service.getNotesTree('u1');
 

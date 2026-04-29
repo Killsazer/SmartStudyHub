@@ -4,6 +4,7 @@ import { NoteEntity } from '../domain/note.entity';
 import { CreateNoteDto } from '../presentation/dto/create-note.dto';
 import { UpdateNoteDto } from '../presentation/dto/update-note.dto';
 import { INoteNode } from '../domain/patterns/composite/note-component';
+import { NoteTreeBuilder } from './note-tree.builder';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -34,8 +35,9 @@ export class NoteService {
   }
 
   async getNotesTree(userId: string): Promise<INoteNode[]> {
-    const roots = await this.noteRepo.getNotesTree(userId);
-    return roots.map(root => root.toJSON());
+    const entities = await this.noteRepo.getNotesTree(userId);
+    const tree = NoteTreeBuilder.build(entities);
+    return tree.map(root => root.toJSON());
   }
 
   async updateNote(userId: string, noteId: string, dto: UpdateNoteDto): Promise<NoteEntity> {

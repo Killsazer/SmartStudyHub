@@ -2,9 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { INoteRepository } from '../domain/note.repository.interface';
 import { NoteEntity, NoteProps } from '../domain/note.entity';
-import { NoteBlock } from '../domain/patterns/composite/note-block';
-import { NoteSection } from '../domain/patterns/composite/note-section';
-import { NoteComponent } from '../domain/patterns/composite/note-component';
 
 @Injectable()
 export class PrismaNoteRepository implements INoteRepository {
@@ -33,47 +30,19 @@ export class PrismaNoteRepository implements INoteRepository {
     return this.toDomainEntity(savedData);
   }
 
-  async findByUserId(userId: string): Promise<NoteEntity[]> {
-    const data = await this.prisma.note.findMany({ where: { userId } });
-    return data.map(d => this.toDomainEntity(d));
-  }
-
   async findById(id: string): Promise<NoteEntity | null> {
-    const d = await this.prisma.note.findUnique({ where: { id } });
-    if (!d) return null;
-    return this.toDomainEntity(d);
+    const data = await this.prisma.note.findUnique({ where: { id } });
+    if (!data) return null;
+    return this.toDomainEntity(data);
   }
 
   async delete(id: string): Promise<void> {
     await this.prisma.note.delete({ where: { id } });
   }
 
-  async getNotesTree(userId: string): Promise<NoteComponent[]> {
-    const allNotes = await this.prisma.note.findMany({ where: { userId } });
-
-    const map = new Map<string, NoteComponent>();
-    const roots: NoteComponent[] = [];
-
-    allNotes.forEach(n => {
-      const component = n.content
-        ? new NoteBlock(n.id, n.title, n.content, n.subjectId)
-        : new NoteSection(n.id, n.title, n.subjectId);
-      map.set(n.id, component);
-    });
-
-    allNotes.forEach(n => {
-      const component = map.get(n.id)!;
-      if (n.parentId && map.has(n.parentId)) {
-        const parent = map.get(n.parentId)!;
-        if (parent instanceof NoteSection) {
-          parent.add(component);
-        }
-      } else {
-        roots.push(component);
-      }
-    });
-
-    return roots;
+  async getNotesTree(userId: string): Promise<NoteEntity[]> {
+    const data = await this.prisma.note.findMany({ where: { userId } });
+    return data.map(d => this.toDomainEntity(d));
   }
 
   private toDomainEntity(d: {
