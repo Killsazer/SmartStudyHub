@@ -49,8 +49,8 @@ export class OnboardingFacade {
       teacherId: teacher.id,
       weekNumber: 1,
       dayOfWeek: 1,
-      startTime: '08:00',
-      endTime: '09:30',
+      startTime: '08:30',
+      endTime: '10:05',
       classType: ClassType.LECTURE,
       location: 'Virtual Classroom',
     });
