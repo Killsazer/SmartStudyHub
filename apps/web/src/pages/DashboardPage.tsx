@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { LogOut, Users, FolderOpen, CalendarDays, ChevronDown, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../features/auth/AuthContext';
@@ -12,7 +13,6 @@ import { ScheduleGrid } from '../features/schedule/components/ScheduleGrid';
 import { ShareSchedule } from '../features/schedule/components/ShareSchedule';
 import { TeacherManager } from '../features/schedule/components/TeacherManager';
 import { CreateSlotModal } from '../features/schedule/components/CreateSlotModal';
-import { SlotDetailSidebar } from '../features/schedule/components/SlotDetailSidebar';
 
 import { SubjectCard } from '../features/subjects/components/SubjectCard';
 import { CreateSubjectModal } from '../features/subjects/components/CreateSubjectModal';
@@ -22,6 +22,7 @@ import { WelcomeModal } from '../features/onboarding/components/WelcomeModal';
 
 const DashboardPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { logout, user, deleteAccount } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
@@ -58,9 +59,6 @@ const DashboardPage = () => {
   const [isCreateSlotOpen, setIsCreateSlotOpen] = useState(false);
   const [newSlotData, setNewSlotData] = useState<{ day: number; timeIndex: number } | undefined>();
   const [editingSlotState, setEditingSlotState] = useState<ScheduleSlot | null>(null);
-  
-  // Slot Detail Sidebar State
-  const [selectedSlot, setSelectedSlot] = useState<ScheduleSlot | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -84,8 +82,7 @@ const DashboardPage = () => {
       setSubjects(subjectsWithTasks);
       setTeachers(tchs);
       setSlots(slts);
-      setSelectedSlot(prev => prev ? (slts.find(s => s.id === prev.id) || null) : null);
-      
+
       if (subs.length === 0 && tchs.length === 0 && slts.length === 0) {
         setShowWelcomeModal(true);
       }
@@ -266,15 +263,31 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        <ScheduleGrid 
+        <ScheduleGrid
           weekNumber={activeWeek}
           slots={slots}
           subjects={subjects}
           teachers={teachers}
-          onSlotClick={(slot) => setSelectedSlot(slot)}
+          onSlotClick={(slot) => {
+            if (slot.subjectId) navigate(`/subjects/${slot.subjectId}`);
+          }}
           onEmptySlotClick={(day, timeIndex) => {
             setNewSlotData({ day, timeIndex });
             setIsCreateSlotOpen(true);
+          }}
+          onEditSlot={(slot) => {
+            setEditingSlotState(slot);
+            setIsCreateSlotOpen(true);
+          }}
+          onDeleteSlot={async (slot) => {
+            if (!window.confirm(t('delete_lesson_confirm', 'Ви дійсно хочете видалити це заняття з розкладу?'))) return;
+            try {
+              await deleteScheduleSlot(slot.id);
+              toast.success(t('deleted_successfully', 'Успішно видалено'));
+              fetchData();
+            } catch {
+              toast.error(t('error', 'Сталася помилка'));
+            }
           }}
         />
       </main>
@@ -287,7 +300,7 @@ const DashboardPage = () => {
         onTeachersChange={fetchData}
       />
 
-      <CreateSlotModal 
+      <CreateSlotModal
         isOpen={isCreateSlotOpen}
         onClose={() => {
           setIsCreateSlotOpen(false);
@@ -299,39 +312,8 @@ const DashboardPage = () => {
         initialDay={newSlotData?.day}
         initialTimeIndex={newSlotData?.timeIndex}
         initialData={editingSlotState || undefined}
-        onCreated={() => {
-          fetchData();
-          if (editingSlotState && selectedSlot?.id === editingSlotState.id) {
-            // Optionally close sidebar entirely, or refetch
-            // setSelectedSlot(null);
-          }
-        }}
+        onCreated={fetchData}
       />
-
-      {selectedSlot && (
-        <SlotDetailSidebar 
-          slot={selectedSlot}
-          subject={subjects.find(s => s.id === selectedSlot.subjectId)}
-          teacher={teachers.find(t => t.id === selectedSlot.teacherId)}
-          onEditSlot={() => {
-            setEditingSlotState(selectedSlot);
-            setIsCreateSlotOpen(true);
-          }}
-          onDeleteSlot={async () => {
-            if (!window.confirm(t('delete_lesson_confirm', 'Ви дійсно хочете видалити це заняття з розкладу?'))) return;
-            try {
-                await deleteScheduleSlot(selectedSlot.id);
-                toast.success(t('deleted_successfully', 'Успішно видалено'));
-                setSelectedSlot(null);
-                fetchData();
-            } catch (err) {
-                toast.error(t('error', 'Сталася помилка'));
-            }
-          }}
-          onClose={() => setSelectedSlot(null)}
-          onDataChanged={fetchData}
-        />
-      )}
 
       {/* Management subjects modal overlay */}
       {isSubjectsModalOpen && (
@@ -383,7 +365,7 @@ const DashboardPage = () => {
                     <SubjectCard
                       key={subj.id}
                       subject={subj}
-                      onClick={() => {}} // Disabled navigation, manageable only
+                      onClick={() => { setIsSubjectsModalOpen(false); navigate(`/subjects/${subj.id}`); }}
                       onEdit={(e) => { e.stopPropagation(); setEditingSubject(subj); setIsCreateSubjectOpen(true); }}
                       onDelete={(e) => handleDeleteSubject(e, subj.id)}
                     />

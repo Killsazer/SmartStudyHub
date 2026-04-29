@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import SubjectPage from './pages/SubjectPage';
 import { ThemeProvider } from './shared/theme/ThemeContext';
 
 
@@ -26,6 +27,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subjects/:id"
+            element={
+              <ProtectedRoute>
+                <SubjectPage />
               </ProtectedRoute>
             }
           />

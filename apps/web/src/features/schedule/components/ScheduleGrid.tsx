@@ -11,6 +11,8 @@ interface Props {
   teachers: Teacher[];
   onSlotClick?: (slot: ScheduleSlot) => void;
   onEmptySlotClick?: (day: number, timeIndex: number) => void;
+  onEditSlot?: (slot: ScheduleSlot) => void;
+  onDeleteSlot?: (slot: ScheduleSlot) => void;
 }
 
 export const KPI_TIME_SLOTS = [
@@ -24,7 +26,7 @@ export const KPI_TIME_SLOTS = [
 
 export const KPI_DAYS = [1, 2, 3, 4, 5, 6]; // Mon - Sat
 
-export const ScheduleGrid: React.FC<Props> = ({ weekNumber, slots, subjects, teachers, onSlotClick, onEmptySlotClick }) => {
+export const ScheduleGrid: React.FC<Props> = ({ weekNumber, slots, subjects, teachers, onSlotClick, onEmptySlotClick, onEditSlot, onDeleteSlot }) => {
   const { t } = useTranslation();
 
   const getDayName = (dayNumber: number) => {
@@ -73,10 +75,12 @@ export const ScheduleGrid: React.FC<Props> = ({ weekNumber, slots, subjects, tea
                     }}
                   >
                     {slot ? (
-                      <ScheduleSlotCard 
-                        slot={slot} 
+                      <ScheduleSlotCard
+                        slot={slot}
                         subject={subjects.find(s => s.id === slot.subjectId)}
                         teacher={teachers.find(t => t.id === slot.teacherId)}
+                        onEdit={onEditSlot ? (e) => { e.stopPropagation(); onEditSlot(slot); } : undefined}
+                        onDelete={onDeleteSlot ? (e) => { e.stopPropagation(); onDeleteSlot(slot); } : undefined}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScheduleSlot, Teacher, ClassType } from '../api/schedule.api';
 import { SubjectItem } from '../../subjects/api/subjects.api';
-import { MapPin, User, ChevronRight } from 'lucide-react';
+import { MapPin, User, Pencil, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { LinkifyText } from '../../../shared/components/LinkifyText';
 
@@ -9,6 +9,8 @@ interface Props {
   slot: ScheduleSlot;
   subject?: SubjectItem;
   teacher?: Teacher;
+  onEdit?: (e: React.MouseEvent) => void;
+  onDelete?: (e: React.MouseEvent) => void;
 }
 
 const getClassTypeColor = (type: ClassType) => {
@@ -20,10 +22,11 @@ const getClassTypeColor = (type: ClassType) => {
   }
 };
 
-export const ScheduleSlotCard: React.FC<Props> = ({ slot, subject, teacher }) => {
+export const ScheduleSlotCard: React.FC<Props> = ({ slot, subject, teacher, onEdit, onDelete }) => {
   const { t } = useTranslation();
   const typeColor = getClassTypeColor(slot.classType);
   const subjectColor = subject?.color || '#3b82f6';
+  const activeTaskCount = subject?.tasks?.filter(t => t.status !== 'DONE').length || 0;
   
   const getClassTypeLabel = (type: ClassType) => {
     switch (type) {
@@ -44,14 +47,39 @@ export const ScheduleSlotCard: React.FC<Props> = ({ slot, subject, teacher }) =>
         style={{ backgroundColor: subjectColor }}
       />
       
+      {(onEdit || onDelete) && (
+        <div className="absolute top-1 right-1 z-10 flex gap-0.5 opacity-0 group-hover/card:opacity-100 transition-opacity">
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              title={t('edit', 'Редагувати')}
+              className="p-1 rounded bg-white/90 dark:bg-zinc-800/90 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 shadow-sm"
+            >
+              <Pencil className="w-3 h-3" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              title={t('delete', 'Видалити')}
+              className="p-1 rounded bg-white/90 dark:bg-zinc-800/90 hover:bg-red-100 dark:hover:bg-red-900/40 text-zinc-600 dark:text-zinc-300 hover:text-red-500 shadow-sm"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="pl-1 h-full flex flex-col">
         <div className="flex justify-between items-start mb-1">
           <span className={`text-[10px] sm:text-xs font-semibold px-1.5 py-0.5 rounded border ${typeColor}`}>
             {getClassTypeLabel(slot.classType)}
           </span>
-          <span className="text-[10px] sm:text-xs font-semibold text-zinc-600 dark:text-zinc-400 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center">
-            {subject?.tasks?.filter(t => t.status !== 'DONE').length || 0} <ChevronRight className="w-3 h-3 ml-0.5" />
-          </span>
+          {activeTaskCount > 0 && (
+            <span className="text-[10px] sm:text-xs font-semibold text-zinc-600 dark:text-zinc-400 group-hover/card:opacity-0 transition-opacity">
+              {activeTaskCount}
+            </span>
+          )}
         </div>
         
         <h4 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white leading-tight mb-1 break-words">
