@@ -269,7 +269,10 @@ const DashboardPage = () => {
           subjects={subjects}
           teachers={teachers}
           onSlotClick={(slot) => {
-            if (slot.subjectId) navigate(`/subjects/${slot.subjectId}`);
+            if (!slot.subjectId) return;
+            const subject = subjects.find(s => s.id === slot.subjectId);
+            const teacher = teachers.find(t => t.id === slot.teacherId);
+            navigate(`/subjects/${slot.subjectId}`, { state: { slot, teacher, subject } });
           }}
           onEmptySlotClick={(day, timeIndex) => {
             setNewSlotData({ day, timeIndex });
