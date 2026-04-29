@@ -20,9 +20,10 @@ interface Props {
   onEditSlot: () => void;
   onDeleteSlot: () => void;
   onClose: () => void;
+  onDataChanged?: () => void;
 }
 
-export const SlotDetailSidebar: React.FC<Props> = ({ slot, subject, teacher, onEditSlot, onDeleteSlot, onClose }) => {
+export const SlotDetailSidebar: React.FC<Props> = ({ slot, subject, teacher, onEditSlot, onDeleteSlot, onClose, onDataChanged }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'tasks' | 'notes'>('tasks');
 
@@ -66,6 +67,7 @@ export const SlotDetailSidebar: React.FC<Props> = ({ slot, subject, teacher, onE
       await deleteTask(taskId);
       toast.success('Task deleted');
       fetchTasks();
+      onDataChanged?.();
     } catch {
       toast.error('Failed to delete task');
     }
@@ -90,6 +92,7 @@ export const SlotDetailSidebar: React.FC<Props> = ({ slot, subject, teacher, onE
       await deleteNote(noteId);
       toast.success('Deleted successfully');
       fetchNotes();
+      onDataChanged?.();
     } catch {
       toast.error('Failed to delete note');
     }
@@ -232,7 +235,7 @@ export const SlotDetailSidebar: React.FC<Props> = ({ slot, subject, teacher, onE
                     <TaskComponent 
                       key={task.id} 
                       task={task} 
-                      onStatusChanged={fetchTasks} 
+                      onStatusChanged={() => { fetchTasks(); onDataChanged?.(); }} 
                       onEdit={() => { setEditingTask(task); setIsTaskModalOpen(true); }}
                       onDelete={() => handleDeleteTask(task.id)}
                     />
@@ -272,7 +275,7 @@ export const SlotDetailSidebar: React.FC<Props> = ({ slot, subject, teacher, onE
         isOpen={isTaskModalOpen}
         onClose={() => { setIsTaskModalOpen(false); setEditingTask(null); }}
         subjectId={subject.id}
-        onCreated={fetchTasks}
+        onCreated={() => { fetchTasks(); onDataChanged?.(); }}
         initialData={editingTask}
       />
       
@@ -281,7 +284,7 @@ export const SlotDetailSidebar: React.FC<Props> = ({ slot, subject, teacher, onE
         onClose={() => { setIsNoteModalOpen(false); setEditingNote(null); }}
         subjectId={subject.id}
         parentId={activeParentNoteId}
-        onCreated={fetchNotes}
+        onCreated={() => { fetchNotes(); onDataChanged?.(); }}
         initialData={editingNote}
       />
     </>

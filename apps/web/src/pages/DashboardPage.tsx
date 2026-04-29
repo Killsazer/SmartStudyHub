@@ -17,6 +17,7 @@ import { SlotDetailSidebar } from '../features/schedule/components/SlotDetailSid
 import { SubjectCard } from '../features/subjects/components/SubjectCard';
 import { CreateSubjectModal } from '../features/subjects/components/CreateSubjectModal';
 import { createSubject, updateSubject, deleteSubject } from '../features/subjects/api/subjects.api';
+import { getTasks } from '../features/tasks/api/tasks.api';
 import { WelcomeModal } from '../features/onboarding/components/WelcomeModal';
 
 const DashboardPage = () => {
@@ -68,12 +69,19 @@ const DashboardPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [subs, tchs, slts] = await Promise.all([
+      const [subs, tchs, slts, allTasks] = await Promise.all([
         getSubjects(),
         getTeachers(),
-        getScheduleSlots(activeWeek)
+        getScheduleSlots(activeWeek),
+        getTasks()
       ]);
-      setSubjects(subs);
+      
+      const subjectsWithTasks = subs.map(sub => ({
+        ...sub,
+        tasks: allTasks.filter(t => t.subjectId === sub.id)
+      }));
+
+      setSubjects(subjectsWithTasks);
       setTeachers(tchs);
       setSlots(slts);
       setSelectedSlot(prev => prev ? (slts.find(s => s.id === prev.id) || null) : null);
@@ -196,7 +204,12 @@ const DashboardPage = () => {
                   </div>
                   <div className="p-2">
                     <button
-                      onClick={() => { setIsProfileOpen(false); logout(); }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsProfileOpen(false);
+                        logout();
+                      }}
                       className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
@@ -297,6 +310,7 @@ const DashboardPage = () => {
             }
           }}
           onClose={() => setSelectedSlot(null)}
+          onDataChanged={fetchData}
         />
       )}
 

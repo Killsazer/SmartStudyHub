@@ -15,8 +15,10 @@ export interface Task {
   isOverdue?: boolean;
 }
 
-export const getTasks = async (subjectId: string, sort: SortStrategy = 'deadline'): Promise<Task[]> => {
-  const res = await apiClient.get('/tasks', { params: { subjectId, sort } });
+export const getTasks = async (subjectId?: string, sort: SortStrategy = 'deadline'): Promise<Task[]> => {
+  const params: Record<string, any> = { sort };
+  if (subjectId) params.subjectId = subjectId;
+  const res = await apiClient.get('/tasks', { params });
   return res.data.data;
 };
 
