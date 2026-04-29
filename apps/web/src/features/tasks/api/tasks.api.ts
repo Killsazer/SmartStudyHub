@@ -1,35 +1,42 @@
 import { apiClient } from '../../../shared/api/client';
 
+export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
+export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
+export type SortStrategy = 'deadline' | 'priority' | 'title';
+
 export interface Task {
   id: string;
   title: string;
-  status: 'TODO' | 'IN_PROGRESS' | 'DONE';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  status: TaskStatus;
+  priority: TaskPriority;
   deadline?: string;
   description?: string;
   subjectId: string;
+  isOverdue?: boolean;
 }
-
-export type SortStrategy = 'deadline' | 'priority' | 'title';
 
 export const getTasks = async (subjectId: string, sort: SortStrategy = 'deadline'): Promise<Task[]> => {
   const res = await apiClient.get('/tasks', { params: { subjectId, sort } });
   return res.data.data;
 };
 
-export const createTask = async (data: { title: string; subjectId: string; priority: string; deadline?: string }): Promise<Task> => {
+export const createTask = async (data: { title: string; subjectId: string; priority: TaskPriority; deadline?: string }): Promise<Task> => {
   const res = await apiClient.post('/tasks', data);
   return res.data.data;
 };
 
-export const changeTaskStatus = async (id: string, status: string): Promise<void> => {
+export const changeTaskStatus = async (id: string, status: TaskStatus): Promise<void> => {
   await apiClient.patch(`/tasks/${id}/status`, { status });
 };
 
-export const updateTask = async (id: string, data: Partial<{ title: string; description: string; priority: string; deadline: string }>): Promise<void> => {
+export const updateTask = async (id: string, data: Partial<{ title: string; description: string; priority: TaskPriority; deadline: string }>): Promise<void> => {
   await apiClient.patch(`/tasks/${id}`, data);
 };
 
 export const deleteTask = async (id: string): Promise<void> => {
   await apiClient.delete(`/tasks/${id}`);
+};
+
+export const undoLastAction = async (): Promise<void> => {
+  await apiClient.post('/tasks/undo');
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Calendar, Flag, CheckCircle2, Circle, Edit2, Trash2 } from 'lucide-react';
-import { Task, changeTaskStatus } from '../api/tasks.api';
+import { Calendar, Flag, CheckCircle2, Circle, Edit2, Trash2, AlertCircle } from 'lucide-react';
+import { Task, changeTaskStatus, undoLastAction } from '../api/tasks.api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 
@@ -25,7 +25,32 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
     const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
     try {
       await changeTaskStatus(task.id, newStatus);
-      toast.success(newStatus === 'DONE' ? 'Task completed! Command & Observer triggered' : 'Task reopened');
+      
+      if (newStatus === 'DONE') {
+        toast((t) => (
+          <div className="flex items-center gap-4">
+            <span>Task completed!</span>
+            <button 
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  await undoLastAction();
+                  onStatusChanged();
+                  toast.success('Action undone');
+                } catch (e) {
+                  toast.error('Failed to undo');
+                }
+              }}
+              className="px-3 py-1 bg-zinc-800 text-white rounded text-xs font-medium hover:bg-zinc-700 transition-colors"
+            >
+              Undo
+            </button>
+          </div>
+        ), { duration: 4000 });
+      } else {
+        toast.success('Task reopened');
+      }
+
       onStatusChanged();
     } catch (err) {
       toast.error('Failed to update task status');
@@ -37,7 +62,7 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
   const isDone = task.status === 'DONE';
 
   return (
-    <div className={`group p-4 rounded-xl border flex items-center gap-4 transition-all ${isDone ? 'bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800/50 opacity-60' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20'}`}>
+    <div className={`group p-4 rounded-xl border flex items-center gap-4 transition-all ${isDone ? 'bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800/50 opacity-60' : task.isOverdue ? 'bg-red-50/50 dark:bg-red-900/10 border-red-500/50 hover:border-red-500 dark:hover:border-red-400 hover:shadow-lg hover:shadow-red-500/10' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20'}`}>
       <button 
         onClick={toggleStatus} 
         disabled={loading}
@@ -58,9 +83,16 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
           </span>
           
           {task.deadline && (
-            <span className="flex items-center gap-1 text-zinc-500">
+            <span className={`flex items-center gap-1 ${task.isOverdue && !isDone ? 'text-red-500 font-medium' : 'text-zinc-500'}`}>
               <Calendar className="w-3.5 h-3.5" />
               {format(new Date(task.deadline), 'MMM d, h:mm a')}
+            </span>
+          )}
+          
+          {task.isOverdue && !isDone && (
+            <span className="flex items-center gap-1 text-red-500 font-medium">
+              <AlertCircle className="w-3.5 h-3.5" />
+              Overdue
             </span>
           )}
         </div>
