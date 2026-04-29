@@ -385,9 +385,11 @@ const DashboardPage = () => {
 
       <WelcomeModal
         isOpen={showWelcomeModal}
-        onComplete={() => {
+        onComplete={(dataGenerated) => {
           setShowWelcomeModal(false);
-          fetchData();
+          if (dataGenerated) {
+            fetchData();
+          }
         }}
       />
     </div>

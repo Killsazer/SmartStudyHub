@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 interface Props {
   isOpen: boolean;
-  onComplete: () => void;
+  onComplete: (dataGenerated?: boolean) => void;
 }
 
 export const WelcomeModal: React.FC<Props> = ({ isOpen, onComplete }) => {
@@ -20,7 +20,7 @@ export const WelcomeModal: React.FC<Props> = ({ isOpen, onComplete }) => {
     try {
       await startOnboarding();
       toast.success(t('onboarding_success', 'Sample study data generated successfully!'));
-      onComplete();
+      onComplete(true);
     } catch (err) {
       toast.error(t('onboarding_error', 'Failed to generate sample data.'));
     } finally {
@@ -59,7 +59,7 @@ export const WelcomeModal: React.FC<Props> = ({ isOpen, onComplete }) => {
         </button>
 
         <button
-          onClick={onComplete}
+          onClick={() => onComplete(false)}
           disabled={loading}
           className="mt-4 text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
         >
