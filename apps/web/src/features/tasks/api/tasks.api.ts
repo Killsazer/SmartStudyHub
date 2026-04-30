@@ -23,7 +23,7 @@ export const getTasks = async (subjectId?: string, sort: SortStrategy = 'deadlin
   return res.data.data;
 };
 
-export const createTask = async (data: { title: string; subjectId: string; priority: TaskPriority; deadline?: string; recurrenceDays?: number }): Promise<Task> => {
+export const createTask = async (data: { title: string; subjectId: string; priority: TaskPriority; description?: string; deadline?: string; recurrenceDays?: number }): Promise<Task> => {
   const res = await apiClient.post('/tasks', data);
   return res.data.data;
 };

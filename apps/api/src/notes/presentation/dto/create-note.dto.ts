@@ -3,7 +3,7 @@ import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 export class CreateNoteDto {
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 
   @IsString()
   @IsOptional()
@@ -14,6 +14,6 @@ export class CreateNoteDto {
   parentId?: string;
 
   @IsString()
-  @IsOptional()
-  subjectId?: string;
+  @IsNotEmpty()
+  subjectId!: string;
 }

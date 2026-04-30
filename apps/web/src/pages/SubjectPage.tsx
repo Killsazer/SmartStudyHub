@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Plus, Clock, MapPin } from 'lucide-react';
 import { TaskItem as TaskComponent } from '../features/tasks/components/TaskItem';
@@ -40,6 +40,9 @@ const SubjectPage = () => {
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [loadingNotes, setLoadingNotes] = useState(true);
 
+  const tasksRequestIdRef = useRef(0);
+  const notesRequestIdRef = useRef(0);
+
   useEffect(() => {
     if (id) {
       fetchTasks();
@@ -48,13 +51,17 @@ const SubjectPage = () => {
   }, [id, sortStrategy]);
 
   const fetchTasks = async () => {
+    const myRequestId = ++tasksRequestIdRef.current;
+    setLoadingTasks(true);
     try {
       const data = await getTasks(id!, sortStrategy);
+      if (myRequestId !== tasksRequestIdRef.current) return;
       setTasks(data);
     } catch (err) {
+      if (myRequestId !== tasksRequestIdRef.current) return;
       toast.error(t('failed_to_load_tasks'));
     } finally {
-      setLoadingTasks(false);
+      if (myRequestId === tasksRequestIdRef.current) setLoadingTasks(false);
     }
   };
 
@@ -80,15 +87,17 @@ const SubjectPage = () => {
   };
 
   const fetchNotes = async () => {
+    const myRequestId = ++notesRequestIdRef.current;
+    setLoadingNotes(true);
     try {
       const data = await getNoteTree();
-      // Only show notes related to this subject (top level components)
-      const subjectNotes = data.filter(n => n.subjectId === id || n.subjectId === null);
-      setNotes(subjectNotes);
+      if (myRequestId !== notesRequestIdRef.current) return;
+      setNotes(data.filter(n => n.subjectId === id));
     } catch (err) {
+      if (myRequestId !== notesRequestIdRef.current) return;
       toast.error(t('failed_to_load_notes'));
     } finally {
-      setLoadingNotes(false);
+      if (myRequestId === notesRequestIdRef.current) setLoadingNotes(false);
     }
   };
 
