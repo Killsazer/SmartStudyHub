@@ -101,7 +101,7 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
       animate="visible"
       exit="exit"
       transition={{ layout: { type: 'spring', stiffness: 380, damping: 32, mass: 0.7 } }}
-      className={`group p-4 rounded-xl border flex items-center gap-4 transition-colors transition-shadow duration-200 will-change-transform ${
+      className={`group p-4 rounded-xl border flex items-center gap-4 transition-shadow duration-200 will-change-transform ${
         isDone
           ? 'bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800/50 opacity-60'
           : task.isOverdue
