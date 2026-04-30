@@ -1,4 +1,5 @@
 import { ClassType, ScheduleSlotEntity, ScheduleSlotProps } from '../schedule-slot.entity';
+import { SlotValidationError } from './slot-validation.error';
 
 export { ClassType, ScheduleSlotEntity };
 
@@ -8,6 +9,12 @@ export class LectureSlot extends ScheduleSlotEntity {
 
 export class LabSlot extends ScheduleSlotEntity {
   readonly classType = ClassType.LAB;
+
+  override validate(): void {
+    if (!this.teacherId) {
+      throw new SlotValidationError('Lab slots require an assigned teacher.');
+    }
+  }
 }
 
 export class PracticeSlot extends ScheduleSlotEntity {

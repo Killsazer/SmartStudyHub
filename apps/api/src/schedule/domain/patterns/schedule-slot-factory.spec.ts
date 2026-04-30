@@ -1,5 +1,6 @@
 import { ScheduleSlotFactory, LectureSlot, LabSlot, PracticeSlot } from './schedule-slot.factory';
 import { ClassType, ScheduleSlotEntity, ScheduleSlotProps } from '../schedule-slot.entity';
+import { SlotValidationError } from './slot-validation.error';
 
 const defaultProps: ScheduleSlotProps = {
   id: 'slot-1',
@@ -69,6 +70,33 @@ describe('ScheduleSlotFactory', () => {
       const slot = ScheduleSlotFactory.createSlot(ClassType.PRACTICE, propsWithoutLocation as ScheduleSlotProps);
 
       expect(slot.location).toBeUndefined();
+    });
+  });
+
+  describe('validate() — polymorphic invariants', () => {
+    it('✅ LectureSlot.validate() does not throw on default props', () => {
+      const slot = ScheduleSlotFactory.createSlot(ClassType.LECTURE, defaultProps);
+
+      expect(() => slot.validate()).not.toThrow();
+    });
+
+    it('✅ PracticeSlot.validate() does not throw on default props', () => {
+      const slot = ScheduleSlotFactory.createSlot(ClassType.PRACTICE, defaultProps);
+
+      expect(() => slot.validate()).not.toThrow();
+    });
+
+    it('❌ LabSlot.validate() throws SlotValidationError when teacherId is null', () => {
+      const slot = ScheduleSlotFactory.createSlot(ClassType.LAB, { ...defaultProps, teacherId: null });
+
+      expect(() => slot.validate()).toThrow(SlotValidationError);
+      expect(() => slot.validate()).toThrow('Lab slots require an assigned teacher.');
+    });
+
+    it('✅ LabSlot.validate() does not throw when teacherId is provided', () => {
+      const slot = ScheduleSlotFactory.createSlot(ClassType.LAB, defaultProps);
+
+      expect(() => slot.validate()).not.toThrow();
     });
   });
 

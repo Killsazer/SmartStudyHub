@@ -38,4 +38,6 @@ export abstract class ScheduleSlotEntity {
     this.endTime = props.endTime;
     this.location = props.location;
   }
+
+  validate(): void {}
 }
