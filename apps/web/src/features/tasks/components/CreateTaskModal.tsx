@@ -63,7 +63,7 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
         title,
         description,
         priority,
-        deadline: deadline ? new Date(deadline).toISOString() : undefined,
+        deadline: deadline ? new Date(deadline).toISOString() : null,
         recurrenceDays: isRecurring ? recurrenceDays : 0,
       };
 

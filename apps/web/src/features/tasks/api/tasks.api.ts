@@ -23,7 +23,7 @@ export const getTasks = async (subjectId?: string, sort: SortStrategy = 'deadlin
   return res.data.data;
 };
 
-export const createTask = async (data: { title: string; subjectId: string; priority: TaskPriority; description?: string; deadline?: string; recurrenceDays?: number }): Promise<Task> => {
+export const createTask = async (data: { title: string; subjectId: string; priority: TaskPriority; description?: string; deadline?: string | null; recurrenceDays?: number }): Promise<Task> => {
   const res = await apiClient.post('/tasks', data);
   return res.data.data;
 };
@@ -32,7 +32,7 @@ export const changeTaskStatus = async (id: string, status: TaskStatus): Promise<
   await apiClient.patch(`/tasks/${id}/status`, { status });
 };
 
-export const updateTask = async (id: string, data: Partial<{ title: string; description: string; priority: TaskPriority; deadline: string; recurrenceDays: number }>): Promise<void> => {
+export const updateTask = async (id: string, data: Partial<{ title: string; description: string; priority: TaskPriority; deadline: string | null; recurrenceDays: number }>): Promise<void> => {
   await apiClient.patch(`/tasks/${id}`, data);
 };
 

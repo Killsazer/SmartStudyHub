@@ -12,13 +12,13 @@ export class PrismaTaskRepository implements ITaskRepository {
       where: { id: task.id },
       update: {
         title: task.title,
-        description: task.description,
+        description: task.description ?? null,
         status: task.status,
         priority: task.priority,
-        deadline: task.deadline,
-        subjectId: task.subjectId,
+        deadline: task.deadline ?? null,
+        subjectId: task.subjectId ?? null,
         userId: task.userId,
-        recurrenceDays: task.recurrenceDays,
+        recurrenceDays: task.recurrenceDays ?? null,
       },
       create: {
         id: task.id,
