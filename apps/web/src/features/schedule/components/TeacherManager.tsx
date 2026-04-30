@@ -41,42 +41,42 @@ export const TeacherManager: React.FC<Props> = ({ isOpen, onClose, teachers, onT
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim()) { toast.error('Teacher name is required'); return; }
-    
+    if (!formName.trim()) { toast.error(t('teacher_name_required')); return; }
+
     setLoading(true);
     try {
       if (editingId) {
-        await updateTeacher(editingId, { 
-          name: formName, 
-          photoUrl: formPhoto || null, 
-          contacts: formContacts || null 
+        await updateTeacher(editingId, {
+          name: formName,
+          photoUrl: formPhoto || null,
+          contacts: formContacts || null
         } as any);
-        toast.success('Teacher updated');
+        toast.success(t('teacher_updated'));
       } else {
-        await createTeacher({ 
-          name: formName, 
-          photoUrl: formPhoto || undefined, 
-          contacts: formContacts || undefined 
+        await createTeacher({
+          name: formName,
+          photoUrl: formPhoto || undefined,
+          contacts: formContacts || undefined
         });
-        toast.success('Teacher added');
+        toast.success(t('teacher_added'));
       }
       resetForm();
       onTeachersChange();
     } catch {
-      toast.error('Failed to save teacher');
+      toast.error(t('failed_to_save_teacher'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete ${name}?`)) return;
+    if (!window.confirm(t('delete_teacher_confirm', { name }))) return;
     try {
       await deleteTeacher(id);
-      toast.success('Teacher deleted');
+      toast.success(t('teacher_deleted'));
       onTeachersChange();
     } catch {
-      toast.error('Failed to delete teacher');
+      toast.error(t('failed_to_delete_teacher'));
     }
   };
 

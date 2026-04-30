@@ -39,7 +39,7 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
           title,
           content: isSection ? undefined : content,
         });
-        toast.success(isSection ? 'Folder updated!' : 'Note updated!');
+        toast.success(isSection ? t('folder_updated') : t('note_updated'));
       } else {
         await createNote({
           title,
@@ -47,7 +47,7 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
           parentId: parentId || undefined,
           subjectId,
         });
-        toast.success(isSection ? 'Folder created!' : 'Note created!');
+        toast.success(isSection ? t('folder_created') : t('note_created'));
       }
       setTitle('');
       setContent('');
@@ -55,7 +55,7 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
       onCreated();
       onClose();
     } catch {
-      toast.error('Failed to create note');
+      toast.error(t('failed_to_create_note'));
     } finally {
       setLoading(false);
     }

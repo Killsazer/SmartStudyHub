@@ -1,5 +1,6 @@
 import React from 'react';
 import { BookOpen, Edit2, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { SubjectItem } from '../api/subjects.api';
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export const SubjectCard: React.FC<Props> = ({ subject, onClick, onEdit, onDelete }) => {
+  const { t } = useTranslation();
   return (
     <div
       onClick={onClick}
@@ -28,19 +30,19 @@ export const SubjectCard: React.FC<Props> = ({ subject, onClick, onEdit, onDelet
           </div>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {onEdit && (
-              <button 
-                onClick={onEdit} 
+              <button
+                onClick={onEdit}
                 className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                title="Edit subject"
+                title={t('edit_subject_title')}
               >
                 <Edit2 className="w-4 h-4" />
               </button>
             )}
             {onDelete && (
-              <button 
-                onClick={onDelete} 
+              <button
+                onClick={onDelete}
                 className="p-1.5 hover:bg-red-50 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-red-500 transition-colors"
-                title="Delete subject"
+                title={t('delete_subject_title')}
               >
                 <Trash2 className="w-4 h-4" />
               </button>

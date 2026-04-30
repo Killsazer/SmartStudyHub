@@ -16,12 +16,12 @@ interface Props {
 }
 
 export const KPI_TIME_SLOTS = [
-  { label: '1 пара', time: '08:30 - 10:05', start: '08:30' },
-  { label: '2 пара', time: '10:25 - 12:00', start: '10:25' },
-  { label: '3 пара', time: '12:20 - 13:55', start: '12:20' },
-  { label: '4 пара', time: '14:15 - 15:50', start: '14:15' },
-  { label: '5 пара', time: '16:10 - 17:45', start: '16:10' },
-  { label: '6 пара', time: '18:05 - 19:40', start: '18:05' },
+  { time: '08:30 - 10:05', start: '08:30' },
+  { time: '10:25 - 12:00', start: '10:25' },
+  { time: '12:20 - 13:55', start: '12:20' },
+  { time: '14:15 - 15:50', start: '14:15' },
+  { time: '16:10 - 17:45', start: '16:10' },
+  { time: '18:05 - 19:40', start: '18:05' },
 ];
 
 export const KPI_DAYS = [1, 2, 3, 4, 5, 6]; // Mon - Sat
@@ -30,7 +30,7 @@ export const ScheduleGrid: React.FC<Props> = ({ weekNumber, slots, subjects, tea
   const { t } = useTranslation();
 
   const getDayName = (dayNumber: number) => {
-    const days = [t('monday', 'Monday'), t('tuesday', 'Tuesday'), t('wednesday', 'Wednesday'), t('thursday', 'Thursday'), t('friday', 'Friday'), t('saturday', 'Saturday')];
+    const days = [t('monday'), t('tuesday'), t('wednesday'), t('thursday'), t('friday'), t('saturday')];
     return days[dayNumber - 1] || '';
   };
 
@@ -44,7 +44,7 @@ export const ScheduleGrid: React.FC<Props> = ({ weekNumber, slots, subjects, tea
         <thead>
           <tr>
             <th className="w-24 p-3 border-b border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 text-xs font-semibold text-zinc-500 text-center">
-              {t('time', 'Time')}
+              {t('time')}
             </th>
             {KPI_DAYS.map(day => (
               <th key={day} className="p-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 text-sm font-semibold text-zinc-700 dark:text-zinc-300 text-center min-w-[160px] max-w-[200px] w-1/6">
@@ -57,7 +57,7 @@ export const ScheduleGrid: React.FC<Props> = ({ weekNumber, slots, subjects, tea
           {KPI_TIME_SLOTS.map((timeSlot, timeIndex) => (
             <tr key={timeSlot.start} className="group">
               <td className="p-3 border-b border-r border-zinc-200 dark:border-zinc-800 text-center">
-                <div className="text-xs font-bold text-zinc-700 dark:text-zinc-300">{timeSlot.label}</div>
+                <div className="text-xs font-bold text-zinc-700 dark:text-zinc-300">{t('pair', { n: timeIndex + 1 })}</div>
                 <div className="text-[10px] text-zinc-500 mt-1">{timeSlot.time}</div>
               </td>
               {KPI_DAYS.map(day => {

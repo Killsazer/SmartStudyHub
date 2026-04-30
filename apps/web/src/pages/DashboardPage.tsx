@@ -87,37 +87,37 @@ const DashboardPage = () => {
         setShowWelcomeModal(true);
       }
     } catch (error) {
-      toast.error('Failed to load dashboard data');
+      toast.error(t('failed_to_load_dashboard'));
     } finally {
       setLoading(false);
     }
   };
 
-  // ─── Subjects Management 
+  // ─── Subjects Management
   const handleCreateSubject = async (data: { title: string; color: string }) => {
     try {
       if (editingSubject) {
         await updateSubject(editingSubject.id, data);
-        toast.success('Subject updated!');
+        toast.success(t('subject_updated'));
       } else {
         await createSubject(data);
-        toast.success('Subject created!');
+        toast.success(t('subject_created'));
       }
       fetchData();
     } catch (error) {
-      toast.error('Failed to save subject');
+      toast.error(t('failed_to_save_subject'));
     }
   };
 
   const handleDeleteSubject = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (!window.confirm('Deleting this subject will also delete all its tasks, notes, and schedule slots. Proceed?')) return;
+    if (!window.confirm(t('delete_subject_confirm'))) return;
     try {
       await deleteSubject(id);
-      toast.success('Subject deleted');
+      toast.success(t('subject_deleted'));
       fetchData();
     } catch (error) {
-      toast.error('Failed to delete subject');
+      toast.error(t('failed_to_delete_subject'));
     }
   };
 
@@ -143,7 +143,7 @@ const DashboardPage = () => {
               onClick={() => setIsSubjectsModalOpen(true)}
               className="px-3 py-1.5 rounded-lg text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors flex items-center gap-2"
             >
-              <FolderOpen className="w-4 h-4" /> <span className="hidden sm:inline-block">Предмети</span>
+              <FolderOpen className="w-4 h-4" /> <span className="hidden sm:inline-block">{t('subjects')}</span>
             </button>
 
             <ShareSchedule onImportComplete={fetchData} />
@@ -216,20 +216,20 @@ const DashboardPage = () => {
                       onMouseDown={async (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (window.confirm(t('delete_account_confirm', 'Are you sure you want to delete your account? All your data will be permanently lost.'))) {
+                        if (window.confirm(t('delete_account_confirm'))) {
                           setIsProfileOpen(false);
                           try {
                             await deleteAccount();
-                            toast.success(t('account_deleted', 'Account deleted successfully'));
+                            toast.success(t('account_deleted'));
                           } catch (err) {
-                            toast.error(t('error_deleting_account', 'Failed to delete account'));
+                            toast.error(t('error_deleting_account'));
                           }
                         }
                       }}
                       className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors mt-1"
                     >
                       <Trash2 className="w-4 h-4" />
-                      {t('delete_account', 'Видалити акаунт')}
+                      {t('delete_account')}
                     </button>
                   </div>
                 </div>
@@ -283,13 +283,13 @@ const DashboardPage = () => {
             setIsCreateSlotOpen(true);
           }}
           onDeleteSlot={async (slot) => {
-            if (!window.confirm(t('delete_lesson_confirm', 'Ви дійсно хочете видалити це заняття з розкладу?'))) return;
+            if (!window.confirm(t('delete_lesson_confirm'))) return;
             try {
               await deleteScheduleSlot(slot.id);
-              toast.success(t('deleted_successfully', 'Успішно видалено'));
+              toast.success(t('deleted_successfully'));
               fetchData();
             } catch {
-              toast.error(t('error', 'Сталася помилка'));
+              toast.error(t('error'));
             }
           }}
         />
@@ -324,7 +324,7 @@ const DashboardPage = () => {
           <div className="w-full max-w-5xl h-[85vh] bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <FolderOpen className="w-6 h-6 text-indigo-500" /> Управління предметами
+                <FolderOpen className="w-6 h-6 text-indigo-500" /> {t('manage_subjects')}
               </h2>
               <button onClick={() => setIsSubjectsModalOpen(false)} className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
                 <LogOut className="w-5 h-5" />
@@ -336,20 +336,20 @@ const DashboardPage = () => {
                 {subjects.length > 0 && (
                   <button
                     onClick={async () => {
-                      if (window.confirm(t('delete_all_subjects_confirm', 'Ви дійсно хочете видалити всі предмети? Це також видалить всі пов\'язані завдання та розклад!'))) {
+                      if (window.confirm(t('delete_all_subjects_confirm'))) {
                         try {
                           await deleteAllSubjects();
-                          toast.success(t('all_subjects_deleted', 'Всі предмети видалено'));
+                          toast.success(t('all_subjects_deleted'));
                           fetchData();
                         } catch (err) {
-                          toast.error(t('error', 'Сталася помилка'));
+                          toast.error(t('error'));
                         }
                       }
                     }}
                     className="bg-red-500/10 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg font-medium hover:bg-red-500/20 transition-colors flex items-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
-                    {t('delete_all', 'Видалити всі')}
+                    {t('delete_all')}
                   </button>
                 )}
                 <button
@@ -361,7 +361,7 @@ const DashboardPage = () => {
               </div>
 
               {subjects.length === 0 ? (
-                <div className="text-center py-12 text-zinc-500">Немає створених предметів.</div>
+                <div className="text-center py-12 text-zinc-500">{t('no_subjects_created')}</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {subjects.map(subj => (

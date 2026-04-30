@@ -3,6 +3,7 @@ import { Calendar, Flag, CheckCircle2, Circle, Edit2, Trash2, AlertCircle } from
 import { Task, changeTaskStatus, undoLastAction } from '../api/tasks.api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   task: Task;
@@ -18,6 +19,7 @@ const PRIORITY_COLORS = {
 };
 
 export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDelete }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const toggleStatus = async () => {
@@ -25,35 +27,35 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
     const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
     try {
       await changeTaskStatus(task.id, newStatus);
-      
+
       if (newStatus === 'DONE') {
-        toast((t) => (
+        toast((toastInstance) => (
           <div className="flex items-center gap-4">
-            <span>Task completed!</span>
-            <button 
+            <span>{t('task_completed')}</span>
+            <button
               onClick={async () => {
-                toast.dismiss(t.id);
+                toast.dismiss(toastInstance.id);
                 try {
                   await undoLastAction();
                   onStatusChanged();
-                  toast.success('Action undone');
+                  toast.success(t('action_undone'));
                 } catch (e) {
-                  toast.error('Failed to undo');
+                  toast.error(t('failed_to_undo'));
                 }
               }}
               className="px-3 py-1 bg-zinc-800 text-white rounded text-xs font-medium hover:bg-zinc-700 transition-colors"
             >
-              Undo
+              {t('undo')}
             </button>
           </div>
         ), { duration: 4000 });
       } else {
-        toast.success('Task reopened');
+        toast.success(t('task_reopened'));
       }
 
       onStatusChanged();
     } catch (err) {
-      toast.error('Failed to update task status');
+      toast.error(t('failed_to_update_task_status'));
     } finally {
       setLoading(false);
     }
@@ -92,7 +94,7 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
           {task.isOverdue && !isDone && (
             <span className="flex items-center gap-1 text-red-500 font-medium">
               <AlertCircle className="w-3.5 h-3.5" />
-              Overdue
+              {t('overdue')}
             </span>
           )}
         </div>
@@ -100,12 +102,12 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
 
       <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
         {onEdit && (
-          <button onClick={onEdit} className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors" title="Edit task">
+          <button onClick={onEdit} className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors" title={t('edit_task_title')}>
             <Edit2 className="w-4 h-4" />
           </button>
         )}
         {onDelete && (
-          <button onClick={onDelete} className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-zinc-800 rounded-lg transition-colors" title="Delete task">
+          <button onClick={onDelete} className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-zinc-800 rounded-lg transition-colors" title={t('delete_task_title')}>
             <Trash2 className="w-4 h-4" />
           </button>
         )}

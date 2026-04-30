@@ -52,20 +52,20 @@ const SubjectPage = () => {
       const data = await getTasks(id!, sortStrategy);
       setTasks(data);
     } catch (err) {
-      toast.error('Failed to load tasks');
+      toast.error(t('failed_to_load_tasks'));
     } finally {
       setLoadingTasks(false);
     }
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    if (!window.confirm('Delete this task?')) return;
+    if (!window.confirm(t('delete_task_confirm'))) return;
     try {
       await deleteTask(taskId);
-      toast.success('Task deleted');
+      toast.success(t('task_deleted'));
       fetchTasks();
     } catch (err) {
-      toast.error('Failed to delete task');
+      toast.error(t('failed_to_delete_task'));
     }
   };
 
@@ -86,20 +86,20 @@ const SubjectPage = () => {
       const subjectNotes = data.filter(n => n.subjectId === id || n.subjectId === null);
       setNotes(subjectNotes);
     } catch (err) {
-      toast.error('Failed to load notes');
+      toast.error(t('failed_to_load_notes'));
     } finally {
       setLoadingNotes(false);
     }
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!window.confirm('Are you sure you want to delete this note/folder? All contents will be lost.')) return;
+    if (!window.confirm(t('delete_note_confirm'))) return;
     try {
       await deleteNote(noteId);
-      toast.success('Deleted successfully');
+      toast.success(t('deleted_successfully'));
       fetchNotes();
     } catch (err) {
-      toast.error('Failed to delete note');
+      toast.error(t('failed_to_delete_note'));
     }
   };
 
@@ -140,11 +140,11 @@ const SubjectPage = () => {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-3 mb-2">
                   <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">
-                    {slotContext.slot.classType}
+                    {t(slotContext.slot.classType.toLowerCase())}
                   </span>
                   <span className="text-sm font-medium text-zinc-500 flex items-center gap-1.5">
                     <Clock className="w-4 h-4" />
-                    {t('day', 'Day')} {slotContext.slot.dayOfWeek}, {slotContext.slot.startTime} – {slotContext.slot.endTime}
+                    {t('day')} {slotContext.slot.dayOfWeek}, {slotContext.slot.startTime} – {slotContext.slot.endTime}
                   </span>
                 </div>
                 {slotContext.subject?.title && (

@@ -69,16 +69,16 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
 
       if (initialData) {
         await updateTask(initialData.id, payload);
-        toast.success('Task updated successfully');
+        toast.success(t('task_updated'));
       } else {
         await createTask({ ...payload, subjectId });
-        toast.success('Task created successfully');
+        toast.success(t('task_created'));
       }
 
       onCreated();
       onClose();
     } catch {
-      toast.error(initialData ? 'Failed to update task' : 'Failed to create task');
+      toast.error(initialData ? t('failed_to_update_task') : t('failed_to_create_task'));
     } finally {
       setLoading(false);
     }
@@ -151,19 +151,19 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
               }`}
             >
               <Repeat className="w-4 h-4" />
-              {t('recurring_task', 'Повторюване завдання')}
+              {t('recurring_task')}
             </button>
-            
+
             {isRecurring && (
               <select
                 value={recurrenceDays}
                 onChange={(e) => setRecurrenceDays(Number(e.target.value))}
                 className="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               >
-                <option value={1}>{t('every_day', 'Щодня')}</option>
-                <option value={7}>{t('every_week', 'Щотижня')}</option>
-                <option value={14}>{t('every_2_weeks', 'Кожні 2 тижні')}</option>
-                <option value={30}>{t('every_month', 'Щомісяця')}</option>
+                <option value={1}>{t('every_day')}</option>
+                <option value={7}>{t('every_week')}</option>
+                <option value={14}>{t('every_2_weeks')}</option>
+                <option value={30}>{t('every_month')}</option>
               </select>
             )}
           </div>

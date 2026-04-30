@@ -53,7 +53,7 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!subjectId) { toast.error('Please select a subject'); return; }
+    if (!subjectId) { toast.error(t('please_select_subject')); return; }
 
     setLoading(true);
     try {
@@ -75,16 +75,16 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
 
       if (initialData) {
         await updateScheduleSlot(initialData.id, payload as any);
-        toast.success(t('save_changes', 'Зберегти зміни'));
+        toast.success(t('save_changes'));
       } else {
         await createScheduleSlot(payload as any);
-        toast.success('Schedule slot created!');
+        toast.success(t('schedule_slot_created'));
       }
 
       onCreated();
       onClose();
     } catch {
-      toast.error('Failed to save schedule slot');
+      toast.error(t('failed_to_save_schedule_slot'));
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
     >
       <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{initialData ? t('edit_lesson', 'Редагувати заняття') : t('add_lesson')}</h2>
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{initialData ? t('edit_lesson') : t('add_lesson')}</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -139,8 +139,8 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
                 onChange={(e) => setTimeIndex(Number(e.target.value))}
                 className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-white"
               >
-                {KPI_TIME_SLOTS.map((t, idx) => (
-                  <option key={idx} value={idx}>{t.label} ({t.start})</option>
+                {KPI_TIME_SLOTS.map((slot, idx) => (
+                  <option key={idx} value={idx}>{t('pair', { n: idx + 1 })} ({slot.start})</option>
                 ))}
               </select>
             </div>
@@ -181,7 +181,7 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
               placeholder={t('location_ph')}
             />
             <p className="text-[11px] text-zinc-400 dark:text-zinc-600 mt-1.5">
-              💡 Виділіть слово і вставте посилання (Ctrl+V) — воно стане клікабельним
+              {t('paste_link_hint')}
             </p>
           </div>
 
@@ -198,7 +198,7 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
               disabled={loading || !subjectId}
               className="px-4 py-2 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-600 text-white transition-colors disabled:opacity-50"
             >
-              {loading ? t('saving') : initialData ? t('save_changes', 'Зберегти зміни') : t('add')}
+              {loading ? t('saving') : initialData ? t('save_changes') : t('add')}
             </button>
           </div>
         </form>

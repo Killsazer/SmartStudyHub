@@ -52,7 +52,7 @@ export const ScheduleSlotCard: React.FC<Props> = ({ slot, subject, teacher, onEd
           {onEdit && (
             <button
               onClick={onEdit}
-              title={t('edit', 'Редагувати')}
+              title={t('edit')}
               className="p-1 rounded bg-white/90 dark:bg-zinc-800/90 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 shadow-sm"
             >
               <Pencil className="w-3 h-3" />
@@ -61,7 +61,7 @@ export const ScheduleSlotCard: React.FC<Props> = ({ slot, subject, teacher, onEd
           {onDelete && (
             <button
               onClick={onDelete}
-              title={t('delete', 'Видалити')}
+              title={t('delete')}
               className="p-1 rounded bg-white/90 dark:bg-zinc-800/90 hover:bg-red-100 dark:hover:bg-red-900/40 text-zinc-600 dark:text-zinc-300 hover:text-red-500 shadow-sm"
             >
               <Trash2 className="w-3 h-3" />

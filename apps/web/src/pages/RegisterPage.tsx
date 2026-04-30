@@ -32,26 +32,26 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       const res = await apiClient.post('/auth/register', formData);
-      toast.success('Account created successfully!');
+      toast.success(t('account_created'));
       login(res.data.data.accessToken);
     } catch (err: any) {
       const errorMsg = err.response?.data?.message;
-      
+
       if (err.response?.status === 409) {
-        setErrors({ email: 'This email is already registered.' });
-        toast.error('User already exists');
+        setErrors({ email: t('email_already_registered') });
+        toast.error(t('user_already_exists'));
       } else if (Array.isArray(errorMsg)) {
         const newErrors: Record<string, string> = {};
         errorMsg.forEach(msg => {
           const lowerMsg = msg.toLowerCase();
-          if (lowerMsg.includes('email')) newErrors.email = 'Must be a valid email (e.g. student@kpi.ua)';
+          if (lowerMsg.includes('email')) newErrors.email = t('email_invalid_format');
           else if (lowerMsg.includes('password')) newErrors.password = msg;
           else if (lowerMsg.includes('firstname')) newErrors.firstName = msg;
           else if (lowerMsg.includes('lastname')) newErrors.lastName = msg;
         });
         setErrors(newErrors);
       } else {
-        toast.error(errorMsg || err.message || 'Registration failed');
+        toast.error(errorMsg || err.message || t('registration_failed'));
       }
     } finally {
       setLoading(false);

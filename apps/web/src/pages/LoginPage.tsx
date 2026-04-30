@@ -19,14 +19,14 @@ const LoginPage = () => {
     setLoading(true);
     try {
       const res = await apiClient.post('/auth/login', { email, password });
-      toast.success('Login successful!');
+      toast.success(t('login_successful'));
       login(res.data.data.accessToken);
     } catch (err: any) {
       const errorMsg = err.response?.data?.message;
       if (Array.isArray(errorMsg)) {
         toast.error(errorMsg.join(', '));
       } else {
-        toast.error(errorMsg || err.message || 'Login failed');
+        toast.error(errorMsg || err.message || t('login_failed'));
       }
     } finally {
       setLoading(false);

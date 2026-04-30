@@ -24,7 +24,7 @@ export const ShareSchedule: React.FC<Props> = ({ onImportComplete }) => {
       const token = await exportSchedule();
       setHashToken(token);
     } catch {
-      toast.error('Failed to export schedule');
+      toast.error(t('failed_to_export_schedule'));
     } finally {
       setLoading(false);
     }
@@ -32,18 +32,18 @@ export const ShareSchedule: React.FC<Props> = ({ onImportComplete }) => {
 
   const handleImport = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!importToken.trim()) { toast.error('Code is required'); return; }
-    if (importToken.length !== 8) { toast.error('Invalid code format. Expected 8 characters.'); return; }
+    if (!importToken.trim()) { toast.error(t('import_code_required')); return; }
+    if (importToken.length !== 8) { toast.error(t('import_invalid_format')); return; }
 
     setLoading(true);
     try {
       await importSchedule(importToken.toLowerCase());
-      toast.success('Розклад успішно імпортовано!');
+      toast.success(t('schedule_imported_success'));
       setIsOpen(false);
       setImportToken('');
       onImportComplete();
     } catch {
-      toast.error('Не вдалося імпортувати розклад. Перевірте код.');
+      toast.error(t('failed_to_import_schedule'));
     } finally {
       setLoading(false);
     }
@@ -54,7 +54,7 @@ export const ShareSchedule: React.FC<Props> = ({ onImportComplete }) => {
       navigator.clipboard.writeText(hashToken);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      toast.success('Скопійовано!');
+      toast.success(t('copied'));
     }
   };
 

@@ -19,10 +19,10 @@ export const WelcomeModal: React.FC<Props> = ({ isOpen, onComplete }) => {
     setLoading(true);
     try {
       await startOnboarding();
-      toast.success(t('onboarding_success', 'Sample study data generated successfully!'));
+      toast.success(t('onboarding_success'));
       onComplete(true);
     } catch (err) {
-      toast.error(t('onboarding_error', 'Failed to generate sample data.'));
+      toast.error(t('onboarding_error'));
     } finally {
       setLoading(false);
     }
@@ -36,11 +36,11 @@ export const WelcomeModal: React.FC<Props> = ({ isOpen, onComplete }) => {
         </div>
         
         <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-3">
-          {t('welcome_title', 'Welcome to Smart Study Hub!')}
+          {t('welcome_title')}
         </h2>
-        
+
         <p className="text-zinc-500 dark:text-zinc-400 mb-8 leading-relaxed">
-          {t('welcome_subtitle', 'Your workspace is currently empty. Would you like us to generate a sample study plan to help you explore the features?')}
+          {t('welcome_subtitle')}
         </p>
 
         <button
@@ -52,7 +52,7 @@ export const WelcomeModal: React.FC<Props> = ({ isOpen, onComplete }) => {
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             <>
-              {t('generate_sample_data', 'Generate Sample Data')}
+              {t('generate_sample_data')}
               <ArrowRight className="w-5 h-5" />
             </>
           )}
@@ -63,7 +63,7 @@ export const WelcomeModal: React.FC<Props> = ({ isOpen, onComplete }) => {
           disabled={loading}
           className="mt-4 text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
         >
-          {t('skip_for_now', 'Skip for now')}
+          {t('skip_for_now')}
         </button>
       </div>
     </div>

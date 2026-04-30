@@ -12,6 +12,7 @@ interface NoteNodeProps {
 }
 
 const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete, depth = 0 }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
   const isSection = node.type === 'section';
 
@@ -48,13 +49,13 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
           {(node.wordCount ?? 0) > 0 && (
             <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
               <Hash className="w-3 h-3" />
-              {node.wordCount} words
+              {node.wordCount} {t('words')}
             </span>
           )}
           {(node.readingMinutes ?? 0) > 0 && (
             <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
               <Clock className="w-3 h-3" />
-              {node.readingMinutes} min read
+              {node.readingMinutes} {t('min_read')}
             </span>
           )}
         </div>
@@ -67,7 +68,7 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
                 onAddChild(node.id);
               }}
               className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-zinc-500 dark:text-zinc-400"
-              title="Add to folder"
+              title={t('add_to_folder')}
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -78,7 +79,7 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
               onEdit(node);
             }}
             className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-zinc-500 dark:text-zinc-400"
-            title="Edit"
+            title={t('edit')}
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -88,7 +89,7 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
               onDelete(node.id);
             }}
             className="p-1 hover:bg-red-50 dark:hover:bg-zinc-700 rounded text-red-500 dark:text-red-400"
-            title="Delete"
+            title={t('delete')}
           >
             <Trash2 className="w-4 h-4" />
           </button>
