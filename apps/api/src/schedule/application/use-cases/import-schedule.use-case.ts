@@ -1,18 +1,21 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../../domain/repositories/schedule-slot.repository.interface';
 import type { ISharedScheduleRepository } from '../../domain/repositories/shared-schedule.repository.interface';
 import { ClassType } from '../../domain/schedule-slot.entity';
 import { ScheduleSlotFactory } from '../../domain/patterns/schedule-slot.factory';
+import { SlotValidationError } from '../../domain/patterns/slot-validation.error';
 import { randomUUID } from 'crypto';
 import { TeacherService } from '../../../teachers/application/teacher.service';
 import { SubjectService } from '../../../subjects/application/subject.service';
 
 @Injectable()
 export class ImportScheduleUseCase {
+  private readonly logger = new Logger(ImportScheduleUseCase.name);
+
   constructor(
     @Inject('IScheduleSlotRepository') private readonly slotRepo: IScheduleSlotRepository,
     @Inject('ISharedScheduleRepository') private readonly sharedRepo: ISharedScheduleRepository,
-    
+
     private readonly teacherService: TeacherService,
     private readonly subjectService: SubjectService,
   ) {}
@@ -59,7 +62,17 @@ export class ImportScheduleUseCase {
         endTime: slot.endTime,
         location: slot.location,
       });
-      
+
+      try {
+        entity.validate();
+      } catch (err) {
+        if (err instanceof SlotValidationError) {
+          this.logger.warn(`Skipping slot during import: ${err.message}`);
+          continue;
+        }
+        throw err;
+      }
+
       await this.slotRepo.save(entity);
     }
   }
