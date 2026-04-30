@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../../shared/api/client';
+import { STORAGE_KEYS } from '../../shared/storage-keys';
 
 interface UserInfo {
   id: string;
@@ -21,7 +22,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(localStorage.getItem('study_hub_token'));
+  const [token, setToken] = useState<string | null>(localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN));
   const [user, setUser] = useState<UserInfo | null>(null);
   const navigate = useNavigate();
 
@@ -51,13 +52,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (newToken: string) => {
-    localStorage.setItem('study_hub_token', newToken);
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, newToken);
     setToken(newToken);
     navigate('/');
   };
 
   const logout = () => {
-    localStorage.removeItem('study_hub_token');
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     setToken(null);
     setUser(null);
     navigate('/login');

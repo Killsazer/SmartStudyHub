@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { STORAGE_KEYS } from './storage-keys';
 
 const en = {
   // General
@@ -234,6 +235,10 @@ const en = {
   error_boundary_title: 'Something went wrong',
   error_boundary_message: 'An unexpected error occurred. Please try reloading the page.',
   reload_page: 'Reload page',
+
+  // Confirm dialog
+  confirm_title: 'Are you sure?',
+  confirm: 'Confirm',
 };
 
 const uk: typeof en = {
@@ -469,6 +474,10 @@ const uk: typeof en = {
   error_boundary_title: 'Щось пішло не так',
   error_boundary_message: 'Сталася непередбачена помилка. Спробуйте перезавантажити сторінку.',
   reload_page: 'Перезавантажити сторінку',
+
+  // Confirm dialog
+  confirm_title: 'Ви впевнені?',
+  confirm: 'Підтвердити',
 };
 
 const resources = {
@@ -476,7 +485,7 @@ const resources = {
   uk: { translation: uk },
 };
 
-const savedLang = localStorage.getItem('language') || 'en';
+const savedLang = localStorage.getItem(STORAGE_KEYS.LANGUAGE) || 'en';
 
 i18n
   .use(initReactI18next)

@@ -1,6 +1,7 @@
 import { Moon, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
+import { STORAGE_KEYS } from '../storage-keys';
 
 export const ThemeLangToggle = () => {
   const { theme, toggleTheme } = useTheme();
@@ -10,7 +11,7 @@ export const ThemeLangToggle = () => {
     const isEn = i18n.language && i18n.language.startsWith('en');
     const newLang = isEn ? 'uk' : 'en';
     i18n.changeLanguage(newLang);
-    localStorage.setItem('language', newLang);
+    localStorage.setItem(STORAGE_KEYS.LANGUAGE, newLang);
   };
 
   const displayLang = i18n.language && i18n.language.startsWith('uk') ? 'UK' : 'EN';
