@@ -9,7 +9,7 @@ export class NoteTreeBuilder {
     const roots: NoteComponent[] = [];
 
     entities.forEach(n => {
-      const component = n.content
+      const component = n.content !== null && n.content !== undefined
         ? new NoteBlock(n.id, n.title, n.content, n.subjectId ?? null)
         : new NoteSection(n.id, n.title, n.subjectId ?? null);
       map.set(n.id, component);

@@ -1,13 +1,14 @@
 import { apiClient } from '../../../shared/api/client';
+import type { ClassTypeValue } from '@studyhub/shared-types';
 
 export interface Teacher {
   id: string;
   name: string;
-  photoUrl?: string;
-  contacts?: string;
+  photoUrl?: string | null;
+  contacts?: string | null;
 }
 
-export type ClassType = 'LECTURE' | 'LAB' | 'PRACTICE';
+export type ClassType = ClassTypeValue;
 
 export interface ScheduleSlot {
   id: string;
@@ -19,7 +20,7 @@ export interface ScheduleSlot {
   startTime: string;
   endTime: string;
   classType: ClassType;
-  location?: string;
+  location: string | null;
 }
 
 // ─── Teachers API

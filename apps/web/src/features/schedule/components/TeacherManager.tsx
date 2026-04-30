@@ -50,14 +50,14 @@ export const TeacherManager: React.FC<Props> = ({ isOpen, onClose, teachers, onT
         await updateTeacher(editingId, {
           name: formName,
           photoUrl: formPhoto || null,
-          contacts: formContacts || null
-        } as any);
+          contacts: formContacts || null,
+        });
         toast.success(t('teacher_updated'));
       } else {
         await createTeacher({
           name: formName,
           photoUrl: formPhoto || undefined,
-          contacts: formContacts || undefined
+          contacts: formContacts || undefined,
         });
         toast.success(t('teacher_added'));
       }
@@ -81,7 +81,7 @@ export const TeacherManager: React.FC<Props> = ({ isOpen, onClose, teachers, onT
     }
   };
 
-  const getAvatar = (name: string, url?: string) => {
+  const getAvatar = (name: string, url?: string | null) => {
     return url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff&size=128`;
   };
 

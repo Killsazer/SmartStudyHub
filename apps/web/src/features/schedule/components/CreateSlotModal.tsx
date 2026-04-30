@@ -74,10 +74,10 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
       };
 
       if (initialData) {
-        await updateScheduleSlot(initialData.id, payload as any);
+        await updateScheduleSlot(initialData.id, payload);
         toast.success(t('save_changes'));
       } else {
-        await createScheduleSlot(payload as any);
+        await createScheduleSlot(payload);
         toast.success(t('schedule_slot_created'));
       }
 

@@ -1,8 +1,6 @@
-export enum ClassType {
-  LECTURE = 'LECTURE',
-  LAB = 'LAB',
-  PRACTICE = 'PRACTICE',
-}
+import { ClassType } from '@studyhub/shared-types';
+
+export { ClassType };
 
 export interface ScheduleSlotProps {
   id: string;

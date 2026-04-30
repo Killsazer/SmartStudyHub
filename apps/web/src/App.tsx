@@ -7,6 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import SubjectPage from './pages/SubjectPage';
 import { ThemeProvider } from './shared/theme/ThemeContext';
+import { ErrorBoundary } from './shared/components/ErrorBoundary';
 
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -19,31 +20,32 @@ function App() {
     <ThemeProvider>
       <BrowserRouter>
         <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/subjects/:id"
-            element={
-              <ProtectedRoute>
-                <SubjectPage />
-              </ProtectedRoute>
-            }
-          />
-
-        </Routes>
-        <Toaster position="top-center" toastOptions={{
-          className: 'dark:bg-zinc-900 border dark:border-zinc-800 bg-white border-zinc-200 text-zinc-900 dark:text-white'
-        }} />
-      </AuthProvider>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/subjects/:id"
+                element={
+                  <ProtectedRoute>
+                    <SubjectPage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </ErrorBoundary>
+          <Toaster position="top-center" toastOptions={{
+            className: 'dark:bg-zinc-900 border dark:border-zinc-800 bg-white border-zinc-200 text-zinc-900 dark:text-white'
+          }} />
+        </AuthProvider>
     </BrowserRouter>
     </ThemeProvider>
   );

@@ -1,14 +1,6 @@
-export enum TaskStatus {
-  TODO = 'TODO',
-  IN_PROGRESS = 'IN_PROGRESS',
-  DONE = 'DONE',
-}
+import { TaskStatus, TaskPriority } from '@studyhub/shared-types';
 
-export enum TaskPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-}
+export { TaskStatus, TaskPriority };
 
 export interface TaskProps {
   id: string;

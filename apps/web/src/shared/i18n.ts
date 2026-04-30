@@ -229,6 +229,11 @@ const en = {
   // Theme / language toggle
   toggle_language: 'Toggle Language',
   toggle_theme: 'Toggle Theme',
+
+  // Error boundary
+  error_boundary_title: 'Something went wrong',
+  error_boundary_message: 'An unexpected error occurred. Please try reloading the page.',
+  reload_page: 'Reload page',
 };
 
 const uk: typeof en = {
@@ -459,6 +464,11 @@ const uk: typeof en = {
   // Theme / language toggle
   toggle_language: 'Змінити мову',
   toggle_theme: 'Змінити тему',
+
+  // Error boundary
+  error_boundary_title: 'Щось пішло не так',
+  error_boundary_message: 'Сталася непередбачена помилка. Спробуйте перезавантажити сторінку.',
+  reload_page: 'Перезавантажити сторінку',
 };
 
 const resources = {

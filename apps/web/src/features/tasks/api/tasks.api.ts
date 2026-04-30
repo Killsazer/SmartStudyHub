@@ -1,8 +1,9 @@
 import { apiClient } from '../../../shared/api/client';
+import type { TaskStatusValue, TaskPriorityValue, TaskSortKeyValue } from '@studyhub/shared-types';
 
-export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
-export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
-export type SortStrategy = 'deadline' | 'priority' | 'title';
+export type TaskStatus = TaskStatusValue;
+export type TaskPriority = TaskPriorityValue;
+export type SortStrategy = TaskSortKeyValue;
 
 export interface Task {
   id: string;

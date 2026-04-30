@@ -1,10 +1,7 @@
 import { ITask, TaskPriority, TaskStatus } from '../../task.entity';
+import { TaskSortKey } from '@studyhub/shared-types';
 
-export enum TaskSortKey {
-  DEADLINE = 'deadline',
-  PRIORITY = 'priority',
-  TITLE = 'title',
-}
+export { TaskSortKey };
 
 export interface ITaskSortStrategy {
   sort(tasks: ITask[]): ITask[];
