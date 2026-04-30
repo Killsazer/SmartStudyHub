@@ -4,6 +4,7 @@ import { Task, changeTaskStatus, undoLastAction } from '../api/tasks.api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 let activeCompletionToastId: string | null = null;
 
@@ -18,6 +19,17 @@ const PRIORITY_COLORS = {
   LOW: 'text-zinc-500 bg-zinc-500/10',
   MEDIUM: 'text-amber-500 bg-amber-500/10',
   HIGH: 'text-red-500 bg-red-500/10',
+};
+
+const taskItemVariants = {
+  hidden: { opacity: 0, y: 8, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring' as const, stiffness: 320, damping: 30, mass: 0.7 },
+  },
+  exit: { opacity: 0, x: -24, scale: 0.96, transition: { duration: 0.18, ease: [0.4, 0, 1, 1] as const } },
 };
 
 export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDelete }) => {
@@ -51,7 +63,7 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
                   toast.error(t('failed_to_undo'));
                 }
               }}
-              className="px-3 py-1 bg-zinc-800 text-white rounded text-xs font-medium hover:bg-zinc-700 transition-colors"
+              className="px-3 py-1 bg-zinc-800 text-white rounded text-xs font-medium hover:bg-zinc-700 active:scale-95 transition-all"
             >
               {t('undo')}
             </button>
@@ -81,34 +93,53 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
     : '';
 
   return (
-    <div className={`group p-4 rounded-xl border flex items-center gap-4 transition-all ${isDone ? 'bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800/50 opacity-60' : task.isOverdue ? 'bg-red-50/50 dark:bg-red-900/10 border-red-500/50 hover:border-red-500 dark:hover:border-red-400 hover:shadow-lg hover:shadow-red-500/10' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20'}`}>
-      <button 
-        onClick={toggleStatus} 
+    <motion.div
+      layout
+      layoutId={task.id}
+      variants={taskItemVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      transition={{ layout: { type: 'spring', stiffness: 380, damping: 32, mass: 0.7 } }}
+      className={`group p-4 rounded-xl border flex items-center gap-4 transition-colors transition-shadow duration-200 will-change-transform ${
+        isDone
+          ? 'bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800/50 opacity-60'
+          : task.isOverdue
+            ? 'bg-red-50/50 dark:bg-red-900/10 border-red-500/50 hover:border-red-500 dark:hover:border-red-400 hover:shadow-lg hover:shadow-red-500/10'
+            : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20'
+      }`}
+    >
+      <button
+        onClick={toggleStatus}
         disabled={loading}
-        className={`shrink-0 transition-colors ${isDone ? 'text-indigo-500' : 'text-zinc-400 dark:text-zinc-600 hover:text-indigo-500 dark:hover:text-indigo-400'}`}
+        className={`shrink-0 transition-all duration-200 active:scale-90 ${
+          isDone
+            ? 'text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400'
+            : 'text-zinc-400 dark:text-zinc-600 hover:text-indigo-500 dark:hover:text-indigo-400 hover:scale-110'
+        }`}
       >
         {isDone ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
       </button>
 
       <div className="flex-1 min-w-0">
-        <h4 className={`text-sm font-medium truncate ${isDone ? 'line-through text-zinc-400 dark:text-zinc-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
+        <h4 className={`text-sm font-medium truncate transition-colors duration-200 ${isDone ? 'line-through text-zinc-400 dark:text-zinc-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
           {task.title}
         </h4>
 
         {task.description && (
-          <p className={`text-xs mt-1 line-clamp-2 ${isDone ? 'text-zinc-400 dark:text-zinc-600' : 'text-zinc-500 dark:text-zinc-400'}`}>
+          <p className={`text-xs mt-1 line-clamp-2 transition-colors duration-200 ${isDone ? 'text-zinc-400 dark:text-zinc-600' : 'text-zinc-500 dark:text-zinc-400'}`}>
             {task.description}
           </p>
         )}
 
-        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1.5 text-xs">
-          <span className={`flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full font-medium ${PRIORITY_COLORS[task.priority]}`}>
+        <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-2 text-xs">
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium ring-1 ring-inset ring-current/10 transition-transform duration-200 group-hover:scale-[1.03] ${PRIORITY_COLORS[task.priority]}`}>
             <Flag className="w-3 h-3" />
             {task.priority}
           </span>
 
           {task.deadline && (
-            <span className={`flex items-center gap-1 ${task.isOverdue && !isDone ? 'text-red-500 font-medium' : 'text-zinc-500'}`}>
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors duration-200 ${task.isOverdue && !isDone ? 'text-red-500 font-medium bg-red-500/5' : 'text-zinc-500 bg-zinc-500/5'}`}>
               <Calendar className="w-3.5 h-3.5" />
               {format(new Date(task.deadline), 'MMM d, h:mm a')}
             </span>
@@ -116,7 +147,7 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
 
           {isRecurring && (
             <span
-              className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 ring-1 ring-inset ring-indigo-500/20 transition-transform duration-200 group-hover:scale-[1.03]"
               title={recurrenceLabel}
             >
               <Repeat className="w-3.5 h-3.5" />
@@ -125,26 +156,38 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
           )}
 
           {task.isOverdue && !isDone && (
-            <span className="flex items-center gap-1 text-red-500 font-medium">
+            <motion.span
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium text-red-500 bg-red-500/10 ring-1 ring-inset ring-red-500/20"
+            >
               <AlertCircle className="w-3.5 h-3.5" />
               {t('overdue')}
-            </span>
+            </motion.span>
           )}
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-2">
         {onEdit && (
-          <button onClick={onEdit} className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors" title={t('edit_task_title')}>
+          <button
+            onClick={onEdit}
+            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all duration-150 active:scale-90"
+            title={t('edit_task_title')}
+          >
             <Edit2 className="w-4 h-4" />
           </button>
         )}
         {onDelete && (
-          <button onClick={onDelete} className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-zinc-800 rounded-lg transition-colors" title={t('delete_task_title')}>
+          <button
+            onClick={onDelete}
+            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-zinc-800 rounded-lg transition-all duration-150 active:scale-90"
+            title={t('delete_task_title')}
+          >
             <Trash2 className="w-4 h-4" />
           </button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

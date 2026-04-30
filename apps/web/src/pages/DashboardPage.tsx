@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Users, FolderOpen, CalendarDays, ChevronDown, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../features/auth/AuthContext';
@@ -19,6 +20,26 @@ import { CreateSubjectModal } from '../features/subjects/components/CreateSubjec
 import { createSubject, updateSubject, deleteSubject, deleteAllSubjects } from '../features/subjects/api/subjects.api';
 import { getTasks } from '../features/tasks/api/tasks.api';
 import { WelcomeModal } from '../features/onboarding/components/WelcomeModal';
+
+const HEADER_BTN_SPRING = { type: 'spring' as const, stiffness: 420, damping: 24, mass: 0.6 };
+const MODAL_EASE = [0.22, 1, 0.36, 1] as const;
+const headerBtnVariants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.05 },
+  tap: { scale: 0.94 },
+};
+
+const teachersIconVariants = {
+  rest: { rotate: 0, y: 0, scale: 1 },
+  hover: { rotate: 0, y: -2, scale: 1.12 },
+  tap: { rotate: 0, y: 0, scale: 0.92 },
+};
+
+const subjectsIconVariants = {
+  rest: { rotate: 0, scale: 1 },
+  hover: { rotate: -8, scale: 1.12 },
+  tap: { rotate: 0, scale: 0.92 },
+};
 
 const DashboardPage = () => {
   const { t } = useTranslation();
@@ -133,18 +154,44 @@ const DashboardPage = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
-            <button
+            <motion.button
               onClick={() => setIsTeacherManagerOpen(true)}
+              variants={headerBtnVariants}
+              initial="rest"
+              animate="rest"
+              whileHover="hover"
+              whileTap="tap"
+              transition={HEADER_BTN_SPRING}
               className="px-3 py-1.5 rounded-lg text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors flex items-center gap-2"
             >
-              <Users className="w-4 h-4" /> <span className="hidden sm:inline-block">{t('teachers')}</span>
-            </button>
-            <button
+              <motion.span
+                variants={teachersIconVariants}
+                transition={HEADER_BTN_SPRING}
+                className="inline-flex"
+              >
+                <Users className="w-4 h-4" />
+              </motion.span>
+              <span className="hidden sm:inline-block">{t('teachers')}</span>
+            </motion.button>
+            <motion.button
               onClick={() => setIsSubjectsModalOpen(true)}
+              variants={headerBtnVariants}
+              initial="rest"
+              animate="rest"
+              whileHover="hover"
+              whileTap="tap"
+              transition={HEADER_BTN_SPRING}
               className="px-3 py-1.5 rounded-lg text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors flex items-center gap-2"
             >
-              <FolderOpen className="w-4 h-4" /> <span className="hidden sm:inline-block">{t('subjects')}</span>
-            </button>
+              <motion.span
+                variants={subjectsIconVariants}
+                transition={HEADER_BTN_SPRING}
+                className="inline-flex"
+              >
+                <FolderOpen className="w-4 h-4" />
+              </motion.span>
+              <span className="hidden sm:inline-block">{t('subjects')}</span>
+            </motion.button>
 
             <ShareSchedule onImportComplete={fetchData} />
 
@@ -319,9 +366,24 @@ const DashboardPage = () => {
       />
 
       {/* Management subjects modal overlay */}
-      {isSubjectsModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/40 dark:bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-5xl h-[85vh] bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl flex flex-col overflow-hidden">
+      <AnimatePresence>
+        {isSubjectsModalOpen && (
+          <motion.div
+            key="subjects-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/40 dark:bg-black/60 backdrop-blur-sm"
+            onClick={(e) => { if (e.target === e.currentTarget) setIsSubjectsModalOpen(false); }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97, y: 10 }}
+              transition={{ duration: 0.24, ease: MODAL_EASE }}
+              className="w-full max-w-5xl h-[85vh] bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl flex flex-col overflow-hidden"
+            >
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <FolderOpen className="w-6 h-6 text-indigo-500" /> {t('manage_subjects')}
@@ -376,9 +438,10 @@ const DashboardPage = () => {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <CreateSubjectModal
         isOpen={isCreateSubjectOpen}

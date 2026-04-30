@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { createNote, updateNote, NoteComponent } from '../api/notes.api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
   isOpen: boolean;
@@ -27,8 +28,6 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
       setIsSection(initialData ? initialData.type === 'section' : false);
     }
   }, [isOpen, initialData]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,16 +61,32 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/20 dark:bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
-            {initialData ? (isSection ? t('edit_folder') : t('edit_note_title')) : (isSection ? t('new_folder') : t('new_note'))}
-          </h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          key="note-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/20 dark:bg-black/60 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget && !loading) onClose(); }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] as const }}
+            className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+                {initialData ? (isSection ? t('edit_folder') : t('edit_note_title')) : (isSection ? t('new_folder') : t('new_note'))}
+              </h2>
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-all duration-150 active:scale-90">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="flex items-center gap-3">
@@ -115,20 +130,22 @@ export const CreateNoteModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+              className="px-4 py-2 rounded-lg font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-150 active:scale-95"
             >
               {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-600 text-white disabled:opacity-50"
+              className="px-4 py-2 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-600 text-white disabled:opacity-50 transition-all duration-150 active:scale-95 shadow-sm hover:shadow-md hover:shadow-indigo-500/20"
             >
               {loading ? t('saving') : initialData ? t('save_changes') : t('create')}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

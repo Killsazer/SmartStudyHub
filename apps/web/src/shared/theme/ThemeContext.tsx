@@ -12,12 +12,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
-    // If user has a preference in localStorage, use it
     const stored = localStorage.getItem('theme');
     if (stored === 'dark' || stored === 'light') {
       return stored;
     }
-    // Default to dark since previous app was implicitly dark
     return 'dark';
   });
 

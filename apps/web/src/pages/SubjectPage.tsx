@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Plus, Clock, MapPin } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TaskItem as TaskComponent } from '../features/tasks/components/TaskItem';
 import { TaskSortDropdown } from '../features/tasks/components/TaskSortDropdown';
 import { CreateTaskModal } from '../features/tasks/components/CreateTaskModal';
@@ -16,12 +17,48 @@ import { ThemeLangToggle } from '../shared/components/ThemeLangToggle';
 import { LinkifyText } from '../shared/components/LinkifyText';
 import { ScheduleSlot, Teacher } from '../features/schedule/api/schedule.api';
 import { SubjectItem } from '../features/subjects/api/subjects.api';
+import { useDelayedFlag } from '../shared/hooks/useDelayedFlag';
 
 type SlotContextState = {
   slot?: ScheduleSlot;
   teacher?: Teacher;
   subject?: SubjectItem;
 };
+
+const taskListVariants = {
+  hidden: { opacity: 1 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.05 } },
+};
+
+const PAGE_EASE = [0.22, 1, 0.36, 1] as const;
+
+const sectionEnter = (delay: number) => ({
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.42, ease: PAGE_EASE, delay },
+});
+
+const TaskSkeletonRow = () => (
+  <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-900/40 flex items-center gap-4">
+    <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+    <div className="flex-1 space-y-2">
+      <div className="h-3 rounded-full bg-zinc-200 dark:bg-zinc-800 w-3/5" />
+      <div className="h-2.5 rounded-full bg-zinc-200/70 dark:bg-zinc-800/70 w-2/5" />
+      <div className="flex gap-2 pt-1">
+        <div className="h-4 w-14 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+        <div className="h-4 w-20 rounded-full bg-zinc-200/70 dark:bg-zinc-800/70" />
+      </div>
+    </div>
+  </div>
+);
+
+const NoteSkeletonRow = ({ width }: { width: string }) => (
+  <div className="flex items-center gap-2 py-2 px-3">
+    <div className="w-4 h-4 rounded bg-zinc-200 dark:bg-zinc-800" />
+    <div className="w-4 h-4 rounded bg-zinc-200 dark:bg-zinc-800" />
+    <div className={`h-3 rounded-full bg-zinc-200 dark:bg-zinc-800 ${width}`} />
+  </div>
+);
 
 const SubjectPage = () => {
   const { t } = useTranslation();
@@ -39,6 +76,9 @@ const SubjectPage = () => {
   const [activeParentNoteId, setActiveParentNoteId] = useState<string | undefined>();
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [loadingNotes, setLoadingNotes] = useState(true);
+
+  const showTasksSkeleton = useDelayedFlag(loadingTasks && tasks.length === 0);
+  const showNotesSkeleton = useDelayedFlag(loadingNotes && notes.length === 0);
 
   const tasksRequestIdRef = useRef(0);
   const notesRequestIdRef = useRef(0);
@@ -137,13 +177,19 @@ const SubjectPage = () => {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {slotContext?.slot && (
-          <section
-            className="relative mb-8 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden"
+          <motion.section
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.42, ease: PAGE_EASE, delay: 0 }}
+            className="relative mb-8 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm"
             style={{ backgroundColor: slotContext.subject?.color ? `${slotContext.subject.color}15` : undefined }}
           >
-            <div
+            <motion.div
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] as const }}
+              style={{ backgroundColor: slotContext.subject?.color || '#3b82f6', transformOrigin: 'top' }}
               className="absolute top-0 left-0 w-1.5 h-full"
-              style={{ backgroundColor: slotContext.subject?.color || '#3b82f6' }}
             />
             <div className="p-5 sm:p-6 pl-7 sm:pl-8 flex flex-col md:flex-row md:items-start md:justify-between gap-5">
               <div className="min-w-0">
@@ -170,7 +216,12 @@ const SubjectPage = () => {
               </div>
 
               {slotContext.teacher && (
-                <div className="flex items-start gap-3 bg-white dark:bg-zinc-900 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800/50 shadow-sm md:max-w-sm md:shrink-0">
+                <motion.div
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.32, delay: 0.08, ease: [0.22, 1, 0.36, 1] as const }}
+                  className="flex items-start gap-3 bg-white dark:bg-zinc-900 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800/50 shadow-sm md:max-w-sm md:shrink-0 transition-shadow hover:shadow-md"
+                >
                   <img
                     src={slotContext.teacher.photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(slotContext.teacher.name)}&background=6366f1&color=fff`}
                     alt={slotContext.teacher.name}
@@ -184,23 +235,23 @@ const SubjectPage = () => {
                       </p>
                     )}
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
-          </section>
+          </motion.section>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
         {/* TASKS COLUMN */}
-        <section>
+        <motion.section {...sectionEnter(0.1)}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight">{t('active_tasks')}</h2>
             <div className="flex items-center gap-4">
               <TaskSortDropdown value={sortStrategy} onChange={setSortStrategy} />
               <button
                 onClick={handleOpenTaskCreate}
-                className="bg-zinc-200 hover:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white p-2 rounded-lg transition-colors"
+                className="bg-zinc-200 hover:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white p-2 rounded-lg transition-all duration-150 active:scale-90 hover:shadow-sm"
                 title={t('create_task')}
               >
                 <Plus className="w-4 h-4" />
@@ -208,56 +259,129 @@ const SubjectPage = () => {
             </div>
           </div>
 
-          <div className="space-y-3">
-            {loadingTasks ? (
-              <div className="animate-pulse flex flex-col gap-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-20 bg-zinc-200 dark:bg-zinc-800/50 rounded-xl" />
+          {/*
+            Render priority order:
+              1. Already have data → list (refetches stay visible, no flash)
+              2. Skeleton timer has elapsed and we're still empty → skeleton
+              3. Loading but inside the 200ms grace window → invisible spacer
+              4. Loaded with empty result → empty state
+            AnimatePresence handles fade between any two of these.
+          */}
+          <AnimatePresence mode="wait" initial={false}>
+            {tasks.length > 0 ? (
+              <motion.div
+                key="tasks-list"
+                variants={taskListVariants}
+                initial="hidden"
+                animate="visible"
+                exit={{ opacity: 0, transition: { duration: 0.18 } }}
+                className="flex flex-col gap-3"
+              >
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {tasks.map((task) => (
+                    <TaskComponent
+                      key={task.id}
+                      task={task}
+                      onStatusChanged={fetchTasks}
+                      onEdit={() => handleOpenTaskEdit(task)}
+                      onDelete={() => handleDeleteTask(task.id)}
+                    />
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            ) : showTasksSkeleton ? (
+              <motion.div
+                key="tasks-skeleton"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.22, ease: PAGE_EASE }}
+                className="flex flex-col gap-3 animate-pulse"
+              >
+                {[0, 1, 2].map((i) => (
+                  <TaskSkeletonRow key={i} />
                 ))}
-              </div>
-            ) : tasks.length === 0 ? (
-              <div className="p-8 border border-zinc-300 dark:border-zinc-800 border-dashed rounded-xl text-center text-zinc-500">
-                {t('no_tasks')}
-              </div>
+              </motion.div>
+            ) : loadingTasks ? (
+              <motion.div
+                key="tasks-grace"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0 }}
+                exit={{ opacity: 0 }}
+                className="min-h-[8rem]"
+                aria-hidden
+              />
             ) : (
-              tasks.map((task) => (
-                <TaskComponent 
-                  key={task.id} 
-                  task={task} 
-                  onStatusChanged={fetchTasks} 
-                  onEdit={() => handleOpenTaskEdit(task)}
-                  onDelete={() => handleDeleteTask(task.id)}
-                />
-              ))
+              <motion.div
+                key="tasks-empty"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.28, ease: PAGE_EASE }}
+                className="p-8 border border-zinc-300 dark:border-zinc-800 border-dashed rounded-xl text-center text-zinc-500"
+              >
+                {t('no_tasks')}
+              </motion.div>
             )}
-          </div>
-        </section>
+          </AnimatePresence>
+        </motion.section>
 
         {/* NOTES COLUMN */}
-        <section>
+        <motion.section {...sectionEnter(0.15)}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight">{t('notes_handouts')}</h2>
             <button
               onClick={() => handleOpenNoteModal()}
-              className="bg-zinc-200 hover:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white p-2 rounded-lg transition-colors"
+              className="bg-zinc-200 hover:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white p-2 rounded-lg transition-all duration-150 active:scale-90 hover:shadow-sm"
               title={t('create_root_note')}
             >
               <Plus className="w-4 h-4" />
             </button>
           </div>
-          
-          {loadingNotes ? (
-            <div className="animate-pulse h-40 bg-zinc-200 dark:bg-zinc-800/50 rounded-xl" />
-          ) : (
-            <NoteTree 
-              data={notes} 
-              subjectId={id!} 
-              onAddNote={handleOpenNoteModal}
-              onEditNote={handleEditNote}
-              onDeleteNote={handleDeleteNote}
-            />
-          )}
-        </section>
+
+          <AnimatePresence mode="wait" initial={false}>
+            {notes.length > 0 || !loadingNotes ? (
+              <motion.div
+                key="notes-list"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.28, ease: PAGE_EASE }}
+              >
+                <NoteTree
+                  data={notes}
+                  subjectId={id!}
+                  onAddNote={handleOpenNoteModal}
+                  onEditNote={handleEditNote}
+                  onDeleteNote={handleDeleteNote}
+                />
+              </motion.div>
+            ) : showNotesSkeleton ? (
+              <motion.div
+                key="notes-skeleton"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.22, ease: PAGE_EASE }}
+                className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2 animate-pulse"
+              >
+                <NoteSkeletonRow width="w-2/5" />
+                <NoteSkeletonRow width="w-1/3" />
+                <NoteSkeletonRow width="w-1/2" />
+                <NoteSkeletonRow width="w-1/4" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="notes-grace"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0 }}
+                exit={{ opacity: 0 }}
+                className="min-h-[8rem]"
+                aria-hidden
+              />
+            )}
+          </AnimatePresence>
+        </motion.section>
         </div>
 
       </main>

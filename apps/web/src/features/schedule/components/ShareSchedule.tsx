@@ -4,6 +4,37 @@ import { exportSchedule, importSchedule } from '../api/schedule.api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const MODAL_EASE = [0.22, 1, 0.36, 1] as const;
+
+const HEADER_BTN_SPRING = { type: 'spring' as const, stiffness: 420, damping: 24, mass: 0.6 };
+const headerBtnVariants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.05 },
+  tap: { scale: 0.94 },
+};
+const tabBtnVariants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.02 },
+  tap: { scale: 0.97 },
+};
+
+const shareIconVariants = {
+  rest: { rotate: 0, scale: 1 },
+  hover: { rotate: 12, scale: 1.12 },
+  tap: { rotate: 0, scale: 0.92 },
+};
+const importIconVariants = {
+  rest: { y: 0, scale: 1 },
+  hover: { y: 2, scale: 1.12 },
+  tap: { y: 0, scale: 0.92 },
+};
+const exportIconVariants = {
+  rest: { y: 0, scale: 1 },
+  hover: { y: -2, scale: 1.12 },
+  tap: { y: 0, scale: 0.92 },
+};
 
 interface Props {
   onImportComplete: () => void;
@@ -60,25 +91,65 @@ export const ShareSchedule: React.FC<Props> = ({ onImportComplete }) => {
 
   return (
     <>
-      <button
+      <motion.button
         onClick={() => { setActiveTab('export'); setIsOpen(true); setHashToken(null); }}
+        variants={headerBtnVariants}
+        initial="rest"
+        animate="rest"
+        whileHover="hover"
+        whileTap="tap"
+        transition={HEADER_BTN_SPRING}
         className="px-3 py-1.5 rounded-lg text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors flex items-center gap-2"
       >
-        <Share2 className="w-4 h-4" /> <span className="hidden sm:inline-block">{t('share_schedule')}</span>
-      </button>
-      
-      <button
-        onClick={() => { setActiveTab('import'); setIsOpen(true); }}
-        className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center gap-2"
-      >
-        <DownloadCloud className="w-4 h-4" /> <span className="hidden md:inline-block">{t('import_schedule')}</span>
-      </button>
-
-      {isOpen && createPortal(
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+        <motion.span
+          variants={shareIconVariants}
+          transition={HEADER_BTN_SPRING}
+          className="inline-flex"
         >
-          <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[90vh]">
+          <Share2 className="w-4 h-4" />
+        </motion.span>
+        <span className="hidden sm:inline-block">{t('share_schedule')}</span>
+      </motion.button>
+
+      <motion.button
+        onClick={() => { setActiveTab('import'); setIsOpen(true); }}
+        variants={headerBtnVariants}
+        initial="rest"
+        animate="rest"
+        whileHover="hover"
+        whileTap="tap"
+        transition={HEADER_BTN_SPRING}
+        className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center gap-2 shadow-sm hover:shadow-md hover:shadow-indigo-500/10"
+      >
+        <motion.span
+          variants={importIconVariants}
+          transition={HEADER_BTN_SPRING}
+          className="inline-flex"
+        >
+          <DownloadCloud className="w-4 h-4" />
+        </motion.span>
+        <span className="hidden md:inline-block">{t('import_schedule')}</span>
+      </motion.button>
+
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              key="share-modal-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/30 dark:bg-black/50 backdrop-blur-sm"
+              onClick={(e) => { if (e.target === e.currentTarget && !loading) setIsOpen(false); }}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={{ duration: 0.22, ease: MODAL_EASE }}
+                className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              >
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 flex-shrink-0">
               <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{t('share_access')}</h2>
               <button 
@@ -91,22 +162,48 @@ export const ShareSchedule: React.FC<Props> = ({ onImportComplete }) => {
             </div>
 
             <div className="flex border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0">
-              <button
+              <motion.button
                 onClick={() => setActiveTab('export')}
+                variants={tabBtnVariants}
+                initial="rest"
+                animate="rest"
+                whileHover="hover"
+                whileTap="tap"
+                transition={HEADER_BTN_SPRING}
                 className={`flex-1 py-3 text-sm font-semibold border-b-2 transition-colors flex items-center justify-center gap-2 ${
                   activeTab === 'export' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
                 }`}
               >
-                <UploadCloud className="w-4 h-4" /> {t('export_tab')}
-              </button>
-              <button
+                <motion.span
+                  variants={exportIconVariants}
+                  transition={HEADER_BTN_SPRING}
+                  className="inline-flex"
+                >
+                  <UploadCloud className="w-4 h-4" />
+                </motion.span>
+                {t('export_tab')}
+              </motion.button>
+              <motion.button
                 onClick={() => setActiveTab('import')}
+                variants={tabBtnVariants}
+                initial="rest"
+                animate="rest"
+                whileHover="hover"
+                whileTap="tap"
+                transition={HEADER_BTN_SPRING}
                 className={`flex-1 py-3 text-sm font-semibold border-b-2 transition-colors flex items-center justify-center gap-2 ${
                   activeTab === 'import' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
                 }`}
               >
-                <DownloadCloud className="w-4 h-4" /> {t('import_tab')}
-              </button>
+                <motion.span
+                  variants={importIconVariants}
+                  transition={HEADER_BTN_SPRING}
+                  className="inline-flex"
+                >
+                  <DownloadCloud className="w-4 h-4" />
+                </motion.span>
+                {t('import_tab')}
+              </motion.button>
             </div>
 
             <div className="p-6 overflow-y-auto">
@@ -172,8 +269,10 @@ export const ShareSchedule: React.FC<Props> = ({ onImportComplete }) => {
                 </form>
               )}
             </div>
-          </div>
-        </div>,
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
         document.body
       )}
     </>

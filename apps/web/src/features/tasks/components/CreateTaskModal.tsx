@@ -3,6 +3,7 @@ import { X, Repeat } from 'lucide-react';
 import { createTask, updateTask, Task, TaskPriority } from '../api/tasks.api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
   isOpen: boolean;
@@ -29,10 +30,8 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
       setPriority(initialData?.priority || 'MEDIUM');
       
       if (initialData?.deadline) {
-        // Convert to YYYY-MM-DDThh:mm
         try {
           const date = new Date(initialData.deadline);
-          // Adjust for local timezone offset
           const offset = date.getTimezoneOffset() * 60000;
           const localISOTime = (new Date(date.getTime() - offset)).toISOString().slice(0, 16);
           setDeadline(localISOTime);
@@ -52,8 +51,6 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
       }
     }
   }, [isOpen, initialData]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,14 +82,30 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/20 dark:bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{initialData ? t('edit_task') : t('new_task')}</h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 dark:hover:text-white">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          key="task-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/20 dark:bg-black/60 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget && !loading) onClose(); }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] as const }}
+            className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{initialData ? t('edit_task') : t('new_task')}</h2>
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 dark:hover:text-white transition-all duration-150 active:scale-90">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
@@ -172,20 +185,22 @@ export const CreateTaskModal: React.FC<Props> = ({ isOpen, onClose, subjectId, o
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+              className="px-4 py-2 rounded-lg font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-150 active:scale-95"
             >
               {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-600 text-white disabled:opacity-50"
+              className="px-4 py-2 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-600 text-white disabled:opacity-50 transition-all duration-150 active:scale-95 shadow-sm hover:shadow-md hover:shadow-indigo-500/20"
             >
               {loading ? t('saving') : initialData ? t('save_changes') : t('create')}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

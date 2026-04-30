@@ -3,6 +3,9 @@ import { X, UserPlus, FileEdit, Trash2, Mail, Link as LinkIcon } from 'lucide-re
 import { Teacher, createTeacher, deleteTeacher, updateTeacher } from '../api/schedule.api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const MODAL_EASE = [0.22, 1, 0.36, 1] as const;
 
 interface Props {
   isOpen: boolean;
@@ -20,8 +23,6 @@ export const TeacherManager: React.FC<Props> = ({ isOpen, onClose, teachers, onT
   const [formPhoto, setFormPhoto] = useState('');
   const [formContacts, setFormContacts] = useState('');
   const [loading, setLoading] = useState(false);
-
-  if (!isOpen) return null;
 
   const resetForm = () => {
     setFormName('');
@@ -87,14 +88,27 @@ export const TeacherManager: React.FC<Props> = ({ isOpen, onClose, teachers, onT
   const isFormOpen = isAdding || editingId !== null;
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/40 dark:bg-black/60 backdrop-blur-sm"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !loading) onClose();
-      }}
-    >
-      <div className="w-full max-w-2xl h-[80vh] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl flex flex-col overflow-hidden">
-        
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          key="teacher-manager-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/40 dark:bg-black/60 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !loading) onClose();
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ duration: 0.22, ease: MODAL_EASE }}
+            className="w-full max-w-2xl h-[80vh] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl flex flex-col overflow-hidden"
+          >
+
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
             {t('teachers')}
@@ -202,7 +216,9 @@ export const TeacherManager: React.FC<Props> = ({ isOpen, onClose, teachers, onT
             </div>
           )}
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
