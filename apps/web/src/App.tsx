@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import SubjectPage from './pages/SubjectPage';
 import { ThemeProvider } from './shared/theme/ThemeContext';
 import { ErrorBoundary } from './shared/components/ErrorBoundary';
+import { ConfirmProvider } from './shared/components/ConfirmDialog';
 
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -20,8 +21,9 @@ function App() {
     <ThemeProvider>
       <BrowserRouter>
         <AuthProvider>
-          <ErrorBoundary>
-            <Routes>
+          <ConfirmProvider>
+            <ErrorBoundary>
+              <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route
@@ -40,11 +42,12 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-            </Routes>
-          </ErrorBoundary>
-          <Toaster position="top-center" toastOptions={{
-            className: 'dark:bg-zinc-900 border dark:border-zinc-800 bg-white border-zinc-200 text-zinc-900 dark:text-white'
-          }} />
+              </Routes>
+            </ErrorBoundary>
+            <Toaster position="top-center" toastOptions={{
+              className: 'dark:bg-zinc-900 border dark:border-zinc-800 bg-white border-zinc-200 text-zinc-900 dark:text-white'
+            }} />
+          </ConfirmProvider>
         </AuthProvider>
     </BrowserRouter>
     </ThemeProvider>

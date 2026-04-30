@@ -4,6 +4,7 @@ import { Teacher, createTeacher, deleteTeacher, updateTeacher } from '../api/sch
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useConfirm } from '../../../shared/components/ConfirmDialog';
 
 const MODAL_EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -16,6 +17,7 @@ interface Props {
 
 export const TeacherManager: React.FC<Props> = ({ isOpen, onClose, teachers, onTeachersChange }) => {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
@@ -71,7 +73,8 @@ export const TeacherManager: React.FC<Props> = ({ isOpen, onClose, teachers, onT
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(t('delete_teacher_confirm', { name }))) return;
+    const ok = await confirm({ message: t('delete_teacher_confirm', { name }), tone: 'danger' });
+    if (!ok) return;
     try {
       await deleteTeacher(id);
       toast.success(t('teacher_deleted'));

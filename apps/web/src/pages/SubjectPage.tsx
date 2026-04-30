@@ -15,6 +15,7 @@ import { CreateNoteModal } from '../features/notes/components/CreateNoteModal';
 import { useTranslation } from 'react-i18next';
 import { ThemeLangToggle } from '../shared/components/ThemeLangToggle';
 import { LinkifyText } from '../shared/components/LinkifyText';
+import { useConfirm } from '../shared/components/ConfirmDialog';
 import { ScheduleSlot, Teacher } from '../features/schedule/api/schedule.api';
 import { SubjectItem } from '../features/subjects/api/subjects.api';
 import { useDelayedFlag } from '../shared/hooks/useDelayedFlag';
@@ -62,6 +63,7 @@ const NoteSkeletonRow = ({ width }: { width: string }) => (
 
 const SubjectPage = () => {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const slotContext = (location.state ?? null) as SlotContextState | null;
@@ -106,7 +108,8 @@ const SubjectPage = () => {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    if (!window.confirm(t('delete_task_confirm'))) return;
+    const ok = await confirm({ message: t('delete_task_confirm'), tone: 'danger' });
+    if (!ok) return;
     try {
       await deleteTask(taskId);
       toast.success(t('task_deleted'));
@@ -142,7 +145,8 @@ const SubjectPage = () => {
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!window.confirm(t('delete_note_confirm'))) return;
+    const ok = await confirm({ message: t('delete_note_confirm'), tone: 'danger' });
+    if (!ok) return;
     try {
       await deleteNote(noteId);
       toast.success(t('deleted_successfully'));
@@ -258,15 +262,6 @@ const SubjectPage = () => {
               </button>
             </div>
           </div>
-
-          {/*
-            Render priority order:
-              1. Already have data → list (refetches stay visible, no flash)
-              2. Skeleton timer has elapsed and we're still empty → skeleton
-              3. Loading but inside the 200ms grace window → invisible spacer
-              4. Loaded with empty result → empty state
-            AnimatePresence handles fade between any two of these.
-          */}
           <AnimatePresence mode="wait" initial={false}>
             {tasks.length > 0 ? (
               <motion.div
