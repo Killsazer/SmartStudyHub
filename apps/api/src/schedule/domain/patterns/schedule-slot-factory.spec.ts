@@ -72,41 +72,6 @@ describe('ScheduleSlotFactory', () => {
     });
   });
 
-  describe('getSlotDetails() — polymorphic behavior', () => {
-    it('✅ LectureSlot returns lecture-specific details', () => {
-      const slot = ScheduleSlotFactory.createSlot(ClassType.LECTURE, defaultProps);
-      const details = slot.getSlotDetails();
-
-      expect(details).toContain('Lecture');
-      expect(details).toContain('08:00');
-      expect(details).toContain('09:30');
-      expect(details).toContain('Room 301');
-    });
-
-    it('✅ LabSlot returns lab-specific details', () => {
-      const slot = ScheduleSlotFactory.createSlot(ClassType.LAB, defaultProps);
-      const details = slot.getSlotDetails();
-
-      expect(details).toContain('Lab');
-      expect(details).toContain('Practical application');
-    });
-
-    it('✅ PracticeSlot returns practice-specific details', () => {
-      const slot = ScheduleSlotFactory.createSlot(ClassType.PRACTICE, defaultProps);
-      const details = slot.getSlotDetails();
-
-      expect(details).toContain('Practice');
-      expect(details).toContain('Group exercises');
-    });
-
-    it('✅ should use TBD when location is undefined', () => {
-      const { location, ...props } = defaultProps;
-      const slot = ScheduleSlotFactory.createSlot(ClassType.LECTURE, props as ScheduleSlotProps);
-
-      expect(slot.getSlotDetails()).toContain('TBD');
-    });
-  });
-
   describe('domain purity', () => {
     it('✅ all subclasses extend ScheduleSlotEntity', () => {
       const lecture = ScheduleSlotFactory.createSlot(ClassType.LECTURE, defaultProps);

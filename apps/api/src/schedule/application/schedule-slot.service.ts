@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import type { IScheduleSlotRepository } from '../domain/repositories/schedule-slot.repository.interface';
 import { ScheduleSlotEntity, ScheduleSlotProps } from '../domain/schedule-slot.entity';
 import { ScheduleSlotFactory } from '../domain/patterns/schedule-slot.factory';
@@ -9,8 +9,6 @@ import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ScheduleSlotService {
-  private readonly logger = new Logger(ScheduleSlotService.name);
-
   constructor(
     @Inject('IScheduleSlotRepository')
     private readonly slotRepo: IScheduleSlotRepository,
@@ -41,8 +39,6 @@ export class ScheduleSlotService {
     };
 
     const entity = ScheduleSlotFactory.createSlot(dto.classType, props);
-
-    this.logger.log(`Factory created slot: ${entity.getSlotDetails()}`);
 
     await this.slotRepo.save(entity);
     return entity;
