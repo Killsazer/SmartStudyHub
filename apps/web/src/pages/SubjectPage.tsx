@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 import { getNoteTree, deleteNote, NoteComponent } from '../features/notes/api/notes.api';
 import { NoteTree } from '../features/notes/components/NoteTree';
-import { CreateNoteModal } from '../features/notes/components/CreateNoteModal';
+import { NoteEditorModal } from '../features/notes/components/NoteEditorModal';
 import { useTranslation } from 'react-i18next';
 import { ThemeLangToggle } from '../shared/components/ThemeLangToggle';
 import { LinkifyText } from '../shared/components/LinkifyText';
@@ -447,7 +447,7 @@ const SubjectPage = () => {
         onCreated={fetchTasks}
         initialData={editingTask}
       />
-      <CreateNoteModal
+      <NoteEditorModal
         isOpen={isNoteModalOpen}
         onClose={() => {
           setIsNoteModalOpen(false);

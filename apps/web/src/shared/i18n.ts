@@ -157,6 +157,7 @@ const en = {
   failed_to_load_notes: 'Failed to load notes',
   failed_to_delete_note: 'Failed to delete note',
   add_to_folder: 'Add to folder',
+  view: 'View',
   words: 'words',
   min_read: 'min read',
 
@@ -406,6 +407,7 @@ const uk: typeof en = {
   failed_to_load_notes: 'Не вдалося завантажити нотатки',
   failed_to_delete_note: 'Не вдалося видалити нотатку',
   add_to_folder: 'Додати в папку',
+  view: 'Переглянути',
   words: 'слів',
   min_read: 'хв читання',
 
