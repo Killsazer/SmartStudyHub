@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Calendar, Flag, CheckCircle2, Circle, Edit2, Trash2, AlertCircle, Repeat } from 'lucide-react';
-import { Task, changeTaskStatus, undoLastAction } from '../api/tasks.api';
+import { Calendar, Flag, CheckCircle2, Circle, Clock, Edit2, Trash2, AlertCircle, Repeat } from 'lucide-react';
+import { Task, TaskStatus, changeTaskStatus, undoLastAction } from '../api/tasks.api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,32 @@ const PRIORITY_COLORS = {
   HIGH: 'text-red-500 bg-red-500/10',
 };
 
+const STATUS_ORDER: TaskStatus[] = ['TODO', 'IN_PROGRESS', 'DONE'];
+
+const STATUS_ICONS: Record<TaskStatus, typeof Circle> = {
+  TODO: Circle,
+  IN_PROGRESS: Clock,
+  DONE: CheckCircle2,
+};
+
+const STATUS_TITLE_KEYS: Record<TaskStatus, string> = {
+  TODO: 'status_todo',
+  IN_PROGRESS: 'status_in_progress',
+  DONE: 'status_done',
+};
+
+const STATUS_TOAST_KEYS: Record<TaskStatus, string> = {
+  TODO: 'task_reopened',
+  IN_PROGRESS: 'task_started',
+  DONE: 'task_completed',
+};
+
+const STATUS_ACTIVE_CLASS: Record<TaskStatus, string> = {
+  TODO: 'bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-100',
+  IN_PROGRESS: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
+  DONE: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300',
+};
+
 const taskItemVariants = {
   hidden: { opacity: 0, y: 8, scale: 0.98 },
   visible: {
@@ -36,43 +62,39 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
-  const toggleStatus = async () => {
+  const handleStatusChange = async (newStatus: TaskStatus) => {
+    if (newStatus === task.status || loading) return;
     setLoading(true);
-    const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
     try {
       await changeTaskStatus(task.id, newStatus);
 
-      if (newStatus === 'DONE') {
-        if (activeCompletionToastId) {
-          toast.dismiss(activeCompletionToastId);
-        }
-        const id = toast((toastInstance) => (
-          <div className="flex items-center gap-4">
-            <span>{t('task_completed')}</span>
-            <button
-              onClick={async () => {
-                toast.dismiss(toastInstance.id);
-                if (activeCompletionToastId === toastInstance.id) {
-                  activeCompletionToastId = null;
-                }
-                try {
-                  await undoLastAction();
-                  onStatusChanged();
-                  toast.success(t('action_undone'));
-                } catch (e) {
-                  toast.error(t('failed_to_undo'));
-                }
-              }}
-              className="px-3 py-1 bg-zinc-800 text-white rounded text-xs font-medium hover:bg-zinc-700 active:scale-95 transition-all"
-            >
-              {t('undo')}
-            </button>
-          </div>
-        ), { duration: 4000 });
-        activeCompletionToastId = id;
-      } else {
-        toast.success(t('task_reopened'));
+      if (activeCompletionToastId) {
+        toast.dismiss(activeCompletionToastId);
       }
+      const id = toast((toastInstance) => (
+        <div className="flex items-center gap-4">
+          <span>{t(STATUS_TOAST_KEYS[newStatus])}</span>
+          <button
+            onClick={async () => {
+              toast.dismiss(toastInstance.id);
+              if (activeCompletionToastId === toastInstance.id) {
+                activeCompletionToastId = null;
+              }
+              try {
+                await undoLastAction();
+                onStatusChanged();
+                toast.success(t('action_undone'));
+              } catch (e) {
+                toast.error(t('failed_to_undo'));
+              }
+            }}
+            className="px-3 py-1 bg-zinc-800 text-white rounded text-xs font-medium hover:bg-zinc-700 active:scale-95 transition-all"
+          >
+            {t('undo')}
+          </button>
+        </div>
+      ), { duration: 4000 });
+      activeCompletionToastId = id;
 
       onStatusChanged();
     } catch (err) {
@@ -109,17 +131,33 @@ export const TaskItem: React.FC<Props> = ({ task, onStatusChanged, onEdit, onDel
             : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20'
       }`}
     >
-      <button
-        onClick={toggleStatus}
-        disabled={loading}
-        className={`shrink-0 transition-all duration-200 active:scale-90 ${
-          isDone
-            ? 'text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400'
-            : 'text-zinc-400 dark:text-zinc-600 hover:text-indigo-500 dark:hover:text-indigo-400 hover:scale-110'
-        }`}
+      <div
+        role="radiogroup"
+        aria-label={t('status')}
+        className="shrink-0 flex flex-col gap-0.5 p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-800/60"
       >
-        {isDone ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
-      </button>
+        {STATUS_ORDER.map((status) => {
+          const Icon = STATUS_ICONS[status];
+          const isActive = task.status === status;
+          return (
+            <button
+              key={status}
+              role="radio"
+              aria-checked={isActive}
+              onClick={() => handleStatusChange(status)}
+              disabled={loading}
+              title={t(STATUS_TITLE_KEYS[status])}
+              className={`p-1.5 rounded-md transition-all duration-150 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed ${
+                isActive
+                  ? STATUS_ACTIVE_CLASS[status]
+                  : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+            </button>
+          );
+        })}
+      </div>
 
       <div className="flex-1 min-w-0">
         <h4 className={`text-sm font-medium truncate transition-colors duration-200 ${isDone ? 'line-through text-zinc-400 dark:text-zinc-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
