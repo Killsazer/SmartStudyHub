@@ -156,6 +156,8 @@ const en = {
   subject_title: 'Subject Title',
   subject_title_ph: 'e.g. Advanced Calculus',
   teacher_opt: 'Teacher (Optional)',
+  teacher_required_lab: 'Teacher (Required)',
+  lab_requires_teacher: 'Lab classes require an assigned teacher.',
   teacher_ph: 'e.g. Dr. Smith',
   accent_color: 'Accent Color',
 
@@ -395,6 +397,8 @@ const uk: typeof en = {
   subject_title: 'Назва предмету',
   subject_title_ph: 'напр. Вища математика',
   teacher_opt: 'Викладач (Необов\'язково)',
+  teacher_required_lab: 'Викладач (Обов\'язково)',
+  lab_requires_teacher: 'Лабораторні заняття потребують призначеного викладача.',
   teacher_ph: 'напр. д-р Іванов',
   accent_color: 'Колір акценту',
 

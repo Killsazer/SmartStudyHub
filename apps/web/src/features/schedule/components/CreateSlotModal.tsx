@@ -51,9 +51,13 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
 
   if (!isOpen) return null;
 
+  const requiresTeacher = classType === 'LAB';
+  const teacherMissing = requiresTeacher && !teacherId;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subjectId) { toast.error(t('please_select_subject')); return; }
+    if (teacherMissing) { toast.error(t('lab_requires_teacher')); return; }
 
     setLoading(true);
     try {
@@ -83,8 +87,9 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
 
       onCreated();
       onClose();
-    } catch {
-      toast.error(t('failed_to_save_schedule_slot'));
+    } catch (err: any) {
+      const beMessage: string | undefined = err?.response?.data?.message;
+      toast.error(beMessage || t('failed_to_save_schedule_slot'));
     } finally {
       setLoading(false);
     }
@@ -147,15 +152,25 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">{t('teacher_opt')}</label>
+            <label className={`block text-sm font-semibold mb-1.5 ${teacherMissing ? 'text-red-500' : 'text-zinc-700 dark:text-zinc-300'}`}>
+              {requiresTeacher ? t('teacher_required_lab') : t('teacher_opt')}
+            </label>
             <select
               value={teacherId}
               onChange={(e) => setTeacherId(e.target.value)}
-              className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-white"
+              className={`w-full bg-white dark:bg-zinc-950 border rounded-lg px-4 py-2 text-zinc-900 dark:text-white transition-colors ${
+                teacherMissing
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-zinc-200 dark:border-zinc-800'
+              }`}
+              required={requiresTeacher}
             >
               <option value="">{t('no_teacher')}</option>
-              {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              {teachers.map(tch => <option key={tch.id} value={tch.id}>{tch.name}</option>)}
             </select>
+            {teacherMissing && (
+              <p className="mt-1.5 text-xs text-red-500">{t('lab_requires_teacher')}</p>
+            )}
           </div>
 
           <div>
@@ -195,8 +210,8 @@ export const CreateSlotModal: React.FC<Props> = ({ isOpen, onClose, subjects, te
             </button>
             <button
               type="submit"
-              disabled={loading || !subjectId}
-              className="px-4 py-2 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-600 text-white transition-colors disabled:opacity-50"
+              disabled={loading || !subjectId || teacherMissing}
+              className="px-4 py-2 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? t('saving') : initialData ? t('save_changes') : t('add')}
             </button>
