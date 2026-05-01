@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Extension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
@@ -22,6 +23,31 @@ import {
 import './editor-styles.css';
 
 const lowlight = createLowlight(common);
+
+// Intercept Tab so the browser doesn't steal focus / open search
+const TabHandler = Extension.create({
+  name: 'tabHandler',
+  addKeyboardShortcuts() {
+    return {
+      Tab: ({ editor }) => {
+        // Inside a list — indent (sink)
+        if (editor.isActive('listItem') || editor.isActive('taskItem')) {
+          return editor.chain().focus().sinkListItem('listItem').run()
+            || editor.chain().focus().sinkListItem('taskItem').run();
+        }
+        // Otherwise insert a tab character
+        return editor.chain().focus().insertContent('\t').run();
+      },
+      'Shift-Tab': ({ editor }) => {
+        if (editor.isActive('listItem') || editor.isActive('taskItem')) {
+          return editor.chain().focus().liftListItem('listItem').run()
+            || editor.chain().focus().liftListItem('taskItem').run();
+        }
+        return true; // consume the event, do nothing
+      },
+    };
+  },
+});
 
 interface RichTextEditorProps {
   content: string;
@@ -78,6 +104,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChang
       TaskItem.configure({ nested: true }),
       CodeBlockLowlight.configure({ lowlight }),
       Placeholder.configure({ placeholder: placeholder || t('content_ph') }),
+      TabHandler,
     ],
     content: content || '',
     onUpdate: ({ editor }) => {
