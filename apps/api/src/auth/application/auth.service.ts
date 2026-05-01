@@ -1,4 +1,4 @@
-import { Injectable, Inject, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import type { IUserRepository } from '../domain/user.repository.interface';
@@ -20,6 +20,7 @@ export class AuthService {
     @Inject('IUserRepository') private readonly userRepo: IUserRepository,
     private readonly jwtService: JwtService
   ) {}
+  private readonly logger = new Logger(AuthService.name);
 
   async register(dto: CreateUserDto): Promise<{ accessToken: string }> {
     const existing = await this.userRepo.findByEmail(dto.email);
@@ -38,8 +39,12 @@ export class AuthService {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+
+    this.logger.log(`Creating user with email: ${dto.email}`);
     
     await this.userRepo.save(user);
+    
+    this.logger.log(`User successfully registered: ${dto.email} (ID: ${userId})`);
 
     return this.generateToken(user);
   }
