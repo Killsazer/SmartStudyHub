@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, FileText, FolderOpen, Clock, Hash } from 'lucide-react';
 import { createNote, updateNote, NoteComponent } from '../api/notes.api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { RichTextEditor } from './RichTextEditor';
 
 interface Props {
   isOpen: boolean;
@@ -14,6 +15,19 @@ interface Props {
   initialData?: NoteComponent | null;
 }
 
+/**
+ * Extracts plain-text word count from an HTML string.
+ * Uses a temporary element to strip tags — works in browser environments.
+ */
+function getWordCount(html: string): number {
+  if (!html) return 0;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  const text = tmp.textContent || tmp.innerText || '';
+  const trimmed = text.trim();
+  return trimmed ? trimmed.split(/\s+/).length : 0;
+}
+
 export const NoteEditorModal: React.FC<Props> = ({ isOpen, onClose, parentId, subjectId, onCreated, initialData }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
@@ -21,7 +35,6 @@ export const NoteEditorModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
   const [isSection, setIsSection] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -33,25 +46,10 @@ export const NoteEditorModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
     }
   }, [isOpen, initialData]);
 
-  // Auto-resize textarea to fit content
-  const autoResize = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${Math.max(el.scrollHeight, 320)}px`;
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen || isSection) return;
-    // Small delay to let the modal render
-    const timer = setTimeout(autoResize, 50);
-    return () => clearTimeout(timer);
-  }, [isOpen, isSection, content, autoResize]);
-
   // Focus title on open for new notes
   useEffect(() => {
     if (!isOpen || initialData) return;
-    const timer = setTimeout(() => titleRef.current?.focus(), 200);
+    const timer = setTimeout(() => titleRef.current?.focus(), 250);
     return () => clearTimeout(timer);
   }, [isOpen, initialData]);
 
@@ -60,13 +58,12 @@ export const NoteEditorModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
     setIsDirty(true);
   };
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
+  const handleContentChange = (html: string) => {
+    setContent(html);
     setIsDirty(true);
-    autoResize();
   };
 
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+  const wordCount = getWordCount(content);
   const readingMinutes = Math.max(1, Math.ceil(wordCount / 200));
 
   const handleSave = async () => {
@@ -105,12 +102,10 @@ export const NoteEditorModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
   };
 
   const handleClose = () => {
-    if (!loading) {
-      onClose();
-    }
+    if (!loading) onClose();
   };
 
-  // Ctrl/Cmd+S to save
+  // Ctrl/Cmd+S to save, Escape to close
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -146,10 +141,10 @@ export const NoteEditorModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 20 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] as const }}
-            className="w-full max-w-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl shadow-zinc-900/10 dark:shadow-black/30 overflow-hidden"
+            className="w-full max-w-4xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl shadow-zinc-900/10 dark:shadow-black/30 overflow-hidden flex flex-col max-h-[90vh]"
           >
-            {/* Header bar */}
-            <div className="flex items-center justify-between px-8 py-4 border-b border-zinc-100 dark:border-zinc-800/60">
+            {/* ── Header bar ── */}
+            <div className="flex items-center justify-between px-8 py-4 border-b border-zinc-100 dark:border-zinc-800/60 shrink-0">
               <div className="flex items-center gap-2.5">
                 {isSection ? (
                   <FolderOpen className="w-5 h-5 text-indigo-400" />
@@ -185,8 +180,8 @@ export const NoteEditorModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
               </div>
             </div>
 
-            {/* Document body */}
-            <div className="px-8 sm:px-12 py-8 min-h-[400px]">
+            {/* ── Document body (scrollable) ── */}
+            <div className="flex-1 overflow-y-auto px-8 sm:px-12 py-8">
               {/* Folder toggle — only for new root-level creation */}
               {showFolderToggle && (
                 <div className="mb-6">
@@ -220,15 +215,12 @@ export const NoteEditorModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
               {/* Subtle divider */}
               <div className="h-px bg-zinc-100 dark:bg-zinc-800/50 my-6" />
 
-              {/* Content area — only for notes, not folders */}
+              {/* Content area — Rich Text Editor for notes, placeholder for folders */}
               {!isSection && (
-                <textarea
-                  ref={textareaRef}
-                  value={content}
+                <RichTextEditor
+                  content={content}
                   onChange={handleContentChange}
                   placeholder={t('content_ph')}
-                  className="w-full text-base leading-relaxed text-zinc-700 dark:text-zinc-300 placeholder-zinc-300 dark:placeholder-zinc-700 bg-transparent border-none outline-none focus:ring-0 p-0 resize-none min-h-[320px]"
-                  style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}
                 />
               )}
 
@@ -239,8 +231,8 @@ export const NoteEditorModal: React.FC<Props> = ({ isOpen, onClose, parentId, su
               )}
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-between px-8 py-4 border-t border-zinc-100 dark:border-zinc-800/60 bg-zinc-50/50 dark:bg-zinc-950/30">
+            {/* ── Footer ── */}
+            <div className="flex items-center justify-between px-8 py-4 border-t border-zinc-100 dark:border-zinc-800/60 bg-zinc-50/50 dark:bg-zinc-950/30 shrink-0">
               <span className="text-xs text-zinc-400 dark:text-zinc-600 hidden sm:inline">
                 {initialData ? '⌘S / Ctrl+S' : ''}
               </span>

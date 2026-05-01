@@ -1,0 +1,227 @@
+/* ===== TipTap Editor Styles ===== */
+
+/* ── Editor root ── */
+.tiptap-editor .ProseMirror {
+  outline: none;
+  min-height: 320px;
+}
+
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: theme('colors.zinc.300');
+  pointer-events: none;
+  height: 0;
+}
+
+:is(.dark) .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  color: theme('colors.zinc.700');
+}
+
+/* ── Headings ── */
+.tiptap-editor h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: theme('colors.zinc.900');
+}
+:is(.dark) .tiptap-editor h1 { color: theme('colors.zinc.100'); }
+
+.tiptap-editor h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: theme('colors.zinc.800');
+}
+:is(.dark) .tiptap-editor h2 { color: theme('colors.zinc.200'); }
+
+.tiptap-editor h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 1.5rem;
+  margin-bottom: 0.4rem;
+  color: theme('colors.zinc.700');
+}
+:is(.dark) .tiptap-editor h3 { color: theme('colors.zinc.300'); }
+
+/* ── Paragraphs ── */
+.tiptap-editor p {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+
+/* ── Links ── */
+.tiptap-editor a {
+  color: theme('colors.indigo.500');
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.tiptap-editor a:hover { color: theme('colors.indigo.400'); }
+
+/* ── Lists ── */
+.tiptap-editor ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+.tiptap-editor ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+.tiptap-editor li {
+  margin-bottom: 0.15rem;
+  line-height: 1.6;
+}
+.tiptap-editor li > p { margin-bottom: 0; }
+
+/* ── Task list (Checklist) ── */
+.tiptap-editor ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+.tiptap-editor ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.tiptap-editor ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+.tiptap-editor ul[data-type="taskList"] li > label input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  border: 1.5px solid theme('colors.zinc.300');
+  cursor: pointer;
+  accent-color: theme('colors.indigo.500');
+}
+:is(.dark) .tiptap-editor ul[data-type="taskList"] li > label input[type="checkbox"] {
+  border-color: theme('colors.zinc.600');
+}
+.tiptap-editor ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  text-decoration: line-through;
+  color: theme('colors.zinc.400');
+}
+:is(.dark) .tiptap-editor ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  color: theme('colors.zinc.600');
+}
+.tiptap-editor ul[data-type="taskList"] li > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Inline code ── */
+.tiptap-editor code:not(pre code) {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.875em;
+  padding: 0.15em 0.4em;
+  border-radius: 0.375rem;
+  background: theme('colors.zinc.100');
+  color: theme('colors.rose.600');
+}
+:is(.dark) .tiptap-editor code:not(pre code) {
+  background: theme('colors.zinc.800');
+  color: theme('colors.rose.400');
+}
+
+/* ── Code blocks ── */
+.tiptap-editor pre {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  background: theme('colors.zinc.950');
+  color: theme('colors.zinc.300');
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 0.75rem 0;
+  overflow-x: auto;
+  border: 1px solid theme('colors.zinc.800');
+}
+.tiptap-editor pre code {
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  background: none;
+  color: inherit;
+  border-radius: 0;
+}
+/* Light mode code block */
+:not(.dark) .tiptap-editor pre {
+  background: theme('colors.zinc.50');
+  color: theme('colors.zinc.800');
+  border-color: theme('colors.zinc.200');
+}
+
+/* ── Lowlight syntax highlighting ── */
+.tiptap-editor pre .hljs-keyword { color: #c678dd; }
+.tiptap-editor pre .hljs-string { color: #98c379; }
+.tiptap-editor pre .hljs-number { color: #d19a66; }
+.tiptap-editor pre .hljs-comment { color: #5c6370; font-style: italic; }
+.tiptap-editor pre .hljs-function { color: #61afef; }
+.tiptap-editor pre .hljs-title { color: #61afef; }
+.tiptap-editor pre .hljs-built_in { color: #e6c07b; }
+.tiptap-editor pre .hljs-attr { color: #d19a66; }
+.tiptap-editor pre .hljs-variable { color: #e06c75; }
+.tiptap-editor pre .hljs-type { color: #e6c07b; }
+.tiptap-editor pre .hljs-params { color: #abb2bf; }
+.tiptap-editor pre .hljs-meta { color: #61afef; }
+.tiptap-editor pre .hljs-tag { color: #e06c75; }
+.tiptap-editor pre .hljs-name { color: #e06c75; }
+
+/* ── Blockquote ── */
+.tiptap-editor blockquote {
+  border-left: 3px solid theme('colors.zinc.200');
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  color: theme('colors.zinc.500');
+  font-style: italic;
+}
+:is(.dark) .tiptap-editor blockquote {
+  border-left-color: theme('colors.zinc.700');
+  color: theme('colors.zinc.400');
+}
+
+/* ── Horizontal rule ── */
+.tiptap-editor hr {
+  border: none;
+  border-top: 1px solid theme('colors.zinc.200');
+  margin: 1.5rem 0;
+}
+:is(.dark) .tiptap-editor hr {
+  border-top-color: theme('colors.zinc.800');
+}
+
+/* ── Text alignment ── */
+.tiptap-editor .text-left { text-align: left; }
+.tiptap-editor .text-center { text-align: center; }
+.tiptap-editor .text-right { text-align: right; }
+
+/* ── Highlight ── */
+.tiptap-editor mark {
+  background-color: theme('colors.yellow.200');
+  border-radius: 0.15em;
+  padding: 0.05em 0.1em;
+}
+:is(.dark) .tiptap-editor mark {
+  background-color: rgba(250, 204, 21, 0.3);
+  color: theme('colors.yellow.200');
+}
+
+/* ── Strikethrough ── */
+.tiptap-editor s { text-decoration: line-through; color: theme('colors.zinc.400'); }
+:is(.dark) .tiptap-editor s { color: theme('colors.zinc.500'); }
