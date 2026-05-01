@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, MapPin, List, LayoutGrid } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TaskItem as TaskComponent } from '../features/tasks/components/TaskItem';
+import { TaskBoard } from '../features/tasks/components/TaskBoard';
 import { TaskSortDropdown } from '../features/tasks/components/TaskSortDropdown';
 import { CreateTaskModal } from '../features/tasks/components/CreateTaskModal';
 import { getTasks, deleteTask, Task, SortStrategy } from '../features/tasks/api/tasks.api';
@@ -19,6 +20,9 @@ import { useConfirm } from '../shared/components/ConfirmDialog';
 import { ScheduleSlot, Teacher } from '../features/schedule/api/schedule.api';
 import { SubjectItem } from '../features/subjects/api/subjects.api';
 import { useDelayedFlag } from '../shared/hooks/useDelayedFlag';
+import { STORAGE_KEYS } from '../shared/storage-keys';
+
+type TaskViewMode = 'list' | 'board';
 
 type SlotContextState = {
   slot?: ScheduleSlot;
@@ -70,6 +74,14 @@ const SubjectPage = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notes, setNotes] = useState<NoteComponent[]>([]);
   const [sortStrategy, setSortStrategy] = useState<SortStrategy>('deadline');
+  const [viewMode, setViewMode] = useState<TaskViewMode>(() => {
+    const stored = localStorage.getItem(STORAGE_KEYS.TASK_VIEW_MODE);
+    return stored === 'board' ? 'board' : 'list';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.TASK_VIEW_MODE, viewMode);
+  }, [viewMode]);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
@@ -245,13 +257,41 @@ const SubjectPage = () => {
           </motion.section>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className={`grid gap-8 ${viewMode === 'board' ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
 
         {/* TASKS COLUMN */}
         <motion.section {...sectionEnter(0.1)}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight">{t('active_tasks')}</h2>
             <div className="flex items-center gap-4">
+              <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-800/60" role="radiogroup" aria-label={t('view_list')}>
+                <button
+                  role="radio"
+                  aria-checked={viewMode === 'list'}
+                  onClick={() => setViewMode('list')}
+                  title={t('view_list')}
+                  className={`p-1.5 rounded-md transition-all duration-150 active:scale-90 ${
+                    viewMode === 'list'
+                      ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  role="radio"
+                  aria-checked={viewMode === 'board'}
+                  onClick={() => setViewMode('board')}
+                  title={t('view_board')}
+                  className={`p-1.5 rounded-md transition-all duration-150 active:scale-90 ${
+                    viewMode === 'board'
+                      ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+              </div>
               <TaskSortDropdown value={sortStrategy} onChange={setSortStrategy} />
               <button
                 onClick={handleOpenTaskCreate}
@@ -263,7 +303,22 @@ const SubjectPage = () => {
             </div>
           </div>
           <AnimatePresence mode="wait" initial={false}>
-            {tasks.length > 0 ? (
+            {tasks.length > 0 && viewMode === 'board' ? (
+              <motion.div
+                key="tasks-board"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, transition: { duration: 0.18 } }}
+                transition={{ duration: 0.28, ease: PAGE_EASE }}
+              >
+                <TaskBoard
+                  tasks={tasks}
+                  onStatusChanged={fetchTasks}
+                  onEdit={handleOpenTaskEdit}
+                  onDelete={handleDeleteTask}
+                />
+              </motion.div>
+            ) : tasks.length > 0 ? (
               <motion.div
                 key="tasks-list"
                 variants={taskListVariants}
