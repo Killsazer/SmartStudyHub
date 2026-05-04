@@ -70,24 +70,33 @@ describe('AuthService', () => {
 
     it('❌ should throw ConflictException when email already exists', async () => {
       mockUserRepo.findByEmail.mockResolvedValue(
-        new UserEntity('existing-id', 'new@kpi.ua', 'hash', 'A', 'B', new Date(), new Date())
+        new UserEntity({
+          id: 'existing-id',
+          email: 'new@kpi.ua',
+          passwordHash: 'hash',
+          firstName: 'A',
+          lastName: 'B',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
       );
 
       await expect(service.register(validDto)).rejects.toThrow(ConflictException);
-      
+
       expect(mockUserRepo.save).not.toHaveBeenCalled();
     });
 
-    it('should generate user ID with correct prefix', async () => {
+    it('✅ should generate a UUID for new user id', async () => {
       mockUserRepo.findByEmail.mockResolvedValue(null);
 
       await service.register(validDto);
 
       const savedUser = mockUserRepo.save.mock.calls[0][0];
-      expect(savedUser.id).toMatch(/^user-\d+$/);
+      // RFC 4122 v4 UUID
+      expect(savedUser.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
     });
 
-    it('should propagate repository errors', async () => {
+    it('❌ should propagate repository errors', async () => {
       mockUserRepo.findByEmail.mockResolvedValue(null);
       mockUserRepo.save.mockRejectedValue(new Error('DB connection lost'));
 
@@ -101,7 +110,15 @@ describe('AuthService', () => {
     const loginDto = { email: 'vadym@kpi.ua', password: 'correct-password' };
 
     it('✅ should return JWT token when credentials are valid', async () => {
-      const user = new UserEntity('u1', 'vadym@kpi.ua', 'hashedPwd', 'Vadym', 'S', new Date(), new Date());
+      const user = new UserEntity({
+        id: 'u1',
+        email: 'vadym@kpi.ua',
+        passwordHash: 'hashedPwd',
+        firstName: 'Vadym',
+        lastName: 'S',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
       mockUserRepo.findByEmail.mockResolvedValue(user);
 
       const result = await service.login(loginDto);
@@ -119,7 +136,15 @@ describe('AuthService', () => {
     });
 
     it('❌ should throw UnauthorizedException when password is wrong', async () => {
-      const user = new UserEntity('u1', 'vadym@kpi.ua', 'hashedPwd', 'Vadym', 'S', new Date(), new Date());
+      const user = new UserEntity({
+        id: 'u1',
+        email: 'vadym@kpi.ua',
+        passwordHash: 'hashedPwd',
+        firstName: 'Vadym',
+        lastName: 'S',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
       mockUserRepo.findByEmail.mockResolvedValue(user);
       bcrypt.compare.mockResolvedValue(false);
 

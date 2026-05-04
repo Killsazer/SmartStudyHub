@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { ScheduleSlotService } from './schedule-slot.service';
 import { ClassType, ScheduleSlotProps } from '../domain/schedule-slot.entity';
 import { ScheduleSlotFactory } from '../domain/patterns/schedule-slot.factory';
+import { TeacherService } from '../../teachers/application/teacher.service';
 
 const createSlotEntity = (overrides: Partial<ScheduleSlotProps> = {}) => {
   const props: ScheduleSlotProps = {
@@ -22,7 +23,7 @@ const createSlotEntity = (overrides: Partial<ScheduleSlotProps> = {}) => {
 describe('ScheduleSlotService', () => {
   let service: ScheduleSlotService;
   let mockSlotRepo: any;
-  let mockTeacherRepo: any;
+  let mockTeacherService: { findTeacherById: jest.Mock };
 
   beforeEach(async () => {
     mockSlotRepo = {
@@ -34,19 +35,15 @@ describe('ScheduleSlotService', () => {
       findByUserIdAndWeek: jest.fn(),
     };
 
-    mockTeacherRepo = {
-      findById: jest.fn(),
-      findByUserId: jest.fn(),
-      save: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+    mockTeacherService = {
+      findTeacherById: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ScheduleSlotService,
         { provide: 'IScheduleSlotRepository', useValue: mockSlotRepo },
-        { provide: 'ITeacherRepository', useValue: mockTeacherRepo },
+        { provide: TeacherService, useValue: mockTeacherService },
       ],
     }).compile();
 
@@ -73,17 +70,17 @@ describe('ScheduleSlotService', () => {
     });
 
     it('✅ should create slot with teacherId when teacher exists', async () => {
-      mockTeacherRepo.findById.mockResolvedValue({ id: 'teacher-1', name: 'Prof' });
+      mockTeacherService.findTeacherById.mockResolvedValue({ id: 'teacher-1', name: 'Prof' });
       const dto = { ...baseDto, teacherId: 'teacher-1' };
 
       const result = await service.createSlot('u1', dto as any);
 
       expect(result.teacherId).toBe('teacher-1');
-      expect(mockTeacherRepo.findById).toHaveBeenCalledWith('teacher-1');
+      expect(mockTeacherService.findTeacherById).toHaveBeenCalledWith('teacher-1');
     });
 
     it('❌ should throw NotFoundException if teacherId does not exist', async () => {
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherService.findTeacherById.mockResolvedValue(null);
       const dto = { ...baseDto, teacherId: 'nonexistent' };
 
       await expect(service.createSlot('u1', dto as any))
@@ -95,14 +92,24 @@ describe('ScheduleSlotService', () => {
     it('✅ should skip teacher validation when teacherId is not provided', async () => {
       await service.createSlot('u1', baseDto as any);
 
-      expect(mockTeacherRepo.findById).not.toHaveBeenCalled();
+      expect(mockTeacherService.findTeacherById).not.toHaveBeenCalled();
     });
 
-    it('✅ should create correct subclass via Factory (LAB)', async () => {
-      const dto = { ...baseDto, classType: ClassType.LAB };
+    it('✅ should create correct subclass via Factory (LAB) when teacher is assigned', async () => {
+      mockTeacherService.findTeacherById.mockResolvedValue({ id: 'teacher-1', name: 'Prof' });
+      const dto = { ...baseDto, classType: ClassType.LAB, teacherId: 'teacher-1' };
+
       const result = await service.createSlot('u1', dto as any);
 
       expect(result.classType).toBe(ClassType.LAB);
+      expect(result.teacherId).toBe('teacher-1');
+    });
+
+    it('❌ should reject LAB slot without a teacher (polymorphic LabSlot.validate)', async () => {
+      const dto = { ...baseDto, classType: ClassType.LAB };
+
+      await expect(service.createSlot('u1', dto as any)).rejects.toThrow(BadRequestException);
+      expect(mockSlotRepo.save).not.toHaveBeenCalled();
     });
   });
 
@@ -131,7 +138,7 @@ describe('ScheduleSlotService', () => {
 
     it('❌ should throw NotFoundException if new teacherId does not exist', async () => {
       mockSlotRepo.findById.mockResolvedValue(createSlotEntity());
-      mockTeacherRepo.findById.mockResolvedValue(null);
+      mockTeacherService.findTeacherById.mockResolvedValue(null);
 
       await expect(service.updateSlot('u1', 'slot-1', { teacherId: 'bad-id' } as any))
         .rejects.toThrow(NotFoundException);

@@ -208,15 +208,15 @@ describe('RecurringTaskDecorator', () => {
     expect(decorator.subjectId).toBe('subj-1');
   });
 
-  it('✅ setter delegation should mutate wrappee', () => {
+  it('✅ decorator is a read-only view — mutations go through wrappee directly', () => {
     const task = createTask();
     const decorator = new RecurringTaskDecorator(task, 7);
 
-    decorator.title = 'Changed';
-    decorator.status = TaskStatus.IN_PROGRESS;
+    task.title = 'Changed';
+    task.status = TaskStatus.IN_PROGRESS;
 
-    expect(task.title).toBe('Changed');
-    expect(task.status).toBe(TaskStatus.IN_PROGRESS);
+    expect(decorator.title).toBe('Changed');
+    expect(decorator.status).toBe(TaskStatus.IN_PROGRESS);
   });
 });
 

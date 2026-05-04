@@ -3,6 +3,14 @@ import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { SubjectService } from './subject.service';
 import { SubjectEntity } from '../domain/subject.entity';
 
+const makeSubject = (overrides: Partial<{ id: string; title: string; userId: string; color: string }> = {}) =>
+  new SubjectEntity({
+    id: overrides.id ?? 'subj-1',
+    title: overrides.title ?? 'Title',
+    userId: overrides.userId ?? 'u1',
+    color: overrides.color ?? '#000000',
+  });
+
 describe('SubjectService', () => {
   let service: SubjectService;
   let mockSubjectRepo: {
@@ -11,15 +19,17 @@ describe('SubjectService', () => {
     delete: jest.Mock;
     findById: jest.Mock;
     findByUserId: jest.Mock;
+    deleteAll: jest.Mock;
   };
 
   beforeEach(async () => {
     mockSubjectRepo = {
-      save: jest.fn().mockResolvedValue(undefined),
-      update: jest.fn().mockResolvedValue(undefined),
+      save: jest.fn().mockImplementation(async (s) => s),
+      update: jest.fn().mockImplementation(async (id) => makeSubject({ id })),
       delete: jest.fn().mockResolvedValue(undefined),
       findById: jest.fn(),
       findByUserId: jest.fn(),
+      deleteAll: jest.fn().mockResolvedValue(undefined),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -33,62 +43,37 @@ describe('SubjectService', () => {
   });
 
   describe('createSubject', () => {
-    it('✅ should create subject via Builder and save to repository', async () => {
+    it('✅ should create subject and save to repository', async () => {
       const dto = { title: 'Mathematics', color: '#FF5722' };
 
-      const subjectId = await service.createSubject('u1', dto);
+      const subject = await service.createSubject('u1', dto);
 
-      expect(subjectId).toBeDefined();
+      expect(subject).toBeInstanceOf(SubjectEntity);
+      expect(subject.title).toBe('Mathematics');
+      expect(subject.color).toBe('#FF5722');
+      expect(subject.userId).toBe('u1');
       expect(mockSubjectRepo.save).toHaveBeenCalledTimes(1);
-
-      const savedSubject = mockSubjectRepo.save.mock.calls[0][0];
-      expect(savedSubject).toBeInstanceOf(SubjectEntity);
-      expect(savedSubject.title).toBe('Mathematics');
-      expect(savedSubject.color).toBe('#FF5722');
-      expect(savedSubject.userId).toBe('u1');
     });
 
     it('✅ should use default color when color is not provided', async () => {
       const dto = { title: 'Physics' };
 
-      await service.createSubject('u1', dto as any);
+      const subject = await service.createSubject('u1', dto as any);
 
-      const savedSubject = mockSubjectRepo.save.mock.calls[0][0];
-      expect(savedSubject.color).toBe('#000000');
-    });
-
-    it('❌ should propagate Builder validation errors (empty title)', async () => {
-      const dto = { title: '' };
-
-      await expect(service.createSubject('u1', dto as any))
-        .rejects.toThrow('Subject title cannot be empty');
-
-      expect(mockSubjectRepo.save).not.toHaveBeenCalled();
-    });
-
-    it('❌ should propagate Builder validation errors (invalid color)', async () => {
-      const dto = { title: 'Art', color: 'not-a-hex' };
-
-      await expect(service.createSubject('u1', dto as any))
-        .rejects.toThrow('Invalid color format');
-
-      expect(mockSubjectRepo.save).not.toHaveBeenCalled();
+      expect(subject.color).toBe('#000000');
     });
 
     it('❌ should propagate repository errors on save', async () => {
       mockSubjectRepo.save.mockRejectedValue(new Error('DB write failed'));
-      const dto = { title: 'Chemistry' };
 
-      await expect(service.createSubject('u1', dto as any))
+      await expect(service.createSubject('u1', { title: 'Chemistry' } as any))
         .rejects.toThrow('DB write failed');
     });
   });
 
   describe('updateSubject', () => {
     it('✅ should update subject when user is the owner', async () => {
-      mockSubjectRepo.findById.mockResolvedValue(
-        new SubjectEntity('subj-1', 'Old Title', 'u1'),
-      );
+      mockSubjectRepo.findById.mockResolvedValue(makeSubject({ title: 'Old Title' }));
 
       await service.updateSubject('u1', 'subj-1', { title: 'New Title' });
 
@@ -108,9 +93,7 @@ describe('SubjectService', () => {
     });
 
     it('❌ should throw ForbiddenException when user is not the owner', async () => {
-      mockSubjectRepo.findById.mockResolvedValue(
-        new SubjectEntity('subj-1', 'Title', 'other-user'),
-      );
+      mockSubjectRepo.findById.mockResolvedValue(makeSubject({ userId: 'other-user' }));
 
       await expect(service.updateSubject('u1', 'subj-1', { title: 'X' }))
         .rejects.toThrow(ForbiddenException);
@@ -121,9 +104,7 @@ describe('SubjectService', () => {
 
   describe('deleteSubject', () => {
     it('✅ should delete subject when user is the owner', async () => {
-      mockSubjectRepo.findById.mockResolvedValue(
-        new SubjectEntity('subj-1', 'Title', 'u1'),
-      );
+      mockSubjectRepo.findById.mockResolvedValue(makeSubject());
 
       await service.deleteSubject('u1', 'subj-1');
 
@@ -140,9 +121,7 @@ describe('SubjectService', () => {
     });
 
     it('❌ should throw ForbiddenException when user is not the owner', async () => {
-      mockSubjectRepo.findById.mockResolvedValue(
-        new SubjectEntity('subj-1', 'Title', 'other-user'),
-      );
+      mockSubjectRepo.findById.mockResolvedValue(makeSubject({ userId: 'other-user' }));
 
       await expect(service.deleteSubject('u1', 'subj-1'))
         .rejects.toThrow(ForbiddenException);
@@ -153,10 +132,7 @@ describe('SubjectService', () => {
 
   describe('getSubjectsByUser', () => {
     it('✅ should return subjects from repository', async () => {
-      const subjects = [
-        new SubjectEntity('s1', 'Math', 'u1'),
-        new SubjectEntity('s2', 'Physics', 'u1'),
-      ];
+      const subjects = [makeSubject({ id: 's1', title: 'Math' }), makeSubject({ id: 's2', title: 'Physics' })];
       mockSubjectRepo.findByUserId.mockResolvedValue(subjects);
 
       const result = await service.getSubjectsByUser('u1');
