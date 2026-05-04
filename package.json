@@ -17,19 +17,5 @@
     "web:dev": "npm run dev -w apps/web",
     "web:build": "npm run build -w apps/web",
     "dev:all": "npm run api:dev & npm run web:dev"
-  },
-  "devDependencies": {
-    "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.8",
-    "tailwindcss": "^3.4.19"
-  },
-  "dependencies": {
-    "axios": "^1.13.6",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "lucide-react": "^1.7.0",
-    "react-hot-toast": "^2.6.0",
-    "react-router-dom": "^7.13.2",
-    "tailwind-merge": "^3.5.0"
   }
 }
