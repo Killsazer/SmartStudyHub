@@ -1,4 +1,5 @@
 import { NoteComponent, INoteNode } from './note-component';
+import type { INoteVisitor } from '../visitor/note.visitor';
 
 export class NoteSection extends NoteComponent {
   private children: NoteComponent[] = [];
@@ -41,5 +42,9 @@ export class NoteSection extends NoteComponent {
       wordCount: this.getWordCount(),
       readingMinutes: this.getEstimatedReadingMinutes(),
     };
+  }
+
+  override accept<T>(visitor: INoteVisitor<T>, depth = 0): T {
+    return visitor.visitSection(this, depth);
   }
 }

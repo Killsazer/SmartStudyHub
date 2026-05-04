@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Folder, FolderOpen, FileText, Plus, ChevronDown, Edit2, Trash2, Clock, Hash } from 'lucide-react';
+import { Folder, FolderOpen, FileText, Plus, ChevronDown, Edit2, Trash2, Clock, Hash, FileDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { NoteComponent } from '../api/notes.api';
+import toast from 'react-hot-toast';
+import { NoteComponent, downloadNoteSubtreePdf } from '../api/notes.api';
 
 interface NoteNodeProps {
   node: NoteComponent;
@@ -22,10 +23,39 @@ const noteNodeVariants = {
   exit: { opacity: 0, x: -16, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] as const } },
 };
 
+const downloadBlob = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
 const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete, depth = 0 }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const isSection = node.type === 'section';
+
+  const handleExport = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isExporting) return;
+    setIsExporting(true);
+    const toastId = toast.loading(t('exporting_pdf'));
+    try {
+      const blob = await downloadNoteSubtreePdf(node.id);
+      const safeName = (node.title || 'note').replace(/[^a-z0-9-_]+/gi, '_').slice(0, 60) || 'note';
+      downloadBlob(blob, `${safeName}.pdf`);
+      toast.success(t('pdf_downloaded'), { id: toastId });
+    } catch {
+      toast.error(t('failed_to_export_pdf'), { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <motion.div
@@ -97,6 +127,14 @@ const NoteNode: React.FC<NoteNodeProps> = ({ node, onAddChild, onEdit, onDelete,
               <Plus className="w-4 h-4" />
             </button>
           )}
+          <button
+            onClick={handleExport}
+            disabled={isExporting}
+            className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded text-zinc-500 dark:text-zinc-400 transition-all duration-150 active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
+            title={t('download_pdf')}
+          >
+            <FileDown className={`w-4 h-4 ${isExporting ? 'animate-pulse' : ''}`} />
+          </button>
           <button
             onClick={(e) => {
               e.stopPropagation();

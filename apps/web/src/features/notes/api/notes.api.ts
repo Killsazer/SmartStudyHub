@@ -28,3 +28,13 @@ export const updateNote = async (id: string, data: { title?: string; content?: s
 export const deleteNote = async (id: string): Promise<void> => {
   await apiClient.delete(`/notes/${id}`);
 };
+
+export const downloadAllNotesPdf = async (): Promise<Blob> => {
+  const res = await apiClient.get('/notes/export/pdf', { responseType: 'blob' });
+  return res.data as Blob;
+};
+
+export const downloadNoteSubtreePdf = async (id: string): Promise<Blob> => {
+  const res = await apiClient.get(`/notes/${id}/export/pdf`, { responseType: 'blob' });
+  return res.data as Blob;
+};

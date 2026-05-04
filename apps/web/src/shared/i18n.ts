@@ -160,6 +160,12 @@ const en = {
   view: 'View',
   words: 'words',
   min_read: 'min read',
+  download_pdf: 'Download PDF',
+  download_notes_pdf: 'Download all notes as PDF',
+  exporting_pdf: 'Generating PDF…',
+  pdf_downloaded: 'PDF downloaded',
+  failed_to_export_pdf: 'Failed to generate PDF',
+  no_notes_to_export: 'Nothing to export — no notes yet',
 
   // Subject modal
   subject_title: 'Subject Title',
@@ -410,6 +416,12 @@ const uk: typeof en = {
   view: 'Переглянути',
   words: 'слів',
   min_read: 'хв читання',
+  download_pdf: 'Завантажити PDF',
+  download_notes_pdf: 'Завантажити всі нотатки в PDF',
+  exporting_pdf: 'Генеруємо PDF…',
+  pdf_downloaded: 'PDF завантажено',
+  failed_to_export_pdf: 'Не вдалося згенерувати PDF',
+  no_notes_to_export: 'Немає що експортувати — нотаток ще немає',
 
   // Subject modal
   subject_title: 'Назва предмету',

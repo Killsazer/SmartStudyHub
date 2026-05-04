@@ -3,7 +3,8 @@ import type { INoteRepository } from '../domain/note.repository.interface';
 import { NoteEntity } from '../domain/note.entity';
 import { CreateNoteDto } from '../presentation/dto/create-note.dto';
 import { UpdateNoteDto } from '../presentation/dto/update-note.dto';
-import { INoteNode } from '../domain/patterns/composite/note-component';
+import { INoteNode, NoteComponent } from '../domain/patterns/composite/note-component';
+import { NoteSection } from '../domain/patterns/composite/note-section';
 import { NoteTreeBuilder } from './note-tree.builder';
 import { randomUUID } from 'crypto';
 
@@ -38,6 +39,32 @@ export class NoteService {
     const entities = await this.noteRepo.getNotesTree(userId);
     const tree = NoteTreeBuilder.build(entities);
     return tree.map(root => root.toJSON());
+  }
+
+  async getNotesComposite(userId: string): Promise<NoteComponent[]> {
+    const entities = await this.noteRepo.getNotesTree(userId);
+    return NoteTreeBuilder.build(entities);
+  }
+
+  async getSubtreeComposite(userId: string, rootId: string): Promise<NoteComponent> {
+    await this.checkAccess(rootId, userId);
+    const roots = await this.getNotesComposite(userId);
+    const found = this.findInTree(roots, rootId);
+    if (!found) {
+      throw new NotFoundException(`Note with ID ${rootId} not found`);
+    }
+    return found;
+  }
+
+  private findInTree(nodes: NoteComponent[], targetId: string): NoteComponent | null {
+    for (const node of nodes) {
+      if (node.id === targetId) return node;
+      if (node instanceof NoteSection) {
+        const found = this.findInTree([...node.getChildren()], targetId);
+        if (found) return found;
+      }
+    }
+    return null;
   }
 
   async updateNote(userId: string, noteId: string, dto: UpdateNoteDto): Promise<NoteEntity> {

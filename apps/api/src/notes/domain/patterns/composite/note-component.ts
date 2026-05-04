@@ -1,3 +1,5 @@
+import type { INoteVisitor } from '../visitor/note.visitor';
+
 export interface INoteNode {
   id: string;
   type: 'section' | 'block';
@@ -23,4 +25,6 @@ export abstract class NoteComponent {
   abstract getEstimatedReadingMinutes(): number;
 
   abstract toJSON(): INoteNode;
+
+  abstract accept<T>(visitor: INoteVisitor<T>, depth?: number): T;
 }

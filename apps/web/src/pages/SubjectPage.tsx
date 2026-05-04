@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, MapPin, List, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, MapPin, List, LayoutGrid, FileDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TaskItem as TaskComponent } from '../features/tasks/components/TaskItem';
 import { TaskBoard } from '../features/tasks/components/TaskBoard';
@@ -10,7 +10,7 @@ import { getTasks, deleteTask, Task, SortStrategy } from '../features/tasks/api/
 import toast from 'react-hot-toast';
 
 
-import { getNoteTree, deleteNote, NoteComponent } from '../features/notes/api/notes.api';
+import { getNoteTree, deleteNote, downloadAllNotesPdf, NoteComponent } from '../features/notes/api/notes.api';
 import { NoteTree } from '../features/notes/components/NoteTree';
 import { NoteEditorModal } from '../features/notes/components/NoteEditorModal';
 import { useTranslation } from 'react-i18next';
@@ -177,6 +177,33 @@ const SubjectPage = () => {
   const handleEditNote = (note: NoteComponent) => {
     setEditingNote(note);
     setIsNoteModalOpen(true);
+  };
+
+  const [isExportingNotes, setIsExportingNotes] = useState(false);
+
+  const handleExportAllNotes = async () => {
+    if (notes.length === 0) {
+      toast.error(t('no_notes_to_export'));
+      return;
+    }
+    setIsExportingNotes(true);
+    const toastId = toast.loading(t('exporting_pdf'));
+    try {
+      const blob = await downloadAllNotesPdf();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'notes.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success(t('pdf_downloaded'), { id: toastId });
+    } catch (err) {
+      toast.error(t('failed_to_export_pdf'), { id: toastId });
+    } finally {
+      setIsExportingNotes(false);
+    }
   };
 
   return (
@@ -380,13 +407,23 @@ const SubjectPage = () => {
         <motion.section {...sectionEnter(0.15)}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight">{t('notes_handouts')}</h2>
-            <button
-              onClick={() => handleOpenNoteModal()}
-              className="bg-zinc-200 hover:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white p-2 rounded-lg transition-all duration-150 active:scale-90 hover:shadow-sm"
-              title={t('create_root_note')}
-            >
-              <Plus className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExportAllNotes}
+                disabled={isExportingNotes || notes.length === 0}
+                className="bg-zinc-200 hover:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white p-2 rounded-lg transition-all duration-150 active:scale-90 hover:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                title={t('download_notes_pdf')}
+              >
+                <FileDown className={`w-4 h-4 ${isExportingNotes ? 'animate-pulse' : ''}`} />
+              </button>
+              <button
+                onClick={() => handleOpenNoteModal()}
+                className="bg-zinc-200 hover:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-white p-2 rounded-lg transition-all duration-150 active:scale-90 hover:shadow-sm"
+                title={t('create_root_note')}
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <AnimatePresence mode="wait" initial={false}>
